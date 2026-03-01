@@ -1,6 +1,7 @@
 package com.hmdm;
 
 import com.google.inject.Injector;
+import com.hmdm.rest.resource.TwoFactorResource;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.listing.ApiListingResource;
 import io.swagger.jaxrs.listing.SwaggerSerializers;
@@ -28,6 +29,7 @@ public class HMDMApplication extends ResourceConfig {
     @Inject
     public HMDMApplication(final ServiceLocator serviceLocator) {
         packages("com.hmdm");
+        register(TwoFactorResource.class);
         register(MultiPartFeature.class);
         register(new ContainerLifecycleListener() {
             public void onStartup(Container container) {
