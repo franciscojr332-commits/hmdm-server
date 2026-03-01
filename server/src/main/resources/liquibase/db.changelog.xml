@@ -2597,4 +2597,22 @@
         </rollback>
     </changeSet>
 
+    <changeSet id="28.02.26-12:00" author="plan" context="common">
+        <comment>New MDM restrictions: blockAirplaneMode, blockPowerOffFrom/To, reopenAppPackage, blockAddUser</comment>
+        <sql>
+            ALTER TABLE configurations ADD COLUMN blockAirplaneMode BOOLEAN;
+            ALTER TABLE configurations ADD COLUMN blockPowerOffFrom VARCHAR(5);
+            ALTER TABLE configurations ADD COLUMN blockPowerOffTo VARCHAR(5);
+            ALTER TABLE configurations ADD COLUMN reopenAppPackage VARCHAR(512);
+            ALTER TABLE configurations ADD COLUMN blockAddUser BOOLEAN;
+        </sql>
+        <rollback>
+            ALTER TABLE configurations DROP COLUMN blockAirplaneMode;
+            ALTER TABLE configurations DROP COLUMN blockPowerOffFrom;
+            ALTER TABLE configurations DROP COLUMN blockPowerOffTo;
+            ALTER TABLE configurations DROP COLUMN reopenAppPackage;
+            ALTER TABLE configurations DROP COLUMN blockAddUser;
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>

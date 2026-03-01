@@ -420,6 +420,11 @@ public class SyncResource {
         data.setKioskLockButtons(configuration.getKioskLockButtons() != null && configuration.getKioskLockButtons() ? true : null);
         data.setKioskScreenOn(configuration.getKioskScreenOn() != null && configuration.getKioskScreenOn() ? true : null);
         data.setRestrictions(configuration.getRestrictions());
+        data.setBlockAirplaneMode(configuration.getBlockAirplaneMode());
+        data.setBlockPowerOffFrom(configuration.getBlockPowerOffFrom());
+        data.setBlockPowerOffTo(configuration.getBlockPowerOffTo());
+        data.setReopenAppPackage(configuration.getReopenAppPackage());
+        data.setBlockAddUser(configuration.getBlockAddUser());
 
         if (settings != null) {
             if (settings.isCustomSend1()) {

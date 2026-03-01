@@ -153,6 +153,16 @@ public interface SyncResponseInt {
 
     String getRestrictions();
 
+    Boolean getBlockAirplaneMode();
+
+    String getBlockPowerOffFrom();
+
+    String getBlockPowerOffTo();
+
+    String getReopenAppPackage();
+
+    Boolean getBlockAddUser();
+
     String getCustom1();
 
     String getCustom2();

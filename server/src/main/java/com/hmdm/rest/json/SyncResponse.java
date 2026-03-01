@@ -249,6 +249,26 @@ public class SyncResponse implements Serializable, SyncResponseInt {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String restrictions;
 
+    @ApiModelProperty("Block airplane mode on device")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Boolean blockAirplaneMode;
+
+    @ApiModelProperty("Start of time window when power off is blocked (HH:mm)")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String blockPowerOffFrom;
+
+    @ApiModelProperty("End of time window when power off is blocked (HH:mm)")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String blockPowerOffTo;
+
+    @ApiModelProperty("Package name of app to reopen when closed")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String reopenAppPackage;
+
+    @ApiModelProperty("Block adding or switching user")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Boolean blockAddUser;
+
     @ApiModelProperty(value = "Custom property #1 if it is being sent to device")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String custom1;
@@ -848,6 +868,51 @@ public class SyncResponse implements Serializable, SyncResponseInt {
 
     public void setRestrictions(String restrictions) {
         this.restrictions = restrictions;
+    }
+
+    @Override
+    public Boolean getBlockAirplaneMode() {
+        return blockAirplaneMode;
+    }
+
+    public void setBlockAirplaneMode(Boolean blockAirplaneMode) {
+        this.blockAirplaneMode = blockAirplaneMode;
+    }
+
+    @Override
+    public String getBlockPowerOffFrom() {
+        return blockPowerOffFrom;
+    }
+
+    public void setBlockPowerOffFrom(String blockPowerOffFrom) {
+        this.blockPowerOffFrom = blockPowerOffFrom;
+    }
+
+    @Override
+    public String getBlockPowerOffTo() {
+        return blockPowerOffTo;
+    }
+
+    public void setBlockPowerOffTo(String blockPowerOffTo) {
+        this.blockPowerOffTo = blockPowerOffTo;
+    }
+
+    @Override
+    public String getReopenAppPackage() {
+        return reopenAppPackage;
+    }
+
+    public void setReopenAppPackage(String reopenAppPackage) {
+        this.reopenAppPackage = reopenAppPackage;
+    }
+
+    @Override
+    public Boolean getBlockAddUser() {
+        return blockAddUser;
+    }
+
+    public void setBlockAddUser(Boolean blockAddUser) {
+        this.blockAddUser = blockAddUser;
     }
 
     @Override

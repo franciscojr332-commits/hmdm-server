@@ -128,6 +128,11 @@ public interface ConfigurationMapper {
             "kioskScreenOn=#{kioskScreenOn}, " +
             "launcherUrl=#{launcherUrl}, " +
             "restrictions=#{restrictions}, " +
+            "blockAirplaneMode=#{blockAirplaneMode}, " +
+            "blockPowerOffFrom=#{blockPowerOffFrom}, " +
+            "blockPowerOffTo=#{blockPowerOffTo}, " +
+            "reopenAppPackage=#{reopenAppPackage}, " +
+            "blockAddUser=#{blockAddUser}, " +
             "autoUpdate=#{autoUpdate}, " +
             "blockStatusBar=#{blockStatusBar}, " +
             "systemUpdateType=#{systemUpdateType}, " +

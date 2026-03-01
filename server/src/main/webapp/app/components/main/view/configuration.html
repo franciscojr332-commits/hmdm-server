@@ -940,6 +940,39 @@
                     </div>
 
                     <div class='form-group'>
+                        <label class='col-sm-3 control-label' localized>form.configuration.settings.mdm.block.airplane.mode</label>
+                        <div class='col-sm-1'>
+                            <input ng-model='configuration.blockAirplaneMode' name="blockAirplaneMode-c" type='checkbox' class='form-control'/>
+                        </div>
+                    </div>
+
+                    <div class='form-group'>
+                        <label class='col-sm-3 control-label' localized>form.configuration.settings.mdm.block.power.off.window</label>
+                        <div class='col-sm-9'>
+                            <input ng-model='configuration.blockPowerOffFrom' name="blockPowerOffFrom-c" type='text' class='form-control' maxlength="5"
+                                   localized-placeholder='form.configuration.settings.mdm.block.power.off.from' style='display:inline;width:5em;'/>
+                            <span localized>form.configuration.settings.mdm.block.power.off.to.label</span>
+                            <input ng-model='configuration.blockPowerOffTo' name="blockPowerOffTo-c" type='text' class='form-control' maxlength="5"
+                                   localized-placeholder='form.configuration.settings.mdm.block.power.off.to' style='display:inline;width:5em;'/>
+                        </div>
+                    </div>
+
+                    <div class='form-group'>
+                        <label class='col-sm-3 control-label' localized>form.configuration.settings.mdm.reopen.app.package</label>
+                        <div class='col-sm-9'>
+                            <input ng-model='configuration.reopenAppPackage' name="reopenAppPackage-c" type='text' class='form-control' maxlength="512"
+                                   localized-placeholder='form.configuration.settings.mdm.reopen.app.package.placeholder'/>
+                        </div>
+                    </div>
+
+                    <div class='form-group'>
+                        <label class='col-sm-3 control-label' localized>form.configuration.settings.mdm.block.add.user</label>
+                        <div class='col-sm-1'>
+                            <input ng-model='configuration.blockAddUser' name="blockAddUser-c" type='checkbox' class='form-control'/>
+                        </div>
+                    </div>
+
+                    <div class='form-group'>
                         <label class='col-sm-3 control-label' localized>form.configuration.settings.mdm.component.server.url</label>
                         <div class='col-sm-9'>
                             <input ng-model='configuration.newServerUrl'

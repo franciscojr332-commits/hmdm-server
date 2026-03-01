@@ -174,6 +174,16 @@ public class Configuration implements CustomerData, Serializable {
     private String launcherUrl;
     @ApiModelProperty("Additional comma separated restrictions in MDM mode")
     private String restrictions;
+    @ApiModelProperty("Block airplane mode on device")
+    private Boolean blockAirplaneMode;
+    @ApiModelProperty("Start of time window when power off is blocked (HH:mm)")
+    private String blockPowerOffFrom;
+    @ApiModelProperty("End of time window when power off is blocked (HH:mm)")
+    private String blockPowerOffTo;
+    @ApiModelProperty("Package name of app to reopen when closed")
+    private String reopenAppPackage;
+    @ApiModelProperty("Block adding or switching user")
+    private Boolean blockAddUser;
 
     // This group of settings corresponds to Design settings
     private boolean useDefaultDesignSettings;
@@ -548,6 +558,46 @@ public class Configuration implements CustomerData, Serializable {
         this.restrictions = restrictions;
     }
 
+    public Boolean getBlockAirplaneMode() {
+        return blockAirplaneMode;
+    }
+
+    public void setBlockAirplaneMode(Boolean blockAirplaneMode) {
+        this.blockAirplaneMode = blockAirplaneMode;
+    }
+
+    public String getBlockPowerOffFrom() {
+        return blockPowerOffFrom;
+    }
+
+    public void setBlockPowerOffFrom(String blockPowerOffFrom) {
+        this.blockPowerOffFrom = blockPowerOffFrom;
+    }
+
+    public String getBlockPowerOffTo() {
+        return blockPowerOffTo;
+    }
+
+    public void setBlockPowerOffTo(String blockPowerOffTo) {
+        this.blockPowerOffTo = blockPowerOffTo;
+    }
+
+    public String getReopenAppPackage() {
+        return reopenAppPackage;
+    }
+
+    public void setReopenAppPackage(String reopenAppPackage) {
+        this.reopenAppPackage = reopenAppPackage;
+    }
+
+    public Boolean getBlockAddUser() {
+        return blockAddUser;
+    }
+
+    public void setBlockAddUser(Boolean blockAddUser) {
+        this.blockAddUser = blockAddUser;
+    }
+
     public String getBaseUrl() {
         return baseUrl;
     }
@@ -909,6 +959,11 @@ public class Configuration implements CustomerData, Serializable {
         copy.setKioskKeyguard(getKioskKeyguard());
         copy.setKioskLockButtons(getKioskLockButtons());
         copy.setRestrictions(getRestrictions());
+        copy.setBlockAirplaneMode(getBlockAirplaneMode());
+        copy.setBlockPowerOffFrom(getBlockPowerOffFrom());
+        copy.setBlockPowerOffTo(getBlockPowerOffTo());
+        copy.setReopenAppPackage(getReopenAppPackage());
+        copy.setBlockAddUser(getBlockAddUser());
 
         copy.setGps(getGps());
         copy.setBluetooth(getBluetooth());
