@@ -88,6 +88,9 @@ angular.module('headwind-kiosk')
                             } else {
                                 console.log('Failed to get resource ' + bundleUrl + ": status " + response.status);
                             }
+                        })
+                        .catch(function () {
+                            /* Plugin may not have i18n for this locale (e.g. 404); ignore to avoid unhandled rejection */
                         });
                 };
 
