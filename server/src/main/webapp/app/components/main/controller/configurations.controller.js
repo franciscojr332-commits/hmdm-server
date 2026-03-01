@@ -26,7 +26,10 @@ angular.module('headwind-kiosk')
         };
 
         $scope.showQrCode = function (configuration) {
-            var baseUrl = (configuration.baseUrl || "").replace(/^(https?):\/?(?!\/)/, "$1://");
+            var baseUrl = configuration.baseUrl || "";
+            if (!baseUrl.match(/^https?:\/\/.+/)) {
+                baseUrl = $window.location.origin;
+            }
             var url = baseUrl + "/#/qr/" + configuration.qrCodeKey + "/";
             $window.open(url, "_self");
         };
