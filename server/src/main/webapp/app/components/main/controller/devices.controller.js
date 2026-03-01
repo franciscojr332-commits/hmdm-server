@@ -169,7 +169,7 @@ angular.module('headwind-kiosk')
             $scope.groups.unshift({id: -1, name: localization.localize('devices.group.options.all')});
         });
 
-        configurationService.getAllConfigNames(function (response) {
+        configurationService.getAllConfigurations(function (response) {
             $scope.configurations = response.data;
             $scope.configurations.unshift({id: -1, name: localization.localize('devices.configuration.options.all')});
         });
@@ -405,7 +405,8 @@ angular.module('headwind-kiosk')
         $scope.showQrCode = function (device) {
             // Workaround against AngularJS bug!
             var number = device.number.replace(/\//g, "~2F");
-            var url = device.configuration.baseUrl + "/#/qr/" + device.configuration.qrCodeKey + "/" + number;
+            var baseUrl = (device.configuration.baseUrl || "").replace(/^(https?):\/?(?!\/)/, "$1://");
+            var url = baseUrl + "/#/qr/" + device.configuration.qrCodeKey + "/" + number;
             $window.open(url, "_self");
         };
 
@@ -493,10 +494,6 @@ angular.module('headwind-kiosk')
         $scope.getDevicePermissionIndicatorImage = function (device) {
             var info = $scope.getDeviceInfo(device);
             if (info) {
-                if (info.kioskMode === true) {
-                    // Do not check permissions in kiosk mode
-                    return 'images/online.png';
-                }
                 var permissions = info.permissions[0] + info.permissions[1] + info.permissions[2];
                 if (permissions === 0) {
                     return 'images/offline.png';
@@ -513,10 +510,6 @@ angular.module('headwind-kiosk')
         $scope.getDevicePermissionTitle = function (device) {
             var info = $scope.getDeviceInfo(device);
             if (info) {
-                if (info.kioskMode === true) {
-                    // Do not check permissions in kiosk mode
-                    return localization.localize('devices.permissions.all');
-                }
                 var permissions = info.permissions[0] + info.permissions[1] + info.permissions[2];
                 if (permissions === 3) {
                     return localization.localize('devices.permissions.all');
@@ -686,22 +679,13 @@ angular.module('headwind-kiosk')
             return null;
         };
 
-        $scope.isKioskMode = function (device) {
+        $scope.getIsKioskMode = function (device) {
             var info = $scope.getDeviceInfo(device);
             if (info) {
                 if (info.kioskMode === true) {
                     return localization.localize('yes');
-                }
-            }
-
-            return null;
-        };
-
-        $scope.isBackgroundMode = function (device) {
-            var info = $scope.getDeviceInfo(device);
-            if (info) {
-                if (info.defaultLauncher === false) {
-                    return localization.localize('yes');
+                } else if (info.defaultLauncher === false) {
+                    return localization.localize('no');
                 }
             }
 
@@ -1019,7 +1003,7 @@ angular.module('headwind-kiosk')
     .controller('DeviceUpdateModalController', function ($scope, $modalInstance, configurationService, deviceService, devices) {
         $scope.device = {};
 
-        configurationService.getAllConfigNames(function (response) {
+        configurationService.getAllConfigurations(function (response) {
             $scope.device.configurationId = response.data[0].id;
             $scope.configurations = response.data;
         });
@@ -1142,8 +1126,6 @@ angular.module('headwind-kiosk')
                     $scope.errorMessage = localization.localize('error.empty.configuration');
                 } else if (!user.allDevicesAvailable && $scope.groupsSelection.length == 0) {
                     $scope.errorMessage = localization.localize('error.empty.group');
-                } else if (/[\/?&]/.test($scope.device.number)) {
-                    $scope.errorMessage = localization.localize('error.invalid.character');
                 } else {
                     $scope.device.groups = $scope.groupsSelection;
 
@@ -1188,7 +1170,7 @@ angular.module('headwind-kiosk')
                 $modalInstance.dismiss();
             };
 
-            configurationService.getAllConfigNames(function (response) {
+            configurationService.getAllConfigurations(function (response) {
                 $scope.configurations = response.data;
             });
 
