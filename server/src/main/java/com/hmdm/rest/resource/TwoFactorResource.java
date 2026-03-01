@@ -46,7 +46,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response as JaxRsResponse;
 import java.io.ByteArrayOutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -93,18 +92,18 @@ public class TwoFactorResource {
     @GET
     @Path("/qr/{userId}")
     @Produces("image/png")
-    public JaxRsResponse getQrCode(@PathParam("userId") @ApiParam("User ID") int userId) {
+    public javax.ws.rs.core.Response getQrCode(@PathParam("userId") @ApiParam("User ID") int userId) {
         Optional<User> current = SecurityContext.get().getCurrentUser();
         if (!current.isPresent()) {
-            return JaxRsResponse.status(JaxRsResponse.SC_UNAUTHORIZED).build();
+            return javax.ws.rs.core.Response.status(javax.ws.rs.core.Response.Status.UNAUTHORIZED).build();
         }
         User me = current.get();
         if (me.getId() != userId && !me.getUserRole().isSuperAdmin()) {
-            return JaxRsResponse.status(JaxRsResponse.SC_FORBIDDEN).build();
+            return javax.ws.rs.core.Response.status(javax.ws.rs.core.Response.Status.FORBIDDEN).build();
         }
         User user = userDAO.getUserDetails(userId);
         if (user == null) {
-            return JaxRsResponse.status(JaxRsResponse.SC_NOT_FOUND).build();
+            return javax.ws.rs.core.Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
         }
         try {
             String secret = secretGenerator.generate();
@@ -121,12 +120,12 @@ public class TwoFactorResource {
             QRCode.from(otpauth).withSize(QR_SIZE, QR_SIZE).to(ImageType.PNG).writeTo(os);
             byte[] png = os.toByteArray();
 
-            return JaxRsResponse.ok(png)
+            return javax.ws.rs.core.Response.ok(png)
                     .type("image/png")
                     .build();
         } catch (Exception e) {
             logger.error("Failed to generate 2FA QR code for user {}", userId, e);
-            return JaxRsResponse.serverError().build();
+            return javax.ws.rs.core.Response.serverError().build();
         }
     }
 
