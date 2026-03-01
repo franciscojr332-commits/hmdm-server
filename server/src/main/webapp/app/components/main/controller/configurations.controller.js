@@ -26,7 +26,8 @@ angular.module('headwind-kiosk')
         };
 
         $scope.showQrCode = function (configuration) {
-            var url = configuration.baseUrl + "/#/qr/" + configuration.qrCodeKey + "/";
+            var baseUrl = (configuration.baseUrl || "").replace(/^(https?):\/?(?!\/)/, "$1://");
+            var url = baseUrl + "/#/qr/" + configuration.qrCodeKey + "/";
             $window.open(url, "_self");
         };
 
@@ -348,8 +349,6 @@ angular.module('headwind-kiosk')
                 return localizedText;
             };
 
-            $scope.localizePermissiveLockedTitle = localization.localize('form.configuration.settings.mdm.permissive.locked');
-
             $scope.filterApps = function (item) {
                 var filter = ($scope.paging.filterText || '').toLowerCase();
 
@@ -535,7 +534,6 @@ angular.module('headwind-kiosk')
 
             $scope.onMainAppSelected = function ($item) {
                 $scope.mainApp = $item;
-                bConfigurationWasLost = false;
             };
             $scope.onContentAppSelected = function ($item) {
                 $scope.contentApp = $item;
@@ -611,64 +609,51 @@ angular.module('headwind-kiosk')
             $scope.loadApps = function (configId) {
                 configurationService.getApplications({"id": configId}, function (response) {
                     if (response.status === 'OK') {
-                        setTimeout(function () {
-                            // Workaround against occasional loss of mainAppId due to AngularJS Digest Cycle
-                            // Thanks to @GlebMan-n
-                            response.data.forEach(function (app) {
-                                app.actionChanged = false;
+                        response.data.forEach(function (app) {
+                            app.actionChanged = false;
+                        });
+
+                        allApplications = response.data.map(function (app) {
+                            return app;
+                        });
+                        $scope.applications = response.data.filter(function (app) {
+                            // Application com.hmdm.launcher is made available by default when creating new configuration
+                            return app.action != '0' && (!app.system || $scope.showSystemApps) || (!configId && app.pkg === 'com.hmdm.launcher' && app.action != '2');
+                        });
+
+                        // For new configuration use default app for main app and content receiver
+                        if (!configId) {
+                            let mainAppCandidates = response.data.filter(function (app) {
+                                return app.pkg === 'com.hmdm.launcher' && app.action != '2';
                             });
 
-                            allApplications = response.data.map(function (app) {
-                                return app;
+                            if (mainAppCandidates.length > 0) {
+                                $scope.configuration.mainAppId = mainAppCandidates[0].usedVersionId;
+                                mainAppCandidates[0].action = 1; // Install
+                            }
+                        }
+
+                        if ($scope.configuration.mainAppId) {
+                            let mainApps = response.data.filter(function (app) {
+                                return app.usedVersionId === $scope.configuration.mainAppId;
                             });
-                            $scope.applications = response.data.filter(function (app) {
-                                // Application com.hmdm.launcher is made available by default when creating new configuration
-                                return app.action != '0' && (!app.system || $scope.showSystemApps) || (!configId && app.pkg === 'com.hmdm.launcher' && app.action != '2');
+
+                            if (mainApps.length > 0) {
+                                $scope.mainApp = mainApps[0];
+                                mainAppSelected = true;
+                            }
+                        }
+
+                        if ($scope.configuration.contentAppId) {
+                            let contentApps = response.data.filter(function (app) {
+                                return app.usedVersionId === $scope.configuration.contentAppId;
                             });
 
-                            // For new configuration use default app for main app and content receiver
-                            if (!configId) {
-                                let mainAppCandidates = response.data.filter(function (app) {
-                                    return app.pkg === 'com.hmdm.launcher' && app.action != '2';
-                                });
-
-                                if (mainAppCandidates.length > 0) {
-                                    $scope.configuration.mainAppId = mainAppCandidates[0].usedVersionId;
-                                    mainAppCandidates[0].action = 1; // Install
-                                }
+                            if (contentApps.length > 0) {
+                                $scope.contentApp = contentApps[0];
+                                contentAppSelected = true;
                             }
-
-                            if (!$scope.configuration.mainAppId) {
-                                console.warn("AngularJS Digest Cycle issue");
-                                // Issue caused by AngularJS Digest Cycle
-                                // Workaround protects configuration
-                                // Against unintended changes
-                                // Temporary solution for stability
-                                bConfigurationWasLost = true;
-                            }
-
-                            if ($scope.configuration.mainAppId) {
-                                let mainApps = response.data.filter(function (app) {
-                                    return app.usedVersionId === $scope.configuration.mainAppId;
-                                });
-
-                                if (mainApps.length > 0) {
-                                    $scope.mainApp = mainApps[0];
-                                    mainAppSelected = true;
-                                }
-                            }
-
-                            if ($scope.configuration.contentAppId) {
-                                let contentApps = response.data.filter(function (app) {
-                                    return app.usedVersionId === $scope.configuration.contentAppId;
-                                });
-
-                                if (contentApps.length > 0) {
-                                    $scope.contentApp = contentApps[0];
-                                    contentAppSelected = true;
-                                }
-                            }
-                        }, 600)
+                        }
                     } else {
                         $scope.errorMessage = localization.localize(response.message);
                     }
@@ -687,9 +672,7 @@ angular.module('headwind-kiosk')
                     $scope.errorMessage = localization.localize('error.empty.configuration.password');
                 } else if ($scope.configuration.kioskMode && (!contentAppSelected)) {
                     $scope.errorMessage = localization.localize('error.empty.configuration.contentApp');
-                } else if (bConfigurationWasLost) {
-                    $scope.errorMessage = localization.localize('error.invalid.configuration.mainApp');
-                } {
+                } else {
                     var request = {};
 
                     for (var prop in $scope.configuration) {
@@ -816,8 +799,8 @@ angular.module('headwind-kiosk')
                     templateUrl: 'app/components/main/view/modal/configurationFile.html',
                     controller: 'FileEditorController',
                     resolve: {
-                        configFiles: function() {
-                            return $scope.configuration.files;
+                        file: function () {
+                            return {remove: false};
                         },
                         defaultFilePath: function() {
                             return $scope.configuration.defaultFilePath;
@@ -1116,6 +1099,39 @@ angular.module('headwind-kiosk')
                 }
             };
 
+            $scope.editFile = function (file) {
+                var modalInstance = $modal.open({
+                    templateUrl: 'app/components/main/view/modal/configurationFile.html',
+                    controller: 'FileEditorController',
+                    resolve: {
+                        file: function () {
+                            return file;
+                        },
+                        defaultFilePath: function() {
+                            return $scope.configuration.defaultFilePath;
+                        }
+                    }
+                });
+
+                modalInstance.result.then(function (updatedFile) {
+                    $scope.configurationForm.$dirty = true;
+                    var index = $scope.configuration.files.findIndex(function (item) {
+                        if (item.id) {
+                            return item.id === updatedFile.id;
+                        } else if (item.tempId) {
+                            return item.tempId === updatedFile.tempId;
+                        } else {
+                            return false;
+                        }
+                    });
+
+                    if (index >= 0) {
+                        $scope.configuration.files[index] = updatedFile;
+                        filterFiles();
+                    }
+                });
+            };
+
             $scope.removeFile = function (file) {
                 var modalInstance = $modal.open({
                     templateUrl: 'app/components/main/view/modal/removeFileConfirmation.html',
@@ -1137,6 +1153,14 @@ angular.module('headwind-kiosk')
                             return false;
                         }
                     });
+
+                    if (removeFileFromDisk) {
+                        if (!$scope.configuration.filesToRemove) {
+                            $scope.configuration.filesToRemove = [];
+                        }
+
+                        $scope.configuration.filesToRemove.push(file.fileId);
+                    }
 
                     if (index >= 0) {
                         $scope.configurationForm.$dirty = true;
@@ -1213,7 +1237,6 @@ angular.module('headwind-kiosk')
 
                         valid = (item.description !== null) && (item.description !== undefined) && item.description.toLowerCase().indexOf(lower) > -1
                             || (item.path !== null) && (item.path !== undefined) && item.path.toLowerCase().indexOf(lower) > -1
-                            || (item.filePath !== null) && (item.filePath !== undefined) && item.filePath.toLowerCase().indexOf(lower) > -1
                             || (item.url !== null) && ((item.url !== undefined)) && item.url.toLowerCase().indexOf(lower) > -1
                     }
 
@@ -1254,7 +1277,6 @@ angular.module('headwind-kiosk')
             var mainAppSelected = false;
             var contentAppSelected = false;
             var allApplications;
-            let bConfigurationWasLost = false;
 
             $scope.configuration = {
                 defaultFilePath: "/"
@@ -1471,60 +1493,11 @@ angular.module('headwind-kiosk')
             $modalInstance.dismiss();
         };
     })
-    .controller('FileEditorController', function ($scope, $modalInstance, localization,
-                                                  defaultFilePath, fileService, configFiles) {
+    .controller('FileEditorController', function ($scope, $modalInstance, localization, file, defaultFilePath) {
 
-        $scope.file = {};
+        $scope.file = angular.copy(file, {});
         $scope.errorMessage = undefined;
         $scope.fileSelected = false;
-
-        $scope.files = [];
-        fileService.getAllFiles({},
-            function (response) {
-                if (response.status === 'OK') {
-                    // Exclude already existing files
-                    var configIds = new Set(configFiles.map(f => f.fileId));
-                    response.data = response.data.filter(f => !configIds.has(f.id));
-
-                    response.data.forEach(function (file) {
-                        file.name = file.description ? file.description :
-                            file.external ? file.url : file.filePath;
-                        if (file.external) {
-                            file.externalUrl = file.url;
-                        }
-                    });
-                    $scope.files = response.data;
-                    $scope.files.unshift({
-                        id: 0,
-                        name: localization.localize('form.configuration.file.create')
-                    });
-                    if ($scope.files.length > 1) {
-                        $scope.file = $scope.files[1];
-                    } else {
-                        $scope.file = $scope.files[0];
-                    }
-                } else {
-                    $scope.errorMessage = localization.localizeServerResponse(response);
-                }
-            });
-
-        fileService.getLimit(function(response) {
-            if (response.status === 'OK' &&
-                response.data.sizeLimit > 0) {
-                var availableSpace = response.data.sizeLimit - response.data.sizeUsed;
-                if (availableSpace < 0) {
-                    availableSpace = 0;
-                }
-                if (availableSpace < 20) {
-                    $scope.availableSpace = localization.localize('form.file.available')
-                        .replaceAll('${space}', availableSpace);
-                }
-            }
-        });
-
-        $scope.fileSelected = function(id) {
-
-        };
 
         $scope.closeModal = function () {
             $modalInstance.dismiss();
@@ -1532,49 +1505,31 @@ angular.module('headwind-kiosk')
 
         $scope.save = function () {
             $scope.errorMessage = undefined;
-            valid = true;
+            if (!$scope.file.lastUpdate) {
+                $scope.file.lastUpdate = Date.now();
+            }
+            $scope.file.remove = ($scope.file.remove === 'true' || $scope.file.remove === true);
+            if ($scope.file.externalUrl && $scope.file.externalUrl.trim().length === 0) {
+                $scope.file.externalUrl = null;
+            }
+            if ($scope.file.filePath && $scope.file.filePath.trim().length === 0) {
+                $scope.file.filePath = null;
+            }
 
-            if ($scope.file.id === 0) {
-                // Check new file validity
-                if ($scope.file.external) {
-                    if ($scope.file.externalUrl.trim().length === 0) {
-                        $scope.errorMessage = localization.localize('error.configuration.file.empty.url');
-                        valid = false;
-                    }
-                } else {
-                    if (!$scope.file.tmpPath) {
-                        $scope.errorMessage = localization.localize('error.configuration.file.empty.file');
-                        valid = false;
-                    }
-                }
-                var request = {};
-                for (var prop in $scope.file) {
-                    if ($scope.file.hasOwnProperty(prop)) {
-                        request[prop] = $scope.file[prop];
-                    }
-                }
-                // Backend accepts null (not 0) for new file creation
-                request.id = null;
-
-                fileService.updateFile(request, function (response) {
-                    if (response.status === 'OK') {
-                        // $scope.file is UploadedFile, make a "new" ConfigurationFile from it
-                        $scope.file.fileId = response.data.id;
-                        $scope.file.filePath = response.data.filePath;
-                        $scope.file.url = response.data.url;
-                        $scope.file.path = response.data.devicePath;
-                        $scope.file.tmpPath = response.data.tmpPath;
-                        $scope.file.id = null;
-                        $modalInstance.close($scope.file);
-                    } else {
-                        $scope.errorMessage = localization.localize(response.message);
-                    }
-                });
-
+            if (!$scope.file.path || $scope.file.path.trim().length === 0) {
+                $scope.errorMessage = localization.localize('error.configuration.file.empty.path');
+            } else if (!$scope.file.remove && (!$scope.file.externalUrl || $scope.file.externalUrl.trim().length === 0)
+                && (!$scope.file.filePath || $scope.file.filePath.trim().length === 0)) {
+                $scope.errorMessage = localization.localize('error.configuration.file.empty.file');
             } else {
-                // $scope.file is UploadedFile, make a "new" ConfigurationFile from it
-                $scope.file.fileId = $scope.file.id;
-                $scope.file.id = null;
+                if ($scope.file.externalUrl && $scope.file.externalUrl.trim().length > 0) {
+                    $scope.file.url = $scope.file.externalUrl;
+                    $scope.file.filePath = undefined;
+                    $scope.file.fileId = undefined;
+                } else {
+                    // $scope.file.url = $scope.file.filePath;
+                    $scope.file.externalUrl = undefined;
+                }
                 $modalInstance.close($scope.file);
             }
         };
@@ -1582,7 +1537,12 @@ angular.module('headwind-kiosk')
         $scope.onStartedUpload = function (files) {
             $scope.successMessage = undefined;
             $scope.errorMessage = undefined;
-            $scope.loading = true;
+            $scope.fileSelected = false;
+
+            if (files.length > 0) {
+                $scope.loading = true;
+                $scope.successMessage = localization.localize('success.uploading.file');
+            }
         };
 
         $scope.onUploadProgress = function(progress) {
@@ -1595,16 +1555,21 @@ angular.module('headwind-kiosk')
         $scope.fileUploaded = function (response) {
             $scope.errorMessage = undefined;
             $scope.successMessage = undefined;
+            $scope.fileSelected = false;
 
             $scope.loading = false;
 
             if (response.data.status === 'OK') {
-                $scope.file.filePath = response.data.data.name;
-                $scope.file.tmpPath = response.data.data.serverPath;
                 if (!defaultFilePath.endsWith("/")) {
                     defaultFilePath += "/";
                 }
-                $scope.file.devicePath = defaultFilePath + response.data.data.name;
+                $scope.file.path = defaultFilePath + response.data.data.filePath;
+                $scope.file.filePath = response.data.data.filePath;
+                $scope.file.fileId = response.data.data.id;
+                $scope.file.lastUpdate = response.data.data.uploadTime;
+                $scope.file.checksum = response.data.data.checksum;
+                $scope.file.url = response.data.data.url;
+                $scope.fileSelected = true;
                 $scope.successMessage = localization.localize('success.file.uploaded');
             } else if (response.data.message == 'error.size.limit.exceeded') {
                 $scope.errorMessage = localization.localize(response.data.message) + ' (' + response.data.data + ' Mb)';
@@ -1612,13 +1577,25 @@ angular.module('headwind-kiosk')
                 $scope.errorMessage = localization.localize(response.data.message);
             }
         };
+
+        $scope.clearFile = function () {
+            $scope.file.filePath = undefined;
+            $scope.file.url = undefined;
+            $scope.file.fileId = undefined;
+            $scope.errorMessage = undefined;
+            $scope.successMessage = undefined;
+            $scope.fileSelected = false;
+            $scope.loading = false;
+        };
     })
     .controller('RemoveConfigurationFileModalController',
         function ($scope, $modalInstance, file) {
 
-            // By now, disable this option so the user isn't confused
-            // TODO: suggest permanent deletion if a file is not used in icons and configurations (except this one)
-            $scope.deleteOptionEnabled = false;
+            $scope.obj = {
+                deleteFileFromDisk: false
+            };
+
+            $scope.deleteOptionEnabled = !file.externalUrl || file.externalUrl.trim().length === 0;
 
             $scope.save = function () {
                 $modalInstance.close($scope.deleteOptionEnabled && $scope.obj.deleteFileFromDisk);
