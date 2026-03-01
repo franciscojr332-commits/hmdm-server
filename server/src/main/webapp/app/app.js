@@ -336,8 +336,13 @@ angular.module('headwind-kiosk',
 
                     if (rejection.status === 403) {
                         var $state = $injector.get('$state');
-                        if ($state.current.name === 'twoFactorAuth') {
-                            // On 2FA page only /rest/private/twofactor/* is allowed; 403 elsewhere is expected
+                        var url = (rejection.config && rejection.config.url) ? rejection.config.url : '';
+                        var skipLogout = $state.current.name === 'twoFactorAuth' ||
+                            url.indexOf('rest/private/settings') !== -1 ||
+                            url.indexOf('rest/private/hints/') !== -1 ||
+                            url.indexOf('rest/private/users/current') !== -1 ||
+                            url.indexOf('rest/plugin/main/private/available') !== -1;
+                        if (skipLogout) {
                             return $q.reject(rejection);
                         }
                         $injector.get('authService').logout();
