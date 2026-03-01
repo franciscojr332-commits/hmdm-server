@@ -24,6 +24,7 @@ package com.hmdm.rest.resource;
 import com.hmdm.persistence.CommonDAO;
 import com.hmdm.persistence.UnsecureDAO;
 import com.hmdm.persistence.UserDAO;
+import com.hmdm.rest.filter.AuthFilter;
 import com.hmdm.persistence.domain.Settings;
 import com.hmdm.persistence.domain.User;
 import com.hmdm.rest.json.Response;
@@ -44,8 +45,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Context;
 import java.io.ByteArrayOutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -133,7 +136,8 @@ public class TwoFactorResource {
     @Path("/verify/{user}/{code}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response verify(@PathParam("user") @ApiParam("User ID") int userId,
-                           @PathParam("code") @ApiParam("TOTP code") String code) {
+                           @PathParam("code") @ApiParam("TOTP code") String code,
+                           @Context HttpServletRequest request) {
         Optional<User> current = SecurityContext.get().getCurrentUser();
         if (!current.isPresent()) {
             return Response.PERMISSION_DENIED();
@@ -153,6 +157,9 @@ public class TwoFactorResource {
             if (!codeVerifier.isValidCode(user.getTwoFactorSecret(), code)) {
                 return Response.ERROR("error.twofactor.invalid.code");
             }
+            if (request.getSession(false) != null) {
+                request.getSession().removeAttribute(AuthFilter.twoFactorNeeded);
+            }
             return Response.OK();
         } catch (Exception e) {
             logger.error("2FA verify failed for user {}", userId, e);
@@ -163,7 +170,7 @@ public class TwoFactorResource {
     @GET
     @Path("/set")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response set() {
+    public Response set(@Context HttpServletRequest request) {
         Optional<User> current = SecurityContext.get().getCurrentUser();
         if (!current.isPresent()) {
             return Response.PERMISSION_DENIED();
@@ -180,6 +187,9 @@ public class TwoFactorResource {
             if (settings != null) {
                 settings.setTwoFactor(true);
                 commonDAO.setTwoFactor(settings);
+            }
+            if (request.getSession(false) != null) {
+                request.getSession().removeAttribute(AuthFilter.twoFactorNeeded);
             }
             return Response.OK();
         } catch (Exception e) {

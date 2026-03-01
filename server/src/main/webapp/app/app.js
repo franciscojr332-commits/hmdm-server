@@ -335,8 +335,13 @@ angular.module('headwind-kiosk',
                     var $rootScope = $body.scope().$root;
 
                     if (rejection.status === 403) {
+                        var $state = $injector.get('$state');
+                        if ($state.current.name === 'twoFactorAuth') {
+                            // On 2FA page only /rest/private/twofactor/* is allowed; 403 elsewhere is expected
+                            return $q.reject(rejection);
+                        }
                         $injector.get('authService').logout();
-                        $injector.get('$state').transitionTo('login');
+                        $state.transitionTo('login');
                         $injector.get('hintService').onLogout();
                         $rootScope.$broadcast("aero_USER_LOGOUT");
 
