@@ -379,7 +379,7 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
 
         var samplePayloads = {
             configUpdated: "",
-            runApp: "{\"pkg\": \"app.package.id\"}",
+            runApp: "{\"pkg\": \"app.package.id\", \"background\": false}",
             uninstallApp: "{\"pkg\": \"app.package.id\"}",
             deleteFile: "{\"path\": \"/path/to/file\"}",
             deleteDir: "{\"path\": \"/path/to/dir\"}",
@@ -397,7 +397,7 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
         };
 
         $scope.typeChanged = function() {
-            $scope.message.payload = samplePayloads[$scope.message.messageType];
+            $scope.message.payload = samplePayloads[$scope.message.messageType] || "";
         };
 
         $scope.send = function () {
@@ -509,7 +509,7 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
 
         var samplePayloads = {
             configUpdated: "",
-            runApp: "{\"pkg\": \"app.package.id\"}",
+            runApp: "{\"pkg\": \"app.package.id\", \"background\": false}",
             uninstallApp: "{\"pkg\": \"app.package.id\"}",
             deleteFile: "{\"path\": \"/path/to/file\"}",
             deleteDir: "{\"path\": \"/path/to/dir\"}",
@@ -527,7 +527,7 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
         };
 
         $scope.typeChanged = function() {
-            $scope.task.payload = samplePayloads[$scope.task.messageType];
+            $scope.task.payload = samplePayloads[$scope.task.messageType] || "";
         };
 
         $scope.save = function () {
