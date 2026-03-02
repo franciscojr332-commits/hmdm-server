@@ -717,8 +717,17 @@ angular.module('headwind-kiosk')
                     }
 
                     var applications = allApplications.filter(function (app) {
-                        // Intentionally using app.action != 0 but not app.action !== 0
-                        return app.action != 0;
+                        // Include: Permitir/Instalar (1), Remover (2), or Bloquear/Não instalar (0) when in config or just changed
+                        if (app.action == 1 || app.action == 2) return true;
+                        if (app.action == 0 && (app.selected || app.actionChanged)) return true;
+                        return false;
+                    });
+
+                    // Ensure every app has usedVersionId (e.g. Settings / block-only apps from list may have null)
+                    applications.forEach(function (app) {
+                        if (!app.usedVersionId && app.latestVersion) {
+                            app.usedVersionId = app.latestVersion;
+                        }
                     });
 
                     request.applications = applications;

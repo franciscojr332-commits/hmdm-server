@@ -97,11 +97,29 @@ public class ConfigurationDAO extends AbstractLinkedDAO<Configuration, Applicati
         return c != null;
     }
 
+    /**
+     * Ensures each application in the list has a valid usedVersionId so that configurationApplications
+     * insert does not fail for system/block-only apps (e.g. Settings) that may have null from the frontend.
+     */
+    private void ensureApplicationVersionIds(List<Application> applications) {
+        for (Application app : applications) {
+            boolean missingVersion = (app.getUsedVersionId() == null || app.getUsedVersionId() == 0)
+                    && (app.getLatestVersion() == null || app.getLatestVersion() == 0);
+            if (missingVersion && app.getId() != null) {
+                Application fromDb = this.applicationMapper.findById(app.getId());
+                if (fromDb != null && fromDb.getLatestVersion() != null) {
+                    app.setUsedVersionId(fromDb.getLatestVersion());
+                }
+            }
+        }
+    }
+
     public void insertConfiguration(Configuration config) {
         insertRecord(config, configuration -> {
             this.mapper.insertConfiguration(configuration);
             if (configuration.getApplications().size() > 0) {
                 configuration.getApplications().forEach(app -> app.setRemove(app.getAction() == 2));
+                ensureApplicationVersionIds(configuration.getApplications());
                 this.mapper.insertConfigurationApplications(configuration.getId(), configuration.getApplications());
             }
             if (configuration.getApplicationSettings() != null && !configuration.getApplicationSettings().isEmpty()) {
@@ -127,6 +145,7 @@ public class ConfigurationDAO extends AbstractLinkedDAO<Configuration, Applicati
                     this.mapper.removeConfigurationApplicationsById(configuration.getId());
                     if (configuration.getApplications().size() > 0) {
                         configuration.getApplications().forEach(app -> app.setRemove(app.getAction() == 2));
+                        ensureApplicationVersionIds(configuration.getApplications());
                         this.mapper.insertConfigurationApplications(configuration.getId(), configuration.getApplications());
                     }
 
