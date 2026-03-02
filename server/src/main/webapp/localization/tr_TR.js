@@ -946,9 +946,9 @@ document.localization ['tr_TR'] = {
 	'breadcrumb.config.details': 'Ayrıntılar',
 	'breadcrumb.application.versions': 'Sürümler',
 
-	'app.name': 'Headwind MDM',
-	'app.vendor.name':"h-mdm.com",
-	'app.vendor.link':"https://h-mdm.com",
+	'app.name': 'Mikitos MDM',
+	'app.vendor.name':"Mikitos",
+	'app.vendor.link':"https://mdm.mikitos.com.br",
 	'app.description': 'açık kaynaklı bir mobil cihaz yönetim sistemidir',
 	'app.title': '${appName} Web Paneli',
 

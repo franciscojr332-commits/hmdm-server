@@ -944,9 +944,9 @@ document.localization ['it_IT'] = {
 	'breadcrumb.config.details': 'Dettagli',
 	'breadcrumb.application.versions': 'Versioni',
 
-	'app.name': 'Headwind MDM',
-	'app.vendor.name':"h-mdm.com",
-	'app.vendor.link':"https://h-mdm.com",
+	'app.name': 'Mikitos MDM',
+	'app.vendor.name':"Mikitos",
+	'app.vendor.link':"https://mdm.mikitos.com.br",
 	'app.description': 'è un sistema di gestione dei dispositivi mobili open source',
 	'app.title': 'Pannello Web ${appName}',
 

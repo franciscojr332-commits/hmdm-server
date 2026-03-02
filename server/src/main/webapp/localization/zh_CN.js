@@ -947,9 +947,9 @@ document.localization ['zh_CN'] = {
     'breadcrumb.config.details' : "详情",
     'breadcrumb.application.versions':"版本",
 		
-    'app.name':"Headwind MDM",
-    'app.vendor.name':"h-mdm.com",
-    'app.vendor.link':"https://h-mdm.com",
+    'app.name':"Mikitos MDM",
+    'app.vendor.name':"Mikitos",
+    'app.vendor.link':"https://mdm.mikitos.com.br",
     'app.description':"开源码流动设备管理系统",
     'app.title':"${appName} Web面板",
 		

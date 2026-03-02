@@ -947,9 +947,9 @@ document.localization ['es_ES'] = {
     'breadcrumb.config.details': 'Detalles',
     'breadcrumb.application.versions': 'Versiones',
 
-    'app.name': 'Headwind MDM',
-    'app.vendor.name':"h-mdm.com",
-    'app.vendor.link':"https://h-mdm.com",
+    'app.name': 'Mikitos MDM',
+    'app.vendor.name':"Mikitos",
+    'app.vendor.link':"https://mdm.mikitos.com.br",
     'app.description': 'es la solucion MDM open-source',
     'app.title': '${appName} Panel Web',
 
