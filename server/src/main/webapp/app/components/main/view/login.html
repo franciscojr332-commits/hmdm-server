@@ -1,15 +1,17 @@
 <!-- Localization completed -->
-<div class="login-page-container" ng-if="!isIE">
-    <div class="login-page-content">
-        <div class="login-logo" ng-if="rebranding">
+<div class="login-page" ng-if="!isIE">
+    <div class="login-wrapper">
+        <div class="login-page-logo" ng-if="rebranding">
             <img src="rest/public/logo" alt="">
-            <span class="logo">{{rebranding.appName}}</span>
+            <span class="login-page-logo-text">{{rebranding.appName}}</span>
         </div>
 
-        <div class='panel panel-default login-panel' ng-class='{"panel-danger": errorMessage, "panel-success": successMessage}'>
-            <div class='panel-heading' ng-if='errorMessage'>{{errorMessage}}</div>
-            <div class='panel-heading' ng-if='successMessage'>{{successMessage}}</div>
-            <div class='panel-body login-panel-body'>
+        <div class="login-card panel panel-default" ng-class='{"panel-danger": errorMessage, "panel-success": successMessage}'>
+            <div class="panel-heading login-card-heading" ng-if='errorMessage'>{{errorMessage}}</div>
+            <div class="panel-heading login-card-heading" ng-if='successMessage'>{{successMessage}}</div>
+            <div class="panel-body login-card-body">
+                <h1 class="login-card-title">Entrar</h1>
+                <p class="login-card-subtitle">Acesse sua conta</p>
                 <form name='loginForm' ng-submit='onLogin()' class="login-form">
                     <div class='form-group'>
                         <label for='username' localized>login.username</label>
