@@ -88,7 +88,9 @@ public class DownloadFilesServlet extends HttpServlet {
             return;
         }
 
-        if (secureEnrollment && !applicationDAO.isMainApp("%" + path)) {
+        // Allow image files (e.g. background image) without signature so launcher can load them regardless of REQUEST_SIGNATURE vs hash.secret mismatch
+        boolean isImageFile = path.toLowerCase().matches(".*\\.(png|jpe?g|gif|webp)$");
+        if (secureEnrollment && !isImageFile && !applicationDAO.isMainApp("%" + path)) {
             String signature = req.getHeader(HEADER_ENROLLMENT_SIGNATURE);
             if (signature == null) {
                 log.warn("No signature for file request " + req.getRequestURL().toString());
