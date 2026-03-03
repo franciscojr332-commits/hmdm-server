@@ -950,7 +950,7 @@ document.localization ['ar_AE'] = {
     "app.name": 'Mikitos MDM',
     'app.vendor.name':"Mikitos",
     'app.vendor.link':"https://mdm.mikitos.com.br",
-    "app.description": 'هو نظام إدارة الأجهزة المحمولة مفتوح المصدر',
+    "app.description": '',
     "app.title": '${appName} لوحة ويب',
 
     "box.show.my.apps.only": 'عرض تطبيقاتي فقط',

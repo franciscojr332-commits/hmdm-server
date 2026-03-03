@@ -950,7 +950,7 @@ document.localization ['de_DE'] = {
     'app.name': 'Mikitos MDM',
     'app.vendor.name':"Mikitos",
     'app.vendor.link':"https://mdm.mikitos.com.br",
-    'app.description': 'ist das Open-Source-Managementsystem für mobile Geräte',
+    'app.description': '',
     'app.title': '${appName}-Webpanel',
 
     'box.show.my.apps.only': 'Nur meine Anwendungen anzeigen',

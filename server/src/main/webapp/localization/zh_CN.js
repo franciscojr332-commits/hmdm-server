@@ -950,7 +950,7 @@ document.localization ['zh_CN'] = {
     'app.name':"Mikitos MDM",
     'app.vendor.name':"Mikitos",
     'app.vendor.link':"https://mdm.mikitos.com.br",
-    'app.description':"开源码流动设备管理系统",
+    'app.description': '',
     'app.title':"${appName} Web面板",
 		
     'box.show.my.apps.only':"仅显示我的应用程式",

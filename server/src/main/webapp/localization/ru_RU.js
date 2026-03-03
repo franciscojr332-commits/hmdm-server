@@ -950,7 +950,7 @@ document.localization[ 'ru_RU' ] = {
     'app.name': 'Mikitos MDM',
     'app.vendor.name':"Mikitos",
     'app.vendor.link':"https://mdm.mikitos.com.br",
-    'app.description': '- система управления мобильными устройствами с открытым кодом',
+    'app.description': '',
     'app.title': '${appName} - панель управления',
 
     'box.show.my.apps.only': 'Показать только мои приложения',

@@ -983,7 +983,7 @@ document.localization ['vi_VN'] = {
     'app.name': 'Mikitos MDM',
     'app.vendor.name': "Mikitos",
     'app.vendor.link': "https://mdm.mikitos.com.br",
-    'app.description': 'là một hệ thống quản lý thiết bị di động mã nguồn mở',
+    'app.description': '',
     'app.title': 'Bảng ${appName} Web',
 
     'box.show.my.apps.only': 'Chỉ hiển thị ứng dụng của tôi',
