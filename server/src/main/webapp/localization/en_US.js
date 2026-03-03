@@ -358,6 +358,7 @@ document.localization ['en_US'] = {
     'form.configuration.settings.design.color.app.names.placeholder': 'Select a color',
     'form.configuration.settings.design.background.image.url': 'URL of the background image',
     'form.configuration.settings.design.background.image.url.placeholder': 'Enter the url of the background image',
+    'form.configuration.settings.design.background.image.hint': 'Use JPEG or PNG; recommended up to 2 MB and 1920×1080. The URL must be reachable from devices (same Base URL as the server). Save configuration and sync the device for the image to appear.',
     'form.configuration.settings.design.icon': 'Icon size',
     'form.configuration.settings.design.icon.small': 'Small',
     'form.configuration.settings.design.icon.medium': 'Average (+ 20%)',
