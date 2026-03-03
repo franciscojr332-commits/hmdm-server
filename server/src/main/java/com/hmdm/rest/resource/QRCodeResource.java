@@ -194,12 +194,17 @@ public class QRCodeResource {
                         String url = !StringUtil.isEmpty(configuration.getLauncherUrl()) ? configuration.getLauncherUrl() : appVersion.getUrl();
                         final String apkUrl = url.replace(" ", "%20");
                         final String sha256;
-                        if (appVersion.getApkHash() == null) {
-                            // Here we keep the original URL to be able to access the file locally
-                            sha256 = calculateApkHash(appVersion.getUrl());
-                            this.unsecureDAO.saveApkFileHash(appVersion.getId(), sha256);
-                        } else {
+                        // Hash MUST match the file at apkUrl (what the device downloads).
+                        // When launcherUrl overrides, we must compute from apkUrl, not appVersion.url.
+                        boolean useStoredHash = appVersion.getApkHash() != null
+                                && StringUtil.isEmpty(configuration.getLauncherUrl());
+                        if (useStoredHash) {
                             sha256 = appVersion.getApkHash();
+                        } else {
+                            sha256 = calculateApkHash(apkUrl);
+                            if (StringUtil.isEmpty(configuration.getLauncherUrl())) {
+                                this.unsecureDAO.saveApkFileHash(appVersion.getId(), sha256);
+                            }
                         }
 
                         Application appMain = this.unsecureDAO.findApplicationById(appVersion.getApplicationId());

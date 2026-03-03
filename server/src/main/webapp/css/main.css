@@ -121,6 +121,84 @@
     padding-top: 10px;
 }
 
+/* Login page: centralização e equilíbrio visual */
+.login-page-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: linear-gradient(160deg, #f6f8fc 0%, #e8eef5 50%, #f0f4f9 100%);
+}
+
+.login-page-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 420px;
+}
+
+.login-page-container .login-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 0 30px 0;
+    text-align: center;
+}
+
+.login-page-container .login-logo img {
+    max-height: 120px;
+    width: auto;
+    margin-bottom: 10px;
+}
+
+.login-page-container .login-logo .logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #4c788c;
+}
+
+.login-page-container .login-panel {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.login-page-container .login-panel-body {
+    padding: 25px;
+    background: #fff;
+}
+
+.login-page-container .login-form .form-control {
+    border: 1px solid #c5d0db;
+    border-radius: 6px;
+    padding: 10px 12px;
+}
+
+.login-page-container .login-form .form-control:focus {
+    border-color: #4c788c;
+    box-shadow: 0 0 0 2px rgba(76, 120, 140, 0.15);
+}
+
+.login-page-container .login-links {
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+}
+
+.login-page-container .login-links div {
+    margin-top: 6px;
+}
+
+.login-page-container .login-submit {
+    width: 100%;
+    padding: 10px 16px;
+    font-weight: 600;
+    border-radius: 6px;
+}
+
 .header .logo-text {
     margin-top: 10px;
     padding-left: 15px;
