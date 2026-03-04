@@ -133,7 +133,9 @@ angular.module('headwind-kiosk')
             updateFile: {url: 'rest/private/web-ui-files/update', method: 'POST'},
             getLimit: {url: 'rest/private/web-ui-files/limit', method: 'GET'},
             getConfigurations: {url: 'rest/private/web-ui-files/configurations/:id', method: 'GET'},
-            updateConfigurations: {url: 'rest/private/web-ui-files/configurations', method: 'POST'}
+            updateConfigurations: {url: 'rest/private/web-ui-files/configurations', method: 'POST'},
+            getServerFiles: {url: 'rest/private/web-ui-files/server-files', method: 'GET'},
+            registerServerFile: {url: 'rest/private/web-ui-files/register-server-file', method: 'POST'}
         })
     })
     .factory('storageService', function () {

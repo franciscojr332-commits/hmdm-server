@@ -109,6 +109,19 @@ public class DownloadFilesServlet extends HttpServlet {
         }
 
         File file = new File(String.format("%s/%s", this.filesDirectory, path));
+        if (!file.exists() && !path.contains("/") && this.baseDirectory.isDirectory()) {
+            // Fallback: file may be under a customer subdir (e.g. /files/mikitos.png -> filesDir/customerId/mikitos.png)
+            File[] dirs = this.baseDirectory.listFiles(File::isDirectory);
+            if (dirs != null) {
+                for (File dir : dirs) {
+                    File candidate = new File(dir, path);
+                    if (candidate.exists() && candidate.isFile()) {
+                        file = candidate;
+                        break;
+                    }
+                }
+            }
+        }
         if (file.exists()) {
 
             long modifiedSince = req.getDateHeader("If-Modified-Since");
@@ -142,7 +155,7 @@ public class DownloadFilesServlet extends HttpServlet {
                 e.printStackTrace();
             }
         } else {
-            System.out.println("Not found: " + file.getAbsolutePath());
+            log.warn("File not found: {}", file.getAbsolutePath());
             resp.sendError(404);
         }
 

@@ -468,6 +468,12 @@ document.localization ['pt_PT'] = {
     'form.configuration.file.action.prompt.2': 'Remover',
     'form.configuration.file.remove.prompt.1': 'Este arquivo não será mais sincronizado com os dispositivos',
     'form.configuration.file.remove.prompt.2': 'Remover arquivos do servidor',
+    'form.configuration.file.from.server': 'Ou selecionar do servidor (ficheiros em /usr/local/tomcat/work/files/)',
+    'form.configuration.file.list.server': 'Listar ficheiros do servidor',
+    'form.configuration.file.loading': 'A carregar...',
+    'form.configuration.file.size': 'Tamanho',
+    'form.configuration.file.use.server': 'Usar',
+    'form.configuration.file.no.server.files': 'Nenhum ficheiro encontrado no diretório do servidor.',
 
     'form.password.title': 'Alterar Senha',
     'form.password.label.user': 'Usuário',
@@ -958,7 +964,7 @@ document.localization ['pt_PT'] = {
     'app.name': 'Mikitos MDM',
     'app.vendor.name':"Mikitos",
     'app.vendor.link':"https://mdm.mikitos.com.br",
-    'app.description': '',
+    'app.description': 'é o sistema de gerenciamento de dispositivos móveis de código aberto',
     'app.title': 'Painel Web ${appName}',
 
     'box.show.my.apps.only': 'Mostrar apenas minhas aplicações',
