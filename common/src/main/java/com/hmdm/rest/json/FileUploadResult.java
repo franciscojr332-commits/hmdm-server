@@ -65,9 +65,22 @@ public class FileUploadResult implements Serializable {
     private String name;
 
     /**
+     * <p>ID of the uploaded file record when registering an existing server file.</p>
+     */
+    private Integer fileId;
+
+    /**
      * <p>Constructs new <code>FileUploadResult</code> instance. This implementation does nothing.</p>
      */
     public FileUploadResult() {
+    }
+
+    public Integer getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(Integer fileId) {
+        this.fileId = fileId;
     }
 
     public String getServerPath() {
@@ -127,6 +140,7 @@ public class FileUploadResult implements Serializable {
                 ", complete=" + complete +
                 ", exists=" + exists +
                 ", name='" + name + '\'' +
+                ", fileId=" + fileId +
                 '}';
     }
 }

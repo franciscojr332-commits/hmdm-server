@@ -416,18 +416,53 @@ angular.module('headwind-kiosk')
             $scope.loading = true;
             fileService.registerServerFile({ filePath: item.filePath, description: item.name }, function (response) {
                 $scope.loading = false;
-                if (response.data && response.data.status === 'OK' && response.data.data) {
-                    var data = response.data.data;
-                    $scope.file.path = data.filePath || item.filePath;
-                    $scope.fileName = item.name;
+                if (response && response.status === 'OK' && response.data) {
+                    var data = response.data;
+                    $scope.file.path = data.serverPath || data.filePath || item.filePath;
+                    $scope.file.fileId = data.fileId || data.id;
+                    $scope.fileName = data.name || item.name;
                     $scope.fileSelected = true;
+                    if (data.application) {
+                        var app = data.application;
+                        $scope.application.name = app.name;
+                        $scope.application.showIcon = app.showIcon;
+                        $scope.application.useKiosk = app.useKiosk;
+                        $scope.application.runAfterInstall = app.runAfterInstall;
+                        $scope.application.runAtBoot = app.runAtBoot;
+                        $scope.application.system = app.system;
+                        $scope.application.autoUpdateDisplayed = true;
+                    }
+                    if (data.fileDetails) {
+                        var fileDetails = data.fileDetails;
+                        $scope.application.pkg = fileDetails.pkg;
+                        $scope.appdesc.pkg = fileDetails.pkg + " - " + localization.localize("form.application.from.file");
+                        if (!$scope.application.name) {
+                            $scope.application.name = fileDetails.name;
+                        }
+                        $scope.application.version = fileDetails.version;
+                        $scope.application.versionCode = fileDetails.versionCode;
+                        $scope.appdesc.version = fileDetails.version + " - " + localization.localize("form.application.from.file");
+                        $scope.application.arch = fileDetails.arch;
+                        $scope.appTypeWarning = null;
+                        $scope.appTypeSuccess = null;
+                        $scope.complete = null;
+                        if (data.exists) {
+                            $scope.appTypeWarning = localization.localize('form.application.version.exists');
+                        } else if (data.complete) {
+                            $scope.appTypeSuccess = localization.localize('form.application.arch.success');
+                            $scope.complete = true;
+                        } else if (fileDetails.arch) {
+                            $scope.appTypeWarning = localization.localize('form.application.arch.warning').replace('${arch}', fileDetails.arch);
+                        }
+                    }
                     $scope.successMessage = localization.localize('success.file.uploaded');
                 } else {
-                    $scope.errorMessage = localization.localize((response.data && response.data.message) || 'error.request.failure');
+                    $scope.errorMessage = localization.localize((response && response.message) || 'error.request.failure');
                 }
-            }, function () {
+            }, function (err) {
                 $scope.loading = false;
-                $scope.errorMessage = localization.localize('error.request.failure');
+                var msg = (err && err.data && err.data.message) ? err.data.message : 'error.request.failure';
+                $scope.errorMessage = localization.localize(msg);
             });
         };
 
@@ -1081,18 +1116,42 @@ angular.module('headwind-kiosk')
             $scope.loading = true;
             fileService.registerServerFile({ filePath: item.filePath, description: item.name }, function (response) {
                 $scope.loading = false;
-                if (response.data && response.data.status === 'OK' && response.data.data) {
-                    var data = response.data.data;
-                    $scope.file.path = data.filePath || item.filePath;
-                    $scope.fileName = item.name;
+                if (response && response.status === 'OK' && response.data) {
+                    var data = response.data;
+                    $scope.file.path = data.serverPath || data.filePath || item.filePath;
+                    $scope.file.fileId = data.fileId || data.id;
+                    $scope.fileName = data.name || item.name;
                     $scope.fileSelected = true;
+                    if (data.fileDetails) {
+                        var fileDetails = data.fileDetails;
+                        $scope.application.pkg = fileDetails.pkg;
+                        if (!$scope.application.name) {
+                            $scope.application.name = fileDetails.name;
+                        }
+                        $scope.application.version = fileDetails.version;
+                        $scope.application.versionCode = fileDetails.versionCode;
+                        $scope.application.arch = fileDetails.arch;
+                        $scope.appdesc.version = fileDetails.version + " - " + localization.localize("form.application.from.file");
+                        $scope.appTypeWarning = null;
+                        $scope.appTypeSuccess = null;
+                        $scope.complete = null;
+                        if (data.exists) {
+                            $scope.appTypeWarning = localization.localize('form.application.version.exists');
+                        } else if (data.complete) {
+                            $scope.appTypeSuccess = localization.localize('form.application.arch.success');
+                            $scope.complete = true;
+                        } else if (fileDetails.arch) {
+                            $scope.appTypeWarning = localization.localize('form.application.arch.warning').replace('${arch}', fileDetails.arch);
+                        }
+                    }
                     $scope.successMessage = localization.localize('success.file.uploaded');
                 } else {
-                    $scope.errorMessage = localization.localize((response.data && response.data.message) || 'error.request.failure');
+                    $scope.errorMessage = localization.localize((response && response.message) || 'error.request.failure');
                 }
-            }, function () {
+            }, function (err) {
                 $scope.loading = false;
-                $scope.errorMessage = localization.localize('error.request.failure');
+                var msg = (err && err.data && err.data.message) ? err.data.message : 'error.request.failure';
+                $scope.errorMessage = localization.localize(msg);
             });
         };
 

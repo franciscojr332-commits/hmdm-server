@@ -184,7 +184,7 @@ document.localization ['pt_PT'] = {
     'error.duplicate.device.number': 'Um dispositivo com esse número já existe',
     'error.internal.server': 'Erro interno do servidor',
     'error.permission.denied': 'Sem direitos de execução',
-    'error.request.failure': 'Falha de solicitou',
+    'error.request.failure': 'Falha na solicitação',
     'error.configuration.device.use': 'Não é possível excluir essa configuração, ela está sendo usada em algum(ns) dispositivo(s). Primeiro vá para "Dispositivos", encontre o dispositivo usando esta configuração e altere sua configuração.',
     'error.invalid.system.update.time': 'Intervalo de instalação inválido',
     'error.size.limit.exceeded': 'Limite de armazenamento excedido',

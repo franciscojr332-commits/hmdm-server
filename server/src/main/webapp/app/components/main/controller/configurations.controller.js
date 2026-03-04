@@ -1553,25 +1553,27 @@ angular.module('headwind-kiosk')
             $scope.loading = true;
             fileService.registerServerFile({ filePath: item.filePath, description: item.name }, function (response) {
                 $scope.loading = false;
-                if (response.data && response.data.status === 'OK' && response.data.data) {
-                    var data = response.data.data;
+                if (response && response.status === 'OK' && response.data) {
+                    var data = response.data;
+                    var filePath = data.serverPath || data.filePath || item.filePath;
                     if (!defaultFilePath.endsWith("/")) {
                         defaultFilePath += "/";
                     }
-                    $scope.file.path = defaultFilePath + (data.filePath || item.filePath);
-                    $scope.file.filePath = data.filePath || item.filePath;
-                    $scope.file.fileId = data.id;
+                    $scope.file.path = defaultFilePath + filePath;
+                    $scope.file.filePath = filePath;
+                    $scope.file.fileId = data.fileId || data.id;
                     $scope.file.lastUpdate = data.uploadTime || Date.now();
                     $scope.file.checksum = data.checksum;
                     $scope.file.url = data.url;
                     $scope.fileSelected = true;
                     $scope.successMessage = localization.localize('success.file.uploaded');
                 } else {
-                    $scope.errorMessage = localization.localize((response.data && response.data.message) || 'error.request.failure');
+                    $scope.errorMessage = localization.localize((response && response.message) || 'error.request.failure');
                 }
-            }, function () {
+            }, function (err) {
                 $scope.loading = false;
-                $scope.errorMessage = localization.localize('error.request.failure');
+                var msg = (err && err.data && err.data.message) ? err.data.message : 'error.request.failure';
+                $scope.errorMessage = localization.localize(msg);
             });
         };
 

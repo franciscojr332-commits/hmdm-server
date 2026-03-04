@@ -498,6 +498,54 @@ public class FilesResource {
                 uploadedFile.setUploadTime(System.currentTimeMillis());
                 uploadedFileDAO.insert(uploadedFile);
                 uploadedFile.setUrl(uploadedFile.getUrl(baseUrl, customer));
+
+                String fileName = fullPath.getName();
+                if (fileName != null && (fileName.toLowerCase().endsWith(".apk") || fileName.toLowerCase().endsWith(".xapk"))) {
+                    try {
+                        APKFileDetails apkFileDetails = apkFileAnalyzer.analyzeFile(fullPath.getAbsolutePath());
+                        ApplicationVersion version;
+                        if (apkFileDetails.getVersionCode() != 0) {
+                            version = applicationDAO.findApplicationVersionByCode(apkFileDetails.getPkg(), apkFileDetails.getVersionCode());
+                            if (version != null && !version.getVersion().equals(apkFileDetails.getVersion())) {
+                                return Response.DUPLICATE_ENTITY("form.application.version.code.exists");
+                            }
+                        }
+                        version = applicationDAO.findApplicationVersion(apkFileDetails.getPkg(), apkFileDetails.getVersion());
+                        FileUploadResult result = new FileUploadResult();
+                        result.setFileId(uploadedFile.getId());
+                        result.setServerPath(filePath);
+                        result.setName(fileName);
+                        result.setFileDetails(apkFileDetails);
+                        if (StringUtil.isEmpty(apkFileDetails.getArch())) {
+                            if (version != null) {
+                                result.setExists(true);
+                            }
+                        } else if (Application.ARCH_ARMEABI.equals(apkFileDetails.getArch())) {
+                            result.setComplete(version != null && !StringUtil.isEmpty(version.getUrlArm64()));
+                            result.setExists(version != null && (!version.isSplit() || !StringUtil.isEmpty(version.getUrlArmeabi())));
+                        } else if (Application.ARCH_ARM64.equals(apkFileDetails.getArch())) {
+                            result.setComplete(version != null && !StringUtil.isEmpty(version.getUrlArmeabi()));
+                            result.setExists(version != null && (!version.isSplit() || !StringUtil.isEmpty(version.getUrlArm64())));
+                        }
+                        List<Application> dbAppsByPkg = applicationDAO.findByPackageId(apkFileDetails.getPkg());
+                        if (!dbAppsByPkg.isEmpty()) {
+                            Application dbApp = dbAppsByPkg.get(0);
+                            Application dbAppCopy = new Application();
+                            dbAppCopy.setId(dbApp.getId());
+                            dbAppCopy.setShowIcon(dbApp.getShowIcon());
+                            dbAppCopy.setUseKiosk(dbApp.getUseKiosk());
+                            dbAppCopy.setRunAfterInstall(dbApp.isRunAfterInstall());
+                            dbAppCopy.setRunAtBoot(dbApp.isRunAtBoot());
+                            dbAppCopy.setSystem(dbApp.isSystem());
+                            dbAppCopy.setName(dbApp.getName());
+                            dbAppCopy.setPkg(dbApp.getPkg());
+                            result.setApplication(dbAppCopy);
+                        }
+                        return Response.OK(result);
+                    } catch (Exception e) {
+                        logger.warn("Could not parse APK/XAPK for file details, returning uploaded file: " + filePath, e);
+                    }
+                }
                 return Response.OK(uploadedFile);
             } catch (IOException e) {
                 logger.error("Error registering server file: " + filePath, e);
