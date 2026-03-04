@@ -1551,30 +1551,32 @@ angular.module('headwind-kiosk')
             if (!item || !item.filePath) return;
             $scope.serverFilesError = undefined;
             $scope.loading = true;
-            fileService.registerServerFile({ filePath: item.filePath, description: item.name }, function (response) {
-                $scope.loading = false;
-                if (response && response.status === 'OK' && response.data) {
-                    var data = response.data;
-                    var filePath = data.serverPath || data.filePath || item.filePath;
-                    if (!defaultFilePath.endsWith("/")) {
-                        defaultFilePath += "/";
+            $http.post('rest/private/web-ui-files/register-server-file', { filePath: item.filePath, description: item.name })
+                .then(function (res) {
+                    $scope.loading = false;
+                    var response = res.data;
+                    if (response && response.status === 'OK' && response.data) {
+                        var data = response.data;
+                        var filePath = data.serverPath || data.filePath || item.filePath;
+                        if (!defaultFilePath.endsWith("/")) {
+                            defaultFilePath += "/";
+                        }
+                        $scope.file.path = defaultFilePath + filePath;
+                        $scope.file.filePath = filePath;
+                        $scope.file.fileId = data.fileId || data.id;
+                        $scope.file.lastUpdate = data.uploadTime || Date.now();
+                        $scope.file.checksum = data.checksum;
+                        $scope.file.url = data.url;
+                        $scope.fileSelected = true;
+                        $scope.successMessage = localization.localize('success.file.uploaded');
+                    } else {
+                        $scope.errorMessage = localization.localize((response && response.message) || 'error.request.failure');
                     }
-                    $scope.file.path = defaultFilePath + filePath;
-                    $scope.file.filePath = filePath;
-                    $scope.file.fileId = data.fileId || data.id;
-                    $scope.file.lastUpdate = data.uploadTime || Date.now();
-                    $scope.file.checksum = data.checksum;
-                    $scope.file.url = data.url;
-                    $scope.fileSelected = true;
-                    $scope.successMessage = localization.localize('success.file.uploaded');
-                } else {
-                    $scope.errorMessage = localization.localize((response && response.message) || 'error.request.failure');
-                }
-            }, function (err) {
-                $scope.loading = false;
-                var msg = (err && err.data && err.data.message) ? err.data.message : 'error.request.failure';
-                $scope.errorMessage = localization.localize(msg);
-            });
+                }, function (err) {
+                    $scope.loading = false;
+                    var msg = (err && err.data && err.data.message) ? err.data.message : 'error.request.failure';
+                    $scope.errorMessage = localization.localize(msg);
+                });
         };
 
         $scope.save = function () {
