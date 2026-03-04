@@ -460,6 +460,12 @@ document.localization[ 'ru_RU' ] = {
     'form.configuration.file.action.prompt.2': 'Удалить',
     'form.configuration.file.remove.prompt.1': 'Этот файл больше не будет синхронизироваться с устройствами',
     'form.configuration.file.remove.prompt.2': 'Удалить файл с сервера',
+    'form.configuration.file.from.server': 'Или выбрать с сервера (файлы в /usr/local/tomcat/work/files/)',
+    'form.configuration.file.list.server': 'Список файлов сервера',
+    'form.configuration.file.loading': 'Загрузка...',
+    'form.configuration.file.size': 'Размер',
+    'form.configuration.file.use.server': 'Использовать',
+    'form.configuration.file.no.server.files': 'Файлы в каталоге сервера не найдены.',
 
     'form.password.title': 'Сменить пароль',
     'form.password.label.user': 'Пользователь',

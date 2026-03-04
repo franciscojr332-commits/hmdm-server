@@ -460,6 +460,12 @@ document.localization ['tr_TR'] = {
 	'form.configuration.file.action.prompt.2': 'Kaldır',
 	'form.configuration.file.remove.prompt.1': 'Bu dosya artık cihazlarla senkronize edilmeyecek',
 	'form.configuration.file.remove.prompt.2': 'Dosyayı sunucudan kaldır',
+	'form.configuration.file.from.server': 'Veya sunucudan seçin (/usr/local/tomcat/work/files/ içindeki dosyalar)',
+	'form.configuration.file.list.server': 'Sunucu dosyalarını listele',
+	'form.configuration.file.loading': 'Yükleniyor...',
+	'form.configuration.file.size': 'Boyut',
+	'form.configuration.file.use.server': 'Kullan',
+	'form.configuration.file.no.server.files': 'Sunucu dizininde dosya bulunamadı.',
 
 	'form.password.title': 'Şifreyi Değiştir',
 	'form.password.label.user': 'Kullanıcı',

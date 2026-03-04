@@ -460,7 +460,13 @@ document.localization ['zh_TW'] = {
     'form.configuration.file.action.prompt.2' : "去掉",
     'form.configuration.file.remove.prompt.1':"此文檔將不再與設備同步",
     'form.configuration.file.remove.prompt.2':"從服務器刪除文檔",
-		
+    'form.configuration.file.from.server': '或從伺服器選擇（/usr/local/tomcat/work/files/ 中的檔案）',
+    'form.configuration.file.list.server': '列出伺服器檔案',
+    'form.configuration.file.loading': '載入中...',
+    'form.configuration.file.size': '大小',
+    'form.configuration.file.use.server': '使用',
+    'form.configuration.file.no.server.files': '在伺服器目錄中未找到檔案。',
+
     'form.password.title' : "更改密碼",
     'form.password.label.user' : "用戶",
     'form.password.label.password.new' : "新密碼",

@@ -543,6 +543,12 @@ document.localization ['vi_VN'] = {
     'form.configuration.file.action.prompt.2': 'Xóa',
     'form.configuration.file.remove.prompt.1': 'Tệp này sẽ không còn được đồng bộ với các thiết bị nữa',
     'form.configuration.file.remove.prompt.2': 'Xóa tệp khỏi máy chủ',
+    'form.configuration.file.from.server': 'Hoặc chọn từ máy chủ (tệp trong /usr/local/tomcat/work/files/)',
+    'form.configuration.file.list.server': 'Liệt kê tệp máy chủ',
+    'form.configuration.file.loading': 'Đang tải...',
+    'form.configuration.file.size': 'Kích thước',
+    'form.configuration.file.use.server': 'Sử dụng',
+    'form.configuration.file.no.server.files': 'Không tìm thấy tệp trong thư mục máy chủ.',
 
     'form.password.length': 'Độ dài tối thiểu: ${length}. ',
 

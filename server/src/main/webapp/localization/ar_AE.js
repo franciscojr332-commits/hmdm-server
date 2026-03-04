@@ -460,6 +460,12 @@ document.localization ['ar_AE'] = {
     'form.configuration.file.action.prompt.2': 'إزالة' ,
     "form.configuration.file.remove.prompt.1": 'لن تتم مزامنة هذا الملف مع الأجهزة بعد الآن',
     'form.configuration.file.remove.prompt.2': 'إزالة الملف من الخادم' ,
+    'form.configuration.file.from.server': 'أو اختر من الخادم (ملفات في /usr/local/tomcat/work/files/)',
+    'form.configuration.file.list.server': 'قائمة ملفات الخادم',
+    'form.configuration.file.loading': 'جاري التحميل...',
+    'form.configuration.file.size': 'الحجم',
+    'form.configuration.file.use.server': 'استخدام',
+    'form.configuration.file.no.server.files': 'لم يتم العثور على ملفات في دليل الخادم.',
 
     "form.password.title": 'تغيير كلمة المرور',
     'form.password.label.user': 'المستخدم',

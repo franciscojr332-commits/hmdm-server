@@ -1510,7 +1510,7 @@ angular.module('headwind-kiosk')
             $modalInstance.dismiss();
         };
     })
-    .controller('FileEditorController', function ($scope, $modalInstance, localization, file, defaultFilePath, fileService) {
+    .controller('FileEditorController', function ($scope, $modalInstance, localization, file, defaultFilePath, fileService, $http) {
 
         $scope.file = angular.copy(file, {});
         $scope.errorMessage = undefined;
@@ -1528,18 +1528,21 @@ angular.module('headwind-kiosk')
             $scope.serverFilesError = undefined;
             $scope.loadingServerFiles = true;
             $scope.serverFiles = [];
-            fileService.getServerFiles({}, function (response) {
+            $http.get('rest/private/web-ui-files/server-files').then(function (res) {
+                var response = res.data;
                 $scope.loadingServerFiles = false;
                 $scope.serverFilesLoaded = true;
-                var list = (response.data && response.data.data) ? response.data.data : (response.data || []);
-                if (response.status === 'OK') {
+                var list = Array.isArray(response) ? response : ((response.data && response.data.data) ? response.data.data : (response.data || []));
+                if (response && response.status === 'OK') {
                     $scope.serverFiles = Array.isArray(list) ? list : [];
                 } else {
+                    $scope.serverFiles = [];
                     $scope.serverFilesError = localization.localize(response.message || 'error.request.failure');
                 }
             }, function () {
                 $scope.loadingServerFiles = false;
                 $scope.serverFilesLoaded = true;
+                $scope.serverFiles = [];
                 $scope.serverFilesError = localization.localize('error.request.failure');
             });
         };

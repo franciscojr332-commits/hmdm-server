@@ -460,6 +460,12 @@ document.localization ['ja_JP'] = {
     'form.configuration.file.action.prompt.2': '削除',
     'form.configuration.file.remove.prompt.1': 'このファイルはデバイスと同期されなくなります',
     'form.configuration.file.remove.prompt.2': 'サーバーからファイルを削除',
+    'form.configuration.file.from.server': 'またはサーバーから選択（/usr/local/tomcat/work/files/ のファイル）',
+    'form.configuration.file.list.server': 'サーバーファイルを一覧表示',
+    'form.configuration.file.loading': '読み込み中...',
+    'form.configuration.file.size': 'サイズ',
+    'form.configuration.file.use.server': '使用',
+    'form.configuration.file.no.server.files': 'サーバーディレクトリにファイルが見つかりません。',
 
     'form.password.title': 'パスワードの変更',
     'form.password.label.user': 'ユーザー',

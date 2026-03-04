@@ -460,6 +460,12 @@ document.localization ['de_DE'] = {
     'form.configuration.file.action.prompt.2': 'Entfernen',
     'form.configuration.file.remove.prompt.1': 'Diese Datei wird nicht mehr mit Geräten synchronisiert',
     'form.configuration.file.remove.prompt.2': 'Datei vom Server entfernen',
+    'form.configuration.file.from.server': 'Oder vom Server wählen (Dateien in /usr/local/tomcat/work/files/)',
+    'form.configuration.file.list.server': 'Serverdateien auflisten',
+    'form.configuration.file.loading': 'Laden...',
+    'form.configuration.file.size': 'Größe',
+    'form.configuration.file.use.server': 'Verwenden',
+    'form.configuration.file.no.server.files': 'Keine Dateien im Serververzeichnis gefunden.',
 
     'form.password.title': 'Passwort ändern',
     'form.password.label.user': 'Benutzer',
