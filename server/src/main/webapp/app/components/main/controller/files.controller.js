@@ -108,7 +108,7 @@ angular.module('headwind-kiosk')
                 } else {
                     $scope.search();
                 }
-            });
+            }).catch(function () {});
 
         };
 
@@ -140,7 +140,7 @@ angular.module('headwind-kiosk')
 
             modalInstance.result.then(function () {
                 $scope.search();
-            });
+            }).catch(function () {});
         };
 
         $scope.showApps = function (file) {

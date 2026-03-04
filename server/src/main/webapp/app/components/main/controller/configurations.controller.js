@@ -96,7 +96,7 @@ angular.module('headwind-kiosk')
 
             modalInstance.result.then(function () {
                 $scope.search();
-            });
+            }).catch(function () {});
         };
 
         $scope.removeConfiguration = function (configuration) {
@@ -308,7 +308,7 @@ angular.module('headwind-kiosk')
                 addedApp.isNew = true;
                 $scope.mainApp = addedApp;
                 $scope.mainApp.action = 1;
-            });
+            }).catch(function () {});
         };
     })
     .controller('ConfigurationEditorController',
@@ -346,7 +346,7 @@ angular.module('headwind-kiosk')
                     if (data) {
                         $scope.configuration.backgroundImageUrl = data.url;
                     }
-                });
+                }).catch(function () {});
             };
 
             $scope.localizeRenewVersionTitle = function (application) {
@@ -422,7 +422,7 @@ angular.module('headwind-kiosk')
                             syncContentApp();
                         }
                     }
-                });
+                }).catch(function () {});
             };
 
             $scope.actionChanged = function (updatedApp) {
@@ -832,7 +832,7 @@ angular.module('headwind-kiosk')
                         $scope.configuration.files.push(file);
                         filterFiles();
                     }
-                });
+                }).catch(function () {});
             };
 
             $scope.addApplicationSetting = function () {
@@ -855,7 +855,7 @@ angular.module('headwind-kiosk')
                         $scope.configuration.applicationSettings.push(applicationSetting);
                         filterApplicationSettings();
                     }
-                });
+                }).catch(function () {});
             };
 
             var mergeApplicationUsageParameters = function (newApplicationUsageParameters) {
@@ -1012,7 +1012,7 @@ angular.module('headwind-kiosk')
                     } else {
                         mergeApplicationUsageParameters(data.applicationParameters);
                     }
-                });
+                }).catch(function () {});
             };
 
             $scope.editDetails = function (application) {
@@ -1096,7 +1096,7 @@ angular.module('headwind-kiosk')
                         $scope.configuration.applicationSettings[index] = applicationSetting;
                         filterApplicationSettings();
                     }
-                });
+                }).catch(function () {});
             };
 
             $scope.removeApplicationSetting = function (applicationSetting) {
@@ -1146,7 +1146,7 @@ angular.module('headwind-kiosk')
                         $scope.configuration.files[index] = updatedFile;
                         filterFiles();
                     }
-                });
+                }).catch(function () {});
             };
 
             $scope.removeFile = function (file) {
@@ -1184,7 +1184,7 @@ angular.module('headwind-kiosk')
                         $scope.configuration.files.splice(index, 1);
                         filterFiles();
                     }
-                });
+                }).catch(function () {});
             };
 
             var turnWifiOn = function () {

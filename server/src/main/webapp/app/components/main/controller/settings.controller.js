@@ -194,7 +194,7 @@ angular.module('headwind-kiosk')
                 if (data) {
                     $scope.settings.backgroundImageUrl = data.url;
                 }
-            });
+            }).catch(function () {});
         };
 
         $scope.saveDefaultDesignSettings = function () {

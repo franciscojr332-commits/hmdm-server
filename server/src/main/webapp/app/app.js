@@ -93,7 +93,10 @@ angular.module('headwind-kiosk',
                 return $delegate;
             }]);
     }])
-    .config(function ($stateProvider, $locationProvider, $urlRouterProvider, getBrowserLanguageProvider, localizeText) {
+    .config(function ($qProvider, $stateProvider, $locationProvider, $urlRouterProvider, getBrowserLanguageProvider, localizeText) {
+        if ($qProvider && typeof $qProvider.errorOnUnhandledRejections === 'function') {
+            $qProvider.errorOnUnhandledRejections(false);
+        }
         $locationProvider.hashPrefix('');
         $urlRouterProvider.otherwise('/');
 

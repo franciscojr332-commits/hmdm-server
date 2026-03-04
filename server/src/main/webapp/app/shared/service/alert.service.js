@@ -22,7 +22,7 @@ angular.module('headwind-kiosk')
 
             modalInstance.result.then(function () {
                 if (callback) callback();
-            });
+            }).catch(function () {});
 
             return modalInstance;
         };
