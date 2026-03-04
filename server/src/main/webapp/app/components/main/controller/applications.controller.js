@@ -165,6 +165,10 @@ angular.module('headwind-kiosk')
         }
 
         $scope.appdesc = {};
+        $scope.serverFiles = [];
+        $scope.serverFilesLoaded = false;
+        $scope.loadingServerFiles = false;
+        $scope.serverFilesError = undefined;
 
         fileService.getLimit(function(response) {
             if (response.status === 'OK' &&
@@ -379,6 +383,47 @@ angular.module('headwind-kiosk')
             $scope.fileSelected = false;
             $scope.invalidFile = false;
             $scope.loading = false;
+        };
+
+        $scope.loadServerFiles = function () {
+            $scope.serverFilesError = undefined;
+            $scope.loadingServerFiles = true;
+            $scope.serverFiles = [];
+            fileService.getServerFiles({}, function (response) {
+                $scope.loadingServerFiles = false;
+                $scope.serverFilesLoaded = true;
+                var list = (response.data && response.data.data) ? response.data.data : (response.data || []);
+                if (response.status === 'OK') {
+                    $scope.serverFiles = Array.isArray(list) ? list : [];
+                } else {
+                    $scope.serverFilesError = localization.localize(response.message || 'error.request.failure');
+                }
+            }, function () {
+                $scope.loadingServerFiles = false;
+                $scope.serverFilesLoaded = true;
+                $scope.serverFilesError = localization.localize('error.request.failure');
+            });
+        };
+
+        $scope.selectServerFile = function (item) {
+            if (!item || !item.filePath) return;
+            $scope.serverFilesError = undefined;
+            $scope.loading = true;
+            fileService.registerServerFile({ filePath: item.filePath, description: item.name }, function (response) {
+                $scope.loading = false;
+                if (response.data && response.data.status === 'OK' && response.data.data) {
+                    var data = response.data.data;
+                    $scope.file.path = data.filePath || item.filePath;
+                    $scope.fileName = item.name;
+                    $scope.fileSelected = true;
+                    $scope.successMessage = localization.localize('success.file.uploaded');
+                } else {
+                    $scope.errorMessage = localization.localize((response.data && response.data.message) || 'error.request.failure');
+                }
+            }, function () {
+                $scope.loading = false;
+                $scope.errorMessage = localization.localize('error.request.failure');
+            });
         };
 
         const doSave = function (request, updateService) {
@@ -891,12 +936,17 @@ angular.module('headwind-kiosk')
     })
     .controller('ApplicationVersionModalController', function ($scope, $modalInstance, applicationService,
                                                                applicationVersion,
-                                                               $modal, isControlPanel, localization) {
+                                                               $modal, isControlPanel, localization, fileService) {
         $scope.isControlPanel = isControlPanel;
 
         $scope.appType = applicationVersion.type;
 
         $scope.isNewApp = applicationVersion.id === null || applicationVersion.id === undefined;
+
+        $scope.serverFiles = [];
+        $scope.serverFilesLoaded = false;
+        $scope.loadingServerFiles = false;
+        $scope.serverFilesError = undefined;
 
         if ($scope.isNewApp) {
             $scope.file = {};
@@ -993,6 +1043,47 @@ angular.module('headwind-kiosk')
             $scope.fileSelected = false;
             $scope.invalidFile = false;
             $scope.loading = false;
+        };
+
+        $scope.loadServerFiles = function () {
+            $scope.serverFilesError = undefined;
+            $scope.loadingServerFiles = true;
+            $scope.serverFiles = [];
+            fileService.getServerFiles({}, function (response) {
+                $scope.loadingServerFiles = false;
+                $scope.serverFilesLoaded = true;
+                var list = (response.data && response.data.data) ? response.data.data : (response.data || []);
+                if (response.status === 'OK') {
+                    $scope.serverFiles = Array.isArray(list) ? list : [];
+                } else {
+                    $scope.serverFilesError = localization.localize(response.message || 'error.request.failure');
+                }
+            }, function () {
+                $scope.loadingServerFiles = false;
+                $scope.serverFilesLoaded = true;
+                $scope.serverFilesError = localization.localize('error.request.failure');
+            });
+        };
+
+        $scope.selectServerFile = function (item) {
+            if (!item || !item.filePath) return;
+            $scope.serverFilesError = undefined;
+            $scope.loading = true;
+            fileService.registerServerFile({ filePath: item.filePath, description: item.name }, function (response) {
+                $scope.loading = false;
+                if (response.data && response.data.status === 'OK' && response.data.data) {
+                    var data = response.data.data;
+                    $scope.file.path = data.filePath || item.filePath;
+                    $scope.fileName = item.name;
+                    $scope.fileSelected = true;
+                    $scope.successMessage = localization.localize('success.file.uploaded');
+                } else {
+                    $scope.errorMessage = localization.localize((response.data && response.data.message) || 'error.request.failure');
+                }
+            }, function () {
+                $scope.loading = false;
+                $scope.errorMessage = localization.localize('error.request.failure');
+            });
         };
 
         $scope.save = function () {

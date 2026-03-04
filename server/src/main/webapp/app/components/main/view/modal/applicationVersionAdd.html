@@ -53,6 +53,27 @@
                      on-success="fileUploaded(response)"></div>
                 <span ng-if="file.path && !invalidFile">{{fileName}}</span>
                 <button class="btn btn-default" ng-if="file.path" ng-click="clearFile()" localized>button.cleanup</button>
+                <div class="form-group" style="margin-top: 12px;">
+                    <label class="control-label" style="margin-bottom: 6px;" localized>form.configuration.file.from.server</label>
+                    <button type="button" class="btn btn-default btn-sm" ng-click="loadServerFiles()" ng-disabled="loadingServerFiles">
+                        <span ng-if="!loadingServerFiles" localized>form.configuration.file.list.server</span>
+                        <span ng-if="loadingServerFiles"><img class="loading-spinner" src="images/loading.gif" style="height: 14px; width: 14px;"/> {{'form.configuration.file.loading' | localize}}</span>
+                    </button>
+                    <div ng-if="serverFilesError" class="error field-hint" style="margin-top: 6px;">{{serverFilesError}}</div>
+                    <div ng-if="serverFiles.length > 0" class="table-responsive" style="margin-top: 8px; max-height: 200px; overflow-y: auto;">
+                        <table class="table table-condensed table-striped">
+                            <thead><tr><th localized>form.configuration.file.name</th><th localized>form.configuration.file.size</th><th></th></tr></thead>
+                            <tbody>
+                                <tr ng-repeat="item in serverFiles">
+                                    <td>{{item.name}}</td>
+                                    <td>{{item.size | number}} B</td>
+                                    <td><button type="button" class="btn btn-default btn-xs" ng-click="selectServerFile(item)" localized>form.configuration.file.use.server</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div ng-if="serverFiles.length === 0 && serverFilesLoaded && !loadingServerFiles" class="field-hint" style="margin-top: 6px;" localized>form.configuration.file.no.server.files</div>
+                </div>
             </div>
         </div>
 
