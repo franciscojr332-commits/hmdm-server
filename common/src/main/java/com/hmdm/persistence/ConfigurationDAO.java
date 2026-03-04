@@ -29,6 +29,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import com.google.inject.Singleton;
 import com.hmdm.event.ConfigurationUpdatedEvent;
@@ -248,6 +249,23 @@ public class ConfigurationDAO extends AbstractLinkedDAO<Configuration, Applicati
 
     public Configuration getConfigurationById(Integer id) {
         return getSingleRecord(() -> this.mapper.getConfigurationById(id), SecurityException::onConfigurationAccessViolation);
+    }
+
+    /**
+     * Ensures the configuration has a non-null qrCodeKey (for QR code URL). If missing, generates one and persists it.
+     */
+    @Transactional
+    public void ensureQrCodeKey(Configuration configuration) {
+        if (configuration == null || configuration.getId() == null) {
+            return;
+        }
+        String key = configuration.getQrCodeKey();
+        if (key == null || key.trim().isEmpty()) {
+            key = UUID.randomUUID().toString().replace("-", "");
+            this.mapper.updateQrCodeKey(configuration.getId(), key);
+            configuration.setQrCodeKey(key);
+            log.info("Generated qrCodeKey for configuration id={}", configuration.getId());
+        }
     }
 
     @Transactional

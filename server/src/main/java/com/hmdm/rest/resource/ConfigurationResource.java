@@ -367,6 +367,7 @@ public class ConfigurationResource {
 
         Configuration configuration = this.configurationDAO.getConfigurationByIdFull(id);
         if (configuration != null) {
+            this.configurationDAO.ensureQrCodeKey(configuration);
             configuration.setBaseUrl(this.configurationDAO.getBaseUrl());
             final List<ConfigurationFile> files = configuration.getFiles();
             if (files != null && !files.isEmpty()) {

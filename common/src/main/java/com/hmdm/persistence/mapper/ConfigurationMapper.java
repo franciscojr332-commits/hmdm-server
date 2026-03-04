@@ -221,6 +221,9 @@ public interface ConfigurationMapper {
     @Select({"SELECT * FROM configurations WHERE qrCodeKey=#{key}"})
     Configuration getConfigurationByQRCodeKey(@Param("key") String key);
 
+    @Update({"UPDATE configurations SET qrcodekey = #{qrCodeKey} WHERE id = #{id}"})
+    void updateQrCodeKey(@Param("id") Integer id, @Param("qrCodeKey") String qrCodeKey);
+
     /**
      * <p>Upgrades the version of specified application used in specified configuration to most recent one.</p>
      *
