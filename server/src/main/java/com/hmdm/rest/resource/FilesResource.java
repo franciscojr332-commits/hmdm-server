@@ -45,6 +45,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -398,6 +399,111 @@ public class FilesResource {
             }
         }
         return Response.OK(lr);
+    }
+
+    // =================================================================================================================
+    @ApiOperation(
+            value = "List server files",
+            notes = "Lists files in the server files directory so the user can select one without uploading",
+            response = ServerFileItem.class,
+            responseContainer = "List"
+    )
+    @GET
+    @Path("/server-files")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response listServerFiles() {
+        if (!SecurityContext.get().hasPermission("edit_files")) {
+            logger.error("Unauthorized attempt to list server files by user " +
+                    SecurityContext.get().getCurrentUserName());
+            return Response.PERMISSION_DENIED();
+        }
+        return SecurityContext.get().getCurrentUser().map(u -> {
+            Customer customer = customerDAO.findById(u.getCustomerId());
+            List<ServerFileItem> result = new ArrayList<>();
+            try {
+                File dir = baseDirectory;
+                String customerDir = customer.getFilesDir();
+                if (customerDir != null && !customerDir.isEmpty()) {
+                    dir = new File(baseDirectory, customerDir);
+                }
+                if (!dir.exists() || !dir.isDirectory()) {
+                    return Response.OK(result);
+                }
+                File[] files = dir.listFiles();
+                if (files == null) {
+                    return Response.OK(result);
+                }
+                for (File f : files) {
+                    if (f.isFile() && !f.isHidden()) {
+                        String relPath = f.getName();
+                        if (customerDir != null && !customerDir.isEmpty()) {
+                            relPath = customerDir + "/" + f.getName();
+                        }
+                        if (!FileUtil.isSafePath(relPath)) {
+                            continue;
+                        }
+                        result.add(new ServerFileItem(relPath, f.getName(), f.length()));
+                    }
+                }
+                return Response.OK(result);
+            } catch (Exception e) {
+                logger.error("Error listing server files", e);
+                return Response.INTERNAL_ERROR();
+            }
+        }).orElse(Response.PERMISSION_DENIED());
+    }
+
+    // =================================================================================================================
+    @ApiOperation(
+            value = "Register server file",
+            notes = "Registers an existing file in the server files directory so it can be used in configurations without uploading",
+            response = UploadedFile.class
+    )
+    @POST
+    @Path("/register-server-file")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response registerServerFile(RegisterServerFileRequest request) {
+        if (!SecurityContext.get().hasPermission("edit_files")) {
+            logger.error("Unauthorized attempt to register server file by user " +
+                    SecurityContext.get().getCurrentUserName());
+            return Response.PERMISSION_DENIED();
+        }
+        if (request == null || request.getFilePath() == null || request.getFilePath().trim().isEmpty()) {
+            return Response.ERROR("error.file.empty");
+        }
+        String filePath = request.getFilePath().trim().replace("\\", "/");
+        if (!FileUtil.isSafePath(filePath)) {
+            logger.error("Unsafe path in register-server-file: " + filePath);
+            return Response.PERMISSION_DENIED();
+        }
+        return SecurityContext.get().getCurrentUser().map(u -> {
+            Customer customer = customerDAO.findById(u.getCustomerId());
+            try {
+                File fullPath = new File(baseDirectory, filePath);
+                if (!fullPath.exists() || !fullPath.isFile()) {
+                    return Response.ERROR("error.file.not.found");
+                }
+                String canonicalBase = baseDirectory.getCanonicalPath();
+                String canonicalFile = fullPath.getCanonicalPath();
+                if (!canonicalFile.startsWith(canonicalBase)) {
+                    logger.error("Path escape attempt: " + filePath);
+                    return Response.PERMISSION_DENIED();
+                }
+                UploadedFile uploadedFile = new UploadedFile();
+                uploadedFile.setCustomerId(customer.getId());
+                uploadedFile.setFilePath(filePath);
+                uploadedFile.setDescription(request.getDescription() != null ? request.getDescription() : fullPath.getName());
+                uploadedFile.setExternal(false);
+                uploadedFile.setUploadTime(System.currentTimeMillis());
+                uploadedFileDAO.insert(uploadedFile);
+                uploadedFile.setUrl(uploadedFile.getUrl(baseUrl, customer));
+                return Response.OK(uploadedFile);
+            } catch (IOException e) {
+                logger.error("Error registering server file: " + filePath, e);
+                return Response.INTERNAL_ERROR();
+            }
+        }).orElse(Response.PERMISSION_DENIED());
     }
 
     // =================================================================================================================
