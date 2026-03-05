@@ -99,7 +99,7 @@
                         <span class='glyphicon glyphicon-trash'></span>
                     </button>
                     <button ng-if="hasPermission('edit_applications') && application.deletionProhibited && (!application.commonApplication || application.customerId == user.customerId)"
-                            localized-title="error.application.config.reference.exists" disabled="disabled"
+                            localized-title="error.application.config.reference.exists"
                             type='button' class='btn btn-default' ng-click='removeApplication( application )'>
                         <span class='glyphicon glyphicon-trash'></span>
                     </button>

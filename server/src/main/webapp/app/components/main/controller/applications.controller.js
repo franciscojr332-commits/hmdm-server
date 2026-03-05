@@ -87,6 +87,10 @@ angular.module('headwind-kiosk')
         };
 
         $scope.removeApplication = function (application) {
+            if (application.deletionProhibited) {
+                alertService.showAlertMessage(localization.localize('error.application.config.reference.exists'));
+                return;
+            }
             let localizedText = localization.localize('question.delete.application').replace('${applicationName}', application.name);
             confirmModal.getUserConfirmation(localizedText, function () {
                 applicationService.removeApplication({id: application.id}, function (response) {

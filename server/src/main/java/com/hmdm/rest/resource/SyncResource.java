@@ -421,8 +421,8 @@ public class SyncResource {
         data.setKioskScreenOn(configuration.getKioskScreenOn() != null && configuration.getKioskScreenOn() ? true : null);
         data.setRestrictions(configuration.getRestrictions());
         data.setBlockAirplaneMode(configuration.getBlockAirplaneMode());
-        data.setBlockPowerOffFrom(configuration.getBlockPowerOffFrom());
-        data.setBlockPowerOffTo(configuration.getBlockPowerOffTo());
+        data.setBlockPowerOffFrom(normalizeTimeToHHmm(configuration.getBlockPowerOffFrom()));
+        data.setBlockPowerOffTo(normalizeTimeToHHmm(configuration.getBlockPowerOffTo()));
         data.setReopenAppPackage(configuration.getReopenAppPackage());
         data.setBlockAddUser(configuration.getBlockAddUser());
 
@@ -701,6 +701,23 @@ public class SyncResource {
         result.addAll(morePreferred);
 
         return result;
+    }
+
+    /**
+     * Normalizes a time string to HH:mm so the device receives a consistent format (e.g. "7:00" -> "07:00").
+     * Returns null for null, empty or invalid input so "aparelho pode ser desligado" when window is not set.
+     */
+    private static String normalizeTimeToHHmm(String time) {
+        if (time == null || (time = time.trim()).isEmpty()) {
+            return null;
+        }
+        if (time.length() == 4 && time.charAt(1) == ':') {
+            return "0" + time;
+        }
+        if (time.length() == 5 && time.charAt(2) == ':') {
+            return time;
+        }
+        return null;
     }
 
 }
