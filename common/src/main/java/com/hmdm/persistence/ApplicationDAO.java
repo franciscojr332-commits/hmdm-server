@@ -886,6 +886,8 @@ public class ApplicationDAO extends AbstractLinkedDAO<Application, ApplicationCo
     public int insertApplicationVersion(ApplicationVersion applicationVersion) {
         log.debug("Entering #insertApplicationVersion: application = {}", applicationVersion);
 
+        final AtomicReference<String> appPkg = new AtomicReference<>();
+
         // If file was selected from server (already registered), use its URL from uploaded_file
         final Integer versionFileId = applicationVersion.getFileId();
         if (versionFileId != null) {
@@ -916,8 +918,6 @@ public class ApplicationDAO extends AbstractLinkedDAO<Application, ApplicationCo
         } else {
             // If an APK-file was set for new app then make the file available in Files area and parse the app parameters
             // from it (package ID, version)
-            final AtomicReference<String> appPkg = new AtomicReference<>();
-
             final String filePath = applicationVersion.getFilePath();
             if (filePath != null && !filePath.trim().isEmpty()) {
                 final int customerId = SecurityContext.get().getCurrentUser().get().getCustomerId();
@@ -953,6 +953,7 @@ public class ApplicationDAO extends AbstractLinkedDAO<Application, ApplicationCo
                     }
 
                     applicationVersion.setVersion(apkFileDetails.getVersion());
+                    appPkg.set(apkFileDetails.getPkg());
                 } else {
                     log.error("Could not move the uploaded .apk-file {}", filePath);
                     throw new DAOException("Could not move the uploaded .apk-file");
