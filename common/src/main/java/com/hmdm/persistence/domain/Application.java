@@ -138,6 +138,12 @@ public class Application implements CustomerData, Serializable {
     @ApiModelProperty(hidden = true)
     private String filePath;
 
+    /**
+     * <p>ID of an already-registered uploaded file (when selecting from server files). If set, URL is taken from this file instead of moving filePath.</p>
+     */
+    @ApiModelProperty(hidden = true)
+    private Integer fileId;
+
     // A helper property to indicate the action required to be performed by mobile device
     // in regard to application installation
     // 0 - do not install and hide if installed
@@ -313,6 +319,14 @@ public class Application implements CustomerData, Serializable {
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    public Integer getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(Integer fileId) {
+        this.fileId = fileId;
     }
 
     public boolean isSystem() {

@@ -1555,15 +1555,25 @@ angular.module('headwind-kiosk')
                 .then(function (res) {
                     $scope.loading = false;
                     var response = res.data;
-                    if (response && response.status === 'OK' && response.data) {
-                        var data = response.data;
+                    if (typeof response === 'string') {
+                        try { response = JSON.parse(response); } catch (e) { response = null; }
+                    }
+                    var data = null;
+                    if (response && typeof response === 'object') {
+                        if ((response.status === 'OK' || response.status === 'ok') && response.data) {
+                            data = response.data;
+                        } else if (response.filePath || response.serverPath || response.id != null) {
+                            data = response;
+                        }
+                    }
+                    if (data) {
                         var filePath = data.serverPath || data.filePath || item.filePath;
                         if (!defaultFilePath.endsWith("/")) {
                             defaultFilePath += "/";
                         }
                         $scope.file.path = defaultFilePath + filePath;
                         $scope.file.filePath = filePath;
-                        $scope.file.fileId = data.fileId || data.id;
+                        $scope.file.fileId = data.fileId != null ? data.fileId : data.id;
                         $scope.file.lastUpdate = data.uploadTime || Date.now();
                         $scope.file.checksum = data.checksum;
                         $scope.file.url = data.url;

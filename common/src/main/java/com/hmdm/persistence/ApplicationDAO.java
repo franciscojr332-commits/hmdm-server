@@ -54,6 +54,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.hmdm.persistence.domain.Application;
 import com.hmdm.persistence.domain.Customer;
+import com.hmdm.persistence.domain.UploadedFile;
 import com.hmdm.persistence.mapper.ApplicationMapper;
 import com.hmdm.security.SecurityContext;
 import com.hmdm.security.SecurityException;
@@ -67,6 +68,7 @@ public class ApplicationDAO extends AbstractLinkedDAO<Application, ApplicationCo
 
     private final ApplicationMapper mapper;
     private final CustomerDAO customerDAO;
+    private final UploadedFileDAO uploadedFileDAO;
     private final String filesDirectory;
     private final String baseUrl;
     private final String apkTrustedUrl;
@@ -74,12 +76,14 @@ public class ApplicationDAO extends AbstractLinkedDAO<Application, ApplicationCo
 
     @Inject
     public ApplicationDAO(ApplicationMapper mapper, CustomerDAO customerDAO,
+                          UploadedFileDAO uploadedFileDAO,
                           @Named("files.directory") String filesDirectory,
                           @Named("base.url") String baseUrl,
                           @Named("apk.trusted.url") String apkTrustedUrl,
                           APKFileAnalyzer apkFileAnalyzer) {
         this.mapper = mapper;
         this.customerDAO = customerDAO;
+        this.uploadedFileDAO = uploadedFileDAO;
         this.filesDirectory = filesDirectory;
         this.baseUrl = baseUrl;
         this.apkTrustedUrl = apkTrustedUrl;
@@ -118,37 +122,54 @@ public class ApplicationDAO extends AbstractLinkedDAO<Application, ApplicationCo
     public int insertApplication(Application application) {
         log.debug("Entering #insertApplication: application = {}", application);
 
-        // If an APK-file was set for new app then make the file available in Files area and parse the app parameters
-        // from it (package ID, version)
-        final String filePath = application.getFilePath();
-        if (filePath != null && !filePath.trim().isEmpty()) {
+        // If file was selected from server (already registered), use its URL from uploaded_file
+        final Integer fileId = application.getFileId();
+        if (fileId != null) {
             final int customerId = SecurityContext.get().getCurrentUser().get().getCustomerId();
             Customer customer = customerDAO.findById(customerId);
-
-            File movedFile = null;
-            try {
-                movedFile = FileUtil.moveFile(customer, filesDirectory, null, filePath);
-            } catch (FileExistsException e) {
-                FileUtil.deleteFile(customer, filesDirectory, FileUtil.getNameFromTmpPath(filePath));
-                movedFile = FileUtil.moveFile(customer, filesDirectory, null, filePath);
+            UploadedFile uploadedFile = uploadedFileDAO.getById(fileId);
+            if (uploadedFile == null || uploadedFile.getCustomerId() != customerId) {
+                log.error("Uploaded file not found or access denied: fileId={}", fileId);
+                throw new DAOException("Uploaded file not found or access denied");
             }
-            if (movedFile != null) {
-                final String fileName = movedFile.getAbsolutePath();
-                final APKFileDetails apkFileDetails = this.apkFileAnalyzer.analyzeFile(fileName);
+            String url = uploadedFile.getUrl() != null && !uploadedFile.getUrl().isEmpty()
+                    ? uploadedFile.getUrl() : uploadedFile.getUrl(this.baseUrl, customer);
+            if (application.getUrl() == null || application.getUrl().trim().isEmpty()) {
+                application.setUrl(url);
+            }
+        } else {
+            // If an APK-file was set for new app then make the file available in Files area and parse the app parameters
+            // from it (package ID, version)
+            final String filePath = application.getFilePath();
+            if (filePath != null && !filePath.trim().isEmpty()) {
+                final int customerId = SecurityContext.get().getCurrentUser().get().getCustomerId();
+                Customer customer = customerDAO.findById(customerId);
 
-                // If URL is not specified explicitly for new app then set the application URL to reference to that
-                // file
-                if ((application.getUrl() == null || application.getUrl().trim().isEmpty())) {
-                    application.setUrl(FileUtil.createFileUrl(this.baseUrl, customer.getFilesDir(), movedFile.getName()));
+                File movedFile = null;
+                try {
+                    movedFile = FileUtil.moveFile(customer, filesDirectory, null, filePath);
+                } catch (FileExistsException e) {
+                    FileUtil.deleteFile(customer, filesDirectory, FileUtil.getNameFromTmpPath(filePath));
+                    movedFile = FileUtil.moveFile(customer, filesDirectory, null, filePath);
                 }
+                if (movedFile != null) {
+                    final String fileName = movedFile.getAbsolutePath();
+                    final APKFileDetails apkFileDetails = this.apkFileAnalyzer.analyzeFile(fileName);
 
-                application.setPkg(apkFileDetails.getPkg());
-                application.setVersion(apkFileDetails.getVersion());
-                // APK architecture is determined on a previous step, and can be overridden by user's request
-                //application.setArch(apkFileDetails.getArch());
-            } else {
-                log.error("Could not move the uploaded .apk-file {}", filePath);
-                throw new DAOException("Could not move the uploaded .apk-file");
+                    // If URL is not specified explicitly for new app then set the application URL to reference to that
+                    // file
+                    if ((application.getUrl() == null || application.getUrl().trim().isEmpty())) {
+                        application.setUrl(FileUtil.createFileUrl(this.baseUrl, customer.getFilesDir(), movedFile.getName()));
+                    }
+
+                    application.setPkg(apkFileDetails.getPkg());
+                    application.setVersion(apkFileDetails.getVersion());
+                    // APK architecture is determined on a previous step, and can be overridden by user's request
+                    //application.setArch(apkFileDetails.getArch());
+                } else {
+                    log.error("Could not move the uploaded .apk-file {}", filePath);
+                    throw new DAOException("Could not move the uploaded .apk-file");
+                }
             }
         }
 
@@ -865,48 +886,77 @@ public class ApplicationDAO extends AbstractLinkedDAO<Application, ApplicationCo
     public int insertApplicationVersion(ApplicationVersion applicationVersion) {
         log.debug("Entering #insertApplicationVersion: application = {}", applicationVersion);
 
-        // If an APK-file was set for new app then make the file available in Files area and parse the app parameters
-        // from it (package ID, version)
-        final AtomicReference<String> appPkg = new AtomicReference<>();
-
-        final String filePath = applicationVersion.getFilePath();
-        if (filePath != null && !filePath.trim().isEmpty()) {
+        // If file was selected from server (already registered), use its URL from uploaded_file
+        final Integer versionFileId = applicationVersion.getFileId();
+        if (versionFileId != null) {
             final int customerId = SecurityContext.get().getCurrentUser().get().getCustomerId();
             Customer customer = customerDAO.findById(customerId);
-
-            File movedFile = null;
-            try {
-                movedFile = FileUtil.moveFile(customer, filesDirectory, null, filePath);
-            } catch (FileExistsException e) {
-                FileUtil.deleteFile(customer, filesDirectory, FileUtil.getNameFromTmpPath(filePath));
-                movedFile = FileUtil.moveFile(customer, filesDirectory, null, filePath);
+            UploadedFile uploadedFile = uploadedFileDAO.getById(versionFileId);
+            if (uploadedFile == null || uploadedFile.getCustomerId() != customerId) {
+                log.error("Uploaded file not found or access denied: fileId={}", versionFileId);
+                throw new DAOException("Uploaded file not found or access denied");
             }
-            if (movedFile != null) {
-                final String fileName = movedFile.getAbsolutePath();
-                final APKFileDetails apkFileDetails = this.apkFileAnalyzer.analyzeFile(fileName);
-
-                // If URL is not specified explicitly for new app then set the application URL to reference to that
-                // file
-                if ((applicationVersion.getUrl() == null || applicationVersion.getUrl().trim().isEmpty())) {
-                    String url = FileUtil.createFileUrl(this.baseUrl, customer.getFilesDir(), movedFile.getName());
-                    // Here we check applicationVersion.getArch() because the admin may wish to override
-                    // the automatic selection
-                    if (StringUtil.isEmpty(applicationVersion.getArch())) {
-                        applicationVersion.setSplit(false);
-                        applicationVersion.setUrl(url);
-                    } else if (applicationVersion.getArch().equals(Application.ARCH_ARMEABI)) {
-                        applicationVersion.setSplit(true);
-                        applicationVersion.setUrlArmeabi(url);
-                    } else if (applicationVersion.getArch().equals(Application.ARCH_ARM64)) {
-                        applicationVersion.setSplit(true);
-                        applicationVersion.setUrlArm64(url);
-                    }
+            String url = uploadedFile.getUrl() != null && !uploadedFile.getUrl().isEmpty()
+                    ? uploadedFile.getUrl() : uploadedFile.getUrl(this.baseUrl, customer);
+            if (applicationVersion.getUrl() == null || applicationVersion.getUrl().trim().isEmpty()) {
+                if (StringUtil.isEmpty(applicationVersion.getArch())) {
+                    applicationVersion.setSplit(false);
+                    applicationVersion.setUrl(url);
+                } else if (applicationVersion.getArch().equals(Application.ARCH_ARMEABI)) {
+                    applicationVersion.setSplit(true);
+                    applicationVersion.setUrlArmeabi(url);
+                } else if (applicationVersion.getArch().equals(Application.ARCH_ARM64)) {
+                    applicationVersion.setSplit(true);
+                    applicationVersion.setUrlArm64(url);
+                } else {
+                    applicationVersion.setSplit(false);
+                    applicationVersion.setUrl(url);
                 }
+            }
+        } else {
+            // If an APK-file was set for new app then make the file available in Files area and parse the app parameters
+            // from it (package ID, version)
+            final AtomicReference<String> appPkg = new AtomicReference<>();
 
-                applicationVersion.setVersion(apkFileDetails.getVersion());
-            } else {
-                log.error("Could not move the uploaded .apk-file {}", filePath);
-                throw new DAOException("Could not move the uploaded .apk-file");
+            final String filePath = applicationVersion.getFilePath();
+            if (filePath != null && !filePath.trim().isEmpty()) {
+                final int customerId = SecurityContext.get().getCurrentUser().get().getCustomerId();
+                Customer customer = customerDAO.findById(customerId);
+
+                File movedFile = null;
+                try {
+                    movedFile = FileUtil.moveFile(customer, filesDirectory, null, filePath);
+                } catch (FileExistsException e) {
+                    FileUtil.deleteFile(customer, filesDirectory, FileUtil.getNameFromTmpPath(filePath));
+                    movedFile = FileUtil.moveFile(customer, filesDirectory, null, filePath);
+                }
+                if (movedFile != null) {
+                    final String fileName = movedFile.getAbsolutePath();
+                    final APKFileDetails apkFileDetails = this.apkFileAnalyzer.analyzeFile(fileName);
+
+                    // If URL is not specified explicitly for new app then set the application URL to reference to that
+                    // file
+                    if ((applicationVersion.getUrl() == null || applicationVersion.getUrl().trim().isEmpty())) {
+                        String url = FileUtil.createFileUrl(this.baseUrl, customer.getFilesDir(), movedFile.getName());
+                        // Here we check applicationVersion.getArch() because the admin may wish to override
+                        // the automatic selection
+                        if (StringUtil.isEmpty(applicationVersion.getArch())) {
+                            applicationVersion.setSplit(false);
+                            applicationVersion.setUrl(url);
+                        } else if (applicationVersion.getArch().equals(Application.ARCH_ARMEABI)) {
+                            applicationVersion.setSplit(true);
+                            applicationVersion.setUrlArmeabi(url);
+                        } else if (applicationVersion.getArch().equals(Application.ARCH_ARM64)) {
+                            applicationVersion.setSplit(true);
+                            applicationVersion.setUrlArm64(url);
+                        }
+                    }
+
+                    applicationVersion.setVersion(apkFileDetails.getVersion());
+                } else {
+                    log.error("Could not move the uploaded .apk-file {}", filePath);
+                    throw new DAOException("Could not move the uploaded .apk-file");
+                }
             }
         }
 

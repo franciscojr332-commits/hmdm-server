@@ -418,10 +418,20 @@ angular.module('headwind-kiosk')
                 .then(function (res) {
                     $scope.loading = false;
                     var response = res.data;
-                    if (response && response.status === 'OK' && response.data) {
-                        var data = response.data;
+                    if (typeof response === 'string') {
+                        try { response = JSON.parse(response); } catch (e) { response = null; }
+                    }
+                    var data = null;
+                    if (response && typeof response === 'object') {
+                        if ((response.status === 'OK' || response.status === 'ok') && response.data) {
+                            data = response.data;
+                        } else if (response.filePath || response.serverPath || response.id != null) {
+                            data = response;
+                        }
+                    }
+                    if (data) {
                         $scope.file.path = data.serverPath || data.filePath || item.filePath;
-                        $scope.file.fileId = data.fileId || data.id;
+                        $scope.file.fileId = data.fileId != null ? data.fileId : data.id;
                         $scope.fileName = data.name || item.name;
                         $scope.fileSelected = true;
                         if (data.application) {
@@ -589,6 +599,9 @@ angular.module('headwind-kiosk')
             if ($scope.isNewApp) {
                 if ($scope.fileSelected) {
                     request.filePath = $scope.file.path;
+                    if ($scope.file.fileId != null) {
+                        request.fileId = $scope.file.fileId;
+                    }
                 }
             }
 
@@ -1120,10 +1133,20 @@ angular.module('headwind-kiosk')
                 .then(function (res) {
                     $scope.loading = false;
                     var response = res.data;
-                    if (response && response.status === 'OK' && response.data) {
-                        var data = response.data;
+                    if (typeof response === 'string') {
+                        try { response = JSON.parse(response); } catch (e) { response = null; }
+                    }
+                    var data = null;
+                    if (response && typeof response === 'object') {
+                        if ((response.status === 'OK' || response.status === 'ok') && response.data) {
+                            data = response.data;
+                        } else if (response.filePath || response.serverPath || response.id != null) {
+                            data = response;
+                        }
+                    }
+                    if (data) {
                         $scope.file.path = data.serverPath || data.filePath || item.filePath;
-                        $scope.file.fileId = data.fileId || data.id;
+                        $scope.file.fileId = data.fileId != null ? data.fileId : data.id;
                         $scope.fileName = data.name || item.name;
                         $scope.fileSelected = true;
                         if (data.fileDetails) {
@@ -1176,6 +1199,9 @@ angular.module('headwind-kiosk')
                 if ($scope.isNewApp) {
                     if ($scope.fileSelected) {
                         request.filePath = $scope.file.path;
+                        if ($scope.file.fileId != null) {
+                            request.fileId = $scope.file.fileId;
+                        }
                     }
                 }
 

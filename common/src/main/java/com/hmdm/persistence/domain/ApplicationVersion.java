@@ -81,6 +81,12 @@ public class ApplicationVersion implements Serializable {
     private String filePath;
 
     /**
+     * <p>ID of an already-registered uploaded file (when selecting from server files). If set, URL is taken from this file.</p>
+     */
+    @ApiModelProperty(hidden = true)
+    private Integer fileId;
+
+    /**
      * <p>Constructs new <code>ApplicationVersion</code> instance. This implementation does nothing.</p>
      */
     public ApplicationVersion() {
@@ -199,6 +205,14 @@ public class ApplicationVersion implements Serializable {
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    public Integer getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(Integer fileId) {
+        this.fileId = fileId;
     }
 
     public String getApkHash() {
