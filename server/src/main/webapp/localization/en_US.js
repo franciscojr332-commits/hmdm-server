@@ -184,6 +184,7 @@ document.localization ['en_US'] = {
     'error.duplicate.configuration.name': 'The configuration with the entered name already exists. Try a different name.',
     'error.duplicate.device.number': 'A device with this number already exists',
     'error.internal.server': 'Internal server error',
+    'error.server.file.not.found': 'Server file not found. Try selecting the file from the server list again.',
     'error.permission.denied': 'No rights to execute',
     'error.request.failure': 'Request failure',
     'error.configuration.device.use': 'Cannot delete this configuration, it is used on devices. First go to "Devices", find the devices using this configuration and change their settings.',

@@ -139,12 +139,31 @@ public class ApplicationDAO extends AbstractLinkedDAO<Application, ApplicationCo
             }
         } else {
             // If an APK-file was set for new app then make the file available in Files area and parse the app parameters
-            // from it (package ID, version)
+            // from it (package ID, version). If filePath looks like a server file path (no temp delimiter), resolve via DB.
             final String filePath = application.getFilePath();
             if (filePath != null && !filePath.trim().isEmpty()) {
                 final int customerId = SecurityContext.get().getCurrentUser().get().getCustomerId();
                 Customer customer = customerDAO.findById(customerId);
 
+                boolean isServerFilePath = false;
+                try {
+                    FileUtil.getNameFromTmpPath(filePath);
+                } catch (RuntimeException e) {
+                    isServerFilePath = true;
+                }
+                if (isServerFilePath) {
+                    UploadedFile byPath = uploadedFileDAO.getByPath(customerId, filePath);
+                    if (byPath != null) {
+                        String url = byPath.getUrl() != null && !byPath.getUrl().isEmpty()
+                                ? byPath.getUrl() : byPath.getUrl(this.baseUrl, customer);
+                        if (application.getUrl() == null || application.getUrl().trim().isEmpty()) {
+                            application.setUrl(url);
+                        }
+                    } else {
+                        log.error("Server file not found in uploaded_files: path={}", filePath);
+                        throw new DAOException("error.server.file.not.found");
+                    }
+                } else {
                 File movedFile = null;
                 try {
                     movedFile = FileUtil.moveFile(customer, filesDirectory, null, filePath);
@@ -169,6 +188,7 @@ public class ApplicationDAO extends AbstractLinkedDAO<Application, ApplicationCo
                 } else {
                     log.error("Could not move the uploaded .apk-file {}", filePath);
                     throw new DAOException("Could not move the uploaded .apk-file");
+                }
                 }
             }
         }
@@ -917,12 +937,44 @@ public class ApplicationDAO extends AbstractLinkedDAO<Application, ApplicationCo
             }
         } else {
             // If an APK-file was set for new app then make the file available in Files area and parse the app parameters
-            // from it (package ID, version)
+            // from it (package ID, version). If filePath looks like a server file path (no temp delimiter), resolve via DB.
             final String filePath = applicationVersion.getFilePath();
             if (filePath != null && !filePath.trim().isEmpty()) {
                 final int customerId = SecurityContext.get().getCurrentUser().get().getCustomerId();
                 Customer customer = customerDAO.findById(customerId);
 
+                // Server file path (e.g. from "Usar"): resolve by path when fileId was not sent
+                boolean isServerFilePath = false;
+                try {
+                    FileUtil.getNameFromTmpPath(filePath);
+                } catch (RuntimeException e) {
+                    isServerFilePath = true;
+                }
+                if (isServerFilePath) {
+                    UploadedFile byPath = uploadedFileDAO.getByPath(customerId, filePath);
+                    if (byPath != null) {
+                        String url = byPath.getUrl() != null && !byPath.getUrl().isEmpty()
+                                ? byPath.getUrl() : byPath.getUrl(this.baseUrl, customer);
+                        if (applicationVersion.getUrl() == null || applicationVersion.getUrl().trim().isEmpty()) {
+                            if (StringUtil.isEmpty(applicationVersion.getArch())) {
+                                applicationVersion.setSplit(false);
+                                applicationVersion.setUrl(url);
+                            } else if (applicationVersion.getArch().equals(Application.ARCH_ARMEABI)) {
+                                applicationVersion.setSplit(true);
+                                applicationVersion.setUrlArmeabi(url);
+                            } else if (applicationVersion.getArch().equals(Application.ARCH_ARM64)) {
+                                applicationVersion.setSplit(true);
+                                applicationVersion.setUrlArm64(url);
+                            } else {
+                                applicationVersion.setSplit(false);
+                                applicationVersion.setUrl(url);
+                            }
+                        }
+                    } else {
+                        log.error("Server file not found in uploaded_files: path={}", filePath);
+                        throw new DAOException("error.server.file.not.found");
+                    }
+                } else {
                 File movedFile = null;
                 try {
                     movedFile = FileUtil.moveFile(customer, filesDirectory, null, filePath);
@@ -957,6 +1009,7 @@ public class ApplicationDAO extends AbstractLinkedDAO<Application, ApplicationCo
                 } else {
                     log.error("Could not move the uploaded .apk-file {}", filePath);
                     throw new DAOException("Could not move the uploaded .apk-file");
+                }
                 }
             }
         }

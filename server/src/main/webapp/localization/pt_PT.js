@@ -183,6 +183,7 @@ document.localization ['pt_PT'] = {
     'error.duplicate.configuration.name': 'O nome de configuração que você digitou já existe. Tente um nome diferente.',
     'error.duplicate.device.number': 'Um dispositivo com esse número já existe',
     'error.internal.server': 'Erro interno do servidor',
+    'error.server.file.not.found': 'Ficheiro do servidor não encontrado. Tente escolher o ficheiro da lista do servidor novamente.',
     'error.permission.denied': 'Sem direitos de execução',
     'error.request.failure': 'Falha na solicitação',
     'error.configuration.device.use': 'Não é possível excluir essa configuração, ela está sendo usada em algum(ns) dispositivo(s). Primeiro vá para "Dispositivos", encontre o dispositivo usando esta configuração e altere sua configuração.',

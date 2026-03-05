@@ -244,6 +244,9 @@ public class ApplicationResource {
         } catch (FileExistsException e) {
             logger.error("Failed to create or update application", e);
             return Response.FILE_EXISTS();
+        } catch (DAOException e) {
+            logger.error("Failed to create or update application: {}", e.getMessage());
+            return Response.ERROR(e.getMessage(), null);
         } catch (Exception e) {
             logger.error("Failed to create or update application", e);
             return Response.INTERNAL_ERROR();
@@ -348,6 +351,9 @@ public class ApplicationResource {
         } catch (FileExistsException e) {
             logger.error("Failed to create or update application version", e);
             return Response.FILE_EXISTS();
+        } catch (DAOException e) {
+            logger.error("Failed to create or update application version: {}", e.getMessage());
+            return Response.ERROR(e.getMessage(), null);
         } catch (Exception e) {
             logger.error("Failed to create or update application version", e);
             return Response.INTERNAL_ERROR();
