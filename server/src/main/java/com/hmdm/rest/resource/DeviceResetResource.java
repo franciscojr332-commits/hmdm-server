@@ -29,6 +29,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.hmdm.notification.PushService;
@@ -77,13 +78,21 @@ public class DeviceResetResource {
         return doRequestDeviceReset(deviceId);
     }
 
-    @ApiOperation(value = "Request device factory reset (by body, legacy)")
+    /** Legacy: body or query param (avoids 500 when frontend cache sends old URL; no @Consumes so empty body is ok). */
+    @ApiOperation(value = "Request device factory reset (by body or query, legacy)")
     @PUT
     @Path("/private/reset")
-    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response requestDeviceResetByBody(DeviceResetRequest request) {
-        Integer deviceId = (request != null) ? request.getDeviceId() : null;
+    public Response requestDeviceResetByBody(
+            DeviceResetRequest request,
+            @QueryParam("deviceId") Integer queryDeviceId) {
+        Integer deviceId = null;
+        if (request != null && request.getDeviceId() != null) {
+            deviceId = request.getDeviceId();
+        }
+        if (deviceId == null && queryDeviceId != null) {
+            deviceId = queryDeviceId;
+        }
         return doRequestDeviceReset(deviceId);
     }
 
