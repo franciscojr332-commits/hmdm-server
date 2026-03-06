@@ -429,6 +429,7 @@ public class SyncResource {
 
         if (dbDevice != null && Boolean.TRUE.equals(dbDevice.getPendingFactoryReset())) {
             data.setFactoryReset(true);
+            logger.info("Sync configuration for device {} (id={}): including factoryReset=true", dbDevice.getNumber(), dbDevice.getId());
         }
 
         if (settings != null) {

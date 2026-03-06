@@ -74,26 +74,56 @@ public class DeviceResetResource {
     @PUT
     @Path("/private/reset/{deviceId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response requestDeviceResetByPath(@PathParam("deviceId") Integer deviceId) {
-        return doRequestDeviceReset(deviceId);
+    public javax.ws.rs.core.Response requestDeviceResetByPath(@PathParam("deviceId") String deviceIdStr) {
+        Integer deviceId = null;
+        if (deviceIdStr != null && !deviceIdStr.trim().isEmpty()) {
+            try {
+                deviceId = Integer.valueOf(deviceIdStr.trim());
+            } catch (NumberFormatException e) {
+                log.warn("Invalid deviceId in path: {}", deviceIdStr);
+                return javax.ws.rs.core.Response.status(javax.ws.rs.core.Response.Status.BAD_REQUEST)
+                        .entity(Response.ERROR("error.bad.request"))
+                        .build();
+            }
+        }
+        if (deviceId == null) {
+            return javax.ws.rs.core.Response.status(javax.ws.rs.core.Response.Status.BAD_REQUEST)
+                    .entity(Response.ERROR("error.bad.request"))
+                    .build();
+        }
+        Response result = doRequestDeviceReset(deviceId);
+        return javax.ws.rs.core.Response.ok(result).build();
     }
 
-    /** Legacy: body or query param (avoids 500 when frontend cache sends old URL; no @Consumes so empty body is ok). */
+    /** Legacy: body or query param. Accepts deviceId as String to avoid 500 when ?deviceId= (empty); returns 400 when invalid. */
     @ApiOperation(value = "Request device factory reset (by body or query, legacy)")
     @PUT
     @Path("/private/reset")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response requestDeviceResetByBody(
+    public javax.ws.rs.core.Response requestDeviceResetByBody(
             DeviceResetRequest request,
-            @QueryParam("deviceId") Integer queryDeviceId) {
+            @QueryParam("deviceId") String queryDeviceIdStr) {
         Integer deviceId = null;
         if (request != null && request.getDeviceId() != null) {
             deviceId = request.getDeviceId();
         }
-        if (deviceId == null && queryDeviceId != null) {
-            deviceId = queryDeviceId;
+        if (deviceId == null && queryDeviceIdStr != null && !queryDeviceIdStr.trim().isEmpty()) {
+            try {
+                deviceId = Integer.valueOf(queryDeviceIdStr.trim());
+            } catch (NumberFormatException e) {
+                log.warn("Invalid deviceId in query: {}", queryDeviceIdStr);
+                return javax.ws.rs.core.Response.status(javax.ws.rs.core.Response.Status.BAD_REQUEST)
+                        .entity(Response.ERROR("error.bad.request"))
+                        .build();
+            }
         }
-        return doRequestDeviceReset(deviceId);
+        if (deviceId == null) {
+            return javax.ws.rs.core.Response.status(javax.ws.rs.core.Response.Status.BAD_REQUEST)
+                    .entity(Response.ERROR("error.bad.request"))
+                    .build();
+        }
+        Response result = doRequestDeviceReset(deviceId);
+        return javax.ws.rs.core.Response.ok(result).build();
     }
 
     private Response doRequestDeviceReset(Integer deviceId) {

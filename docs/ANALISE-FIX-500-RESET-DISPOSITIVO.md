@@ -3,6 +3,8 @@
 **Data:** 6 de março de 2026  
 **Problema:** `PUT .../rest/plugins/devicereset/private/reset?deviceId=` → 500 Internal Server Error
 
+**Atualização:** O 500 persistia porque o frontend em produção (ou em cache) continuava a enviar `?deviceId=` (URL antiga). Foi feita correção **no backend** para nunca devolver 500 por parâmetro inválido: ambos os endpoints passam a aceitar `deviceId` como **String**, fazer o parse manual e devolver **HTTP 400** quando for vazio ou inválido.
+
 ---
 
 ## 1. Origem do 500
@@ -90,3 +92,24 @@ Utilizador clica "Restaurar dispositivo de fábrica"
   3. Validação com `Number(id)` e `isNaN` cobre strings inválidas como `"undefined"`, evitando que um bug noutra parte da app provoque `.../reset/undefined` e um 500 no backend.
 
 Recomendação: fazer deploy da alteração no frontend (e limpar cache do browser se necessário) e voltar a testar o botão; o 500 neste fluxo deve deixar de ocorrer.
+
+---
+
+## 6. Correção no backend (quando o 500 persistiu)
+
+**Causa:** O frontend em produção/cache ainda chamava `PUT .../private/reset?deviceId=` (sem valor). O JAX-RS convertia `""` para `Integer` e lançava exceção **antes** de executar o resource → 500.
+
+**Alterações em `DeviceResetResource.java`:**
+
+1. **PUT /private/reset (legacy)**  
+   - `@QueryParam("deviceId") Integer` → `@QueryParam("deviceId") String queryDeviceIdStr`  
+   - Parse manual com `Integer.valueOf(queryDeviceIdStr.trim())` dentro de try/catch.  
+   - Se vazio, null ou não numérico: `javax.ws.rs.core.Response.status(400).entity(Response.ERROR("error.bad.request")).build()`.  
+   - Assim não há exceção de conversão e o cliente recebe **400** em vez de 500.
+
+2. **PUT /private/reset/{deviceId} (path)**  
+   - `@PathParam("deviceId") Integer` → `@PathParam("deviceId") String deviceIdStr`  
+   - Parse manual; se inválido (ex.: "undefined"): resposta **400** com o mesmo body.  
+   - Evita 500 quando o path contém valor não numérico.
+
+**Resultado:** Para `?deviceId=` ou path inválido, o servidor responde **400 Bad Request** com `{"status":"ERROR","message":"error.bad.request"}`. O Angular trata como erro e o callback de erro mostra a mensagem ao utilizador; não há mais 500 por parâmetro inválido.
