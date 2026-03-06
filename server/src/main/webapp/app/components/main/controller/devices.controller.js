@@ -268,7 +268,6 @@ angular.module('headwind-kiosk')
         var searchIsRunning = false;
         $scope.search = function (spinnerHidden, callback) {
             if (searchIsRunning) {
-                console.log("Skipping device search since a previous search is pending", new Error());
                 return;
             }
 

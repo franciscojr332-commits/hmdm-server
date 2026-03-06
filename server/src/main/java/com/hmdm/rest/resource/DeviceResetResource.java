@@ -74,7 +74,8 @@ public class DeviceResetResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response requestDeviceReset(DeviceResetRequest request) {
-        if (!SecurityContext.get().hasPermission("plugin_devicereset_access")) {
+        if (!SecurityContext.get().hasPermission("plugin_devicereset_access")
+                && !SecurityContext.get().hasPermission("edit_devices")) {
             return Response.PERMISSION_DENIED();
         }
         if (request == null || request.getDeviceId() == null) {
