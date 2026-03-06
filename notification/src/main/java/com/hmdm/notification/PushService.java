@@ -10,11 +10,15 @@ import com.hmdm.persistence.DeviceDAO;
 import com.hmdm.persistence.domain.Configuration;
 import com.hmdm.persistence.domain.Device;
 import org.mybatis.guice.transactional.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 @Singleton
 public class PushService {
+
+    private static final Logger log = LoggerFactory.getLogger(PushService.class);
 
     private final PushSender pushSenderMqtt;
     private final PushSender pushSenderPolling;
@@ -82,15 +86,18 @@ public class PushService {
      *
      * @param deviceId an ID of device to be notified.
      * @param messageType Message type
+     * @return true if the device was found and the message was sent (MQTT + polling), false if device not found
      */
-    public void sendSimpleMessage(Integer deviceId, String messageType) {
+    public boolean sendSimpleMessage(Integer deviceId, String messageType) {
         final Device dbDevice = this.deviceDAO.getDeviceById(deviceId);
-        if (dbDevice != null) {
-            PushMessage message = new PushMessage();
-            message.setDeviceId(dbDevice.getId());
-            message.setMessageType(messageType);
-
-            this.send(message);
+        if (dbDevice == null) {
+            log.warn("sendSimpleMessage: device id {} not found, push not sent (type={})", deviceId, messageType);
+            return false;
         }
+        PushMessage message = new PushMessage();
+        message.setDeviceId(dbDevice.getId());
+        message.setMessageType(messageType);
+        this.send(message);
+        return true;
     }
 }

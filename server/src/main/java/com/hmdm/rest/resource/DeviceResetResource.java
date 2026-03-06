@@ -23,7 +23,6 @@ package com.hmdm.rest.resource;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.PUT;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -67,26 +66,31 @@ public class DeviceResetResource {
     /**
      * Admin requests factory reset for a device. Sets pending flag and sends a configUpdated push
      * so the device syncs immediately (near real-time). Sync response then sends factoryReset flag.
+     * deviceId is taken from the URL path so the push is reliably sent (avoids body parsing issues).
      */
     @ApiOperation(value = "Request device factory reset")
     @PUT
-    @Path("/private/reset")
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/private/reset/{deviceId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response requestDeviceReset(DeviceResetRequest request) {
+    public Response requestDeviceReset(@PathParam("deviceId") Integer deviceId) {
         if (!SecurityContext.get().hasPermission("plugin_devicereset_access")
                 && !SecurityContext.get().hasPermission("edit_devices")) {
             return Response.PERMISSION_DENIED();
         }
-        if (request == null || request.getDeviceId() == null) {
+        if (deviceId == null) {
             return Response.ERROR("error.bad.request");
         }
         try {
-            deviceDAO.requestDeviceReset(request.getDeviceId());
-            pushService.sendSimpleMessage(request.getDeviceId(), PushMessage.TYPE_CONFIG_UPDATED);
+            deviceDAO.requestDeviceReset(deviceId);
+            boolean pushSent = pushService.sendSimpleMessage(deviceId, PushMessage.TYPE_CONFIG_UPDATED);
+            if (!pushSent) {
+                log.warn("Device {} not found for push; reset flag was set, device will get it on next sync", deviceId);
+            } else {
+                log.info("Device reset requested for device id {}, configUpdated push sent", deviceId);
+            }
             return Response.OK();
         } catch (Exception e) {
-            log.error("Failed to request device reset for device id {}", request.getDeviceId(), e);
+            log.error("Failed to request device reset for device id {}", deviceId, e);
             return Response.INTERNAL_ERROR();
         }
     }
@@ -111,16 +115,4 @@ public class DeviceResetResource {
         }
     }
 
-    /** Request body for private/reset: deviceId to reset. */
-    public static class DeviceResetRequest {
-        private Integer deviceId;
-
-        public Integer getDeviceId() {
-            return deviceId;
-        }
-
-        public void setDeviceId(Integer deviceId) {
-            this.deviceId = deviceId;
-        }
-    }
 }

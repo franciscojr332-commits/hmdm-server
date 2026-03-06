@@ -966,7 +966,7 @@ angular.module('headwind-kiosk')
         $scope.requestDeviceReset = function (device) {
             let localizedText = localization.localize('question.device.reset').replace('${deviceNumber}', device.number);
             confirmModal.getUserConfirmation(localizedText, function () {
-                deviceService.requestDeviceReset({}, { deviceId: device.id }, function () {
+                deviceService.requestDeviceReset({ deviceId: device.id }, function () {
                     alertService.success(localization.localize('success.device.reset.requested'));
                 }, function () {
                     alertService.error(localization.localize('error.device.reset'));
