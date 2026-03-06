@@ -1,6 +1,6 @@
 // Localization completed
 angular.module('headwind-kiosk')
-    .controller('DevicesTabController', function ($scope, $rootScope, $state, $modal, $interval, $cookies, $window, $filter, $timeout,
+    .controller('DevicesTabController', function ($scope, $rootScope, $state, $modal, $injector, $interval, $cookies, $window, $filter, $timeout,
                                                   confirmModal, deviceService, groupService, settingsService, hintService,
                                                   authService, pluginService, configurationService, alertService,
                                                   spinnerService, localization, utils) {
@@ -964,8 +964,24 @@ angular.module('headwind-kiosk')
         };
 
         $scope.openDeviceResetModal = function (preselectedDevice) {
-            var devicesList = $scope.devices || [];
+            var devicesList = angular.copy($scope.devices) || [];
             var preselected = preselectedDevice || null;
+            if (preselected && preselected.id != null) {
+                var found = devicesList.some(function (d) { return d.id === preselected.id; });
+                if (!found) {
+                    devicesList.unshift(preselected);
+                }
+            }
+            var modalSvc;
+            try {
+                modalSvc = $injector.get('$uibModal');
+            } catch (e) {
+                modalSvc = $modal;
+            }
+            if (!modalSvc) {
+                alertService.error(localization.localize('error.device.reset'));
+                return;
+            }
             var resetModalTemplate =
                 '<div class="modal-header">' +
                 '  <h4 class="modal-title" localized>button.device.reset</h4>' +
@@ -994,22 +1010,28 @@ angular.module('headwind-kiosk')
                 '  </form>' +
                 '</div>';
             $timeout(function () {
-                var modalInstance = $modal.open({
-                    template: resetModalTemplate,
-                    controller: 'DeviceResetModalController',
-                    size: 'sm',
-                    resolve: {
-                        devices: function () {
-                            return devicesList;
-                        },
-                        preselectedDevice: function () {
-                            return preselected;
+                try {
+                    var modalInstance = modalSvc.open({
+                        template: resetModalTemplate,
+                        controller: 'DeviceResetModalController',
+                        size: 'sm',
+                        resolve: {
+                            devices: function () {
+                                return devicesList;
+                            },
+                            preselectedDevice: function () {
+                                return preselected;
+                            }
                         }
+                    });
+                    if (modalInstance && modalInstance.result) {
+                        modalInstance.result.then(function () {
+                            $scope.search();
+                        }, function () {});
                     }
-                });
-                modalInstance.result.then(function () {
-                    $scope.search();
-                }, function () {});
+                } catch (e) {
+                    alertService.error(localization.localize('error.device.reset'));
+                }
             }, 0);
         };
 
@@ -1112,36 +1134,43 @@ angular.module('headwind-kiosk')
             $modalInstance.dismiss();
         }
     })
-    .controller('DeviceResetModalController', function ($scope, $modalInstance, deviceService, alertService, localization, devices, preselectedDevice) {
-        $scope.devices = devices || [];
-        $scope.selectedDevice = preselectedDevice || null;
-        $scope.errorMessage = null;
-
-        $scope.deviceLabel = function (d) {
-            if (!d) return '';
-            var desc = (d.description && d.description.trim()) ? d.description.trim() : '';
-            return desc ? (d.number + ' - ' + desc) : (d.number || 'ID ' + d.id);
-        };
-
-        $scope.confirm = function () {
-            var device = $scope.selectedDevice;
-            if (!device || device.id == null) {
-                alertService.error(localization.localize('form.device.reset.select.device'));
-                return;
+    .controller('DeviceResetModalController', ['$scope', '$injector', 'deviceService', 'alertService', 'localization', 'devices', 'preselectedDevice',
+        function ($scope, $injector, deviceService, alertService, localization, devices, preselectedDevice) {
+            var modalInstance;
+            try {
+                modalInstance = $injector.get('$uibModalInstance');
+            } catch (e) {
+                modalInstance = $injector.get('$modalInstance');
             }
+            $scope.devices = devices || [];
+            $scope.selectedDevice = preselectedDevice || null;
             $scope.errorMessage = null;
-            deviceService.requestDeviceReset({ deviceId: device.id }, function () {
-                alertService.success(localization.localize('success.device.reset.requested'));
-                $modalInstance.close();
-            }, function () {
-                $scope.errorMessage = localization.localize('error.device.reset');
-            });
-        };
 
-        $scope.closeModal = function () {
-            $modalInstance.dismiss();
-        };
-    })
+            $scope.deviceLabel = function (d) {
+                if (!d) return '';
+                var desc = (d.description && d.description.trim()) ? d.description.trim() : '';
+                return desc ? (d.number + ' - ' + desc) : (d.number || 'ID ' + d.id);
+            };
+
+            $scope.confirm = function () {
+                var device = $scope.selectedDevice;
+                if (!device || device.id == null) {
+                    alertService.error(localization.localize('form.device.reset.select.device'));
+                    return;
+                }
+                $scope.errorMessage = null;
+                deviceService.requestDeviceReset({ deviceId: device.id }, function () {
+                    alertService.success(localization.localize('success.device.reset.requested'));
+                    modalInstance.close();
+                }, function () {
+                    $scope.errorMessage = localization.localize('error.device.reset');
+                });
+            };
+
+            $scope.closeModal = function () {
+                modalInstance.dismiss();
+            };
+        }])
     .controller('DeviceModalController',
         function ($scope, $modalInstance, deviceService, configurationService, groupService, device, settings,
                   localization, authService, confirmModal) {
