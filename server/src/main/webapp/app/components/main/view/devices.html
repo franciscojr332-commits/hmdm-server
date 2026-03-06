@@ -447,7 +447,7 @@
                         ng-click='showQrCode(device)'>
                     <span class='glyphicon glyphicon-qrcode'></span>
                 </button>
-                <button type='button' class='btn btn-default' ng-click='requestDeviceReset( device )'
+                <button type='button' class='btn btn-default' ng-click='openDeviceResetModal( device )'
                         localized-title="button.device.reset" ng-if="hasPermission('plugin_devicereset_access') || hasPermission('edit_devices')">
                     <span class='glyphicon glyphicon-repeat'></span>
                 </button>
