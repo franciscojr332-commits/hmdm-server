@@ -174,4 +174,6 @@ public interface SyncResponseInt {
     String getVendor();
 
     String getDescription();
+
+    Boolean getFactoryReset();
 }

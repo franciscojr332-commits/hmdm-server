@@ -290,6 +290,10 @@ public class SyncResponse implements Serializable, SyncResponseInt {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String description;
 
+    @ApiModelProperty("When true, device should perform factory reset (wipe)")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Boolean factoryReset;
+
     public SyncResponse() {
     }
 
@@ -967,5 +971,14 @@ public class SyncResponse implements Serializable, SyncResponseInt {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public Boolean getFactoryReset() {
+        return factoryReset;
+    }
+
+    public void setFactoryReset(Boolean factoryReset) {
+        this.factoryReset = factoryReset;
     }
 }

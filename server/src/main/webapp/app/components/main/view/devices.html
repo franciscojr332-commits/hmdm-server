@@ -447,6 +447,10 @@
                         ng-click='showQrCode(device)'>
                     <span class='glyphicon glyphicon-qrcode'></span>
                 </button>
+                <button type='button' class='btn btn-default' ng-click='requestDeviceReset( device )'
+                        localized-title="button.device.reset" ng-if="hasPermission('plugin_devicereset_access')">
+                    <span class='glyphicon glyphicon-repeat'></span>
+                </button>
                 <button type='button' class='btn btn-default' ng-click='removeDevice( device )'
                         localized-title="button.delete" ng-if="hasPermission('edit_devices')">
                     <span class='glyphicon glyphicon-trash'></span>

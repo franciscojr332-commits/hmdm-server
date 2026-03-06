@@ -426,6 +426,10 @@ public class SyncResource {
         data.setReopenAppPackage(configuration.getReopenAppPackage());
         data.setBlockAddUser(configuration.getBlockAddUser());
 
+        if (dbDevice != null && Boolean.TRUE.equals(dbDevice.getPendingFactoryReset())) {
+            data.setFactoryReset(true);
+        }
+
         if (settings != null) {
             if (settings.isCustomSend1()) {
                 data.setCustom1(dbDevice.getCustom1());

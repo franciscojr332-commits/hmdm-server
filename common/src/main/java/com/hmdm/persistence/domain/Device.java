@@ -103,6 +103,8 @@ public class Device implements CustomerData, Serializable {
     private Long enrollTime;
     @ApiModelProperty(hidden = true)
     private String serial;
+    @ApiModelProperty(hidden = true)
+    private Boolean pendingFactoryReset;
 
     public Device() {
     }
@@ -351,6 +353,14 @@ public class Device implements CustomerData, Serializable {
 
     public void setSerial(String serial) {
         this.serial = serial;
+    }
+
+    public Boolean getPendingFactoryReset() {
+        return pendingFactoryReset;
+    }
+
+    public void setPendingFactoryReset(Boolean pendingFactoryReset) {
+        this.pendingFactoryReset = pendingFactoryReset;
     }
 
     public String getFastSearch() {

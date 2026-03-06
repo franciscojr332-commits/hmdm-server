@@ -2615,4 +2615,18 @@
         </rollback>
     </changeSet>
 
+    <changeSet id="06.03.26-10:00" author="plan" context="common">
+        <comment>Device reset: pending_factory_reset on devices, permission plugin_devicereset_access</comment>
+        <sql>
+            ALTER TABLE devices ADD COLUMN pending_factory_reset BOOLEAN NOT NULL DEFAULT false;
+            INSERT INTO permissions (name, description) VALUES ('plugin_devicereset_access', 'Reset and reboot devices');
+            INSERT INTO userRolePermissions (roleId, permissionId) SELECT 1, id FROM permissions WHERE name = 'plugin_devicereset_access';
+        </sql>
+        <rollback>
+            ALTER TABLE devices DROP COLUMN pending_factory_reset;
+            DELETE FROM userRolePermissions WHERE permissionId IN (SELECT id FROM permissions WHERE name = 'plugin_devicereset_access');
+            DELETE FROM permissions WHERE name = 'plugin_devicereset_access';
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>

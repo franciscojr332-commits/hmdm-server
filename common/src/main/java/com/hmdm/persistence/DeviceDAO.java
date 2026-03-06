@@ -182,6 +182,21 @@ public class DeviceDAO extends AbstractDAO<Device> {
         );
     }
 
+    /** Request factory reset for device; next sync will send factoryReset flag. */
+    public void requestDeviceReset(Integer deviceId) {
+        updateById(
+                deviceId,
+                this.mapper::getDeviceById,
+                device -> this.mapper.setPendingFactoryReset(device.getId()),
+                SecurityException::onDeviceAccessViolation
+        );
+    }
+
+    /** Clear pending factory reset when device confirms (public endpoint, no auth). */
+    public void clearPendingFactoryResetByNumber(String number) {
+        this.mapper.clearPendingFactoryResetByNumber(number);
+    }
+
     public Device getDeviceByNumber(String number) {
         return getSingleRecord(() -> this.mapper.getDeviceByNumber(number), SecurityException::onDeviceAccessViolation);
     }

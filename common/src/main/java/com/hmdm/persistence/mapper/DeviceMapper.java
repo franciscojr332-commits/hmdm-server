@@ -144,6 +144,12 @@ public interface DeviceMapper {
     void updateDeviceDescription(@Param("deviceId") Integer deviceId,
                                  @Param("description") String newDeviceDesc);
 
+    @Update({"UPDATE devices SET pending_factory_reset = true WHERE id = #{deviceId}"})
+    void setPendingFactoryReset(@Param("deviceId") Integer deviceId);
+
+    @Update({"UPDATE devices SET pending_factory_reset = false WHERE number = #{number}"})
+    void clearPendingFactoryResetByNumber(@Param("number") String number);
+
     @Update({"UPDATE devices SET fastSearch = RIGHT(number, #{fastSearchChars}) WHERE fastSearch IS NULL " +
             " OR LENGTH(fastSearch) != #{fastSearchChars}"})
     void updateFastSearch(@Param("fastSearchChars") Integer fastSearchChars);
