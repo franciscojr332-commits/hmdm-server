@@ -425,6 +425,7 @@ public class SyncResource {
         data.setBlockPowerOffTo(normalizeTimeToHHmm(configuration.getBlockPowerOffTo()));
         data.setReopenAppPackage(configuration.getReopenAppPackage());
         data.setBlockAddUser(configuration.getBlockAddUser());
+        data.setBlockSettings(configuration.getBlockSettings());
 
         if (dbDevice != null && Boolean.TRUE.equals(dbDevice.getPendingFactoryReset())) {
             data.setFactoryReset(true);

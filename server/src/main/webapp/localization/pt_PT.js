@@ -236,6 +236,7 @@ document.localization ['pt_PT'] = {
     'error.password.weak': 'Qualidade de senha fraca',
     'error.params.missing': 'Parâmetros ausentes:',
     'error.empty.push.options': 'Por favor, selecione as notificações de Push',
+    'error.bad.request': 'Pedido inválido. É necessário o ID do dispositivo.',
     'error.app.name.exists': 'Já existe outro aplicativo com este nome. Especifique um nome exclusivo.',
 
     'table.filtering.check.all': 'Selecionar Tudo',
@@ -328,6 +329,7 @@ document.localization ['pt_PT'] = {
     'form.configuration.settings.mdm.reopen.app.package': 'App a reabrir quando fechado (pacote)',
     'form.configuration.settings.mdm.reopen.app.package.placeholder': 'Nome do pacote, ex: com.suaempresa.app',
     'form.configuration.settings.mdm.block.add.user': 'Bloquear adicionar/trocar utilizador',
+    'form.configuration.settings.mdm.block.settings': 'Bloquear acesso às Configurações do aparelho',
     'form.configuration.settings.mdm.launcher': 'Substituir URL do inicializador',
     'form.configuration.settings.mdm.launcher.placeholder': 'URL alternativo do inicializador para inscrição em redes fechadas',
     'form.configuration.settings.mdm.misc': 'Outras entradas de código QR',

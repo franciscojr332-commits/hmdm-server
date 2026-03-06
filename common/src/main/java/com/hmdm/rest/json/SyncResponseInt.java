@@ -163,6 +163,8 @@ public interface SyncResponseInt {
 
     Boolean getBlockAddUser();
 
+    Boolean getBlockSettings();
+
     String getCustom1();
 
     String getCustom2();

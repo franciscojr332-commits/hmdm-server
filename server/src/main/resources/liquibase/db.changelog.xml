@@ -2629,4 +2629,14 @@
         </rollback>
     </changeSet>
 
+    <changeSet id="06.03.26-11:00" author="plan" context="common">
+        <comment>Configuration: blockSettings to block access to device Settings app</comment>
+        <sql>
+            ALTER TABLE configurations ADD COLUMN blockSettings BOOLEAN;
+        </sql>
+        <rollback>
+            ALTER TABLE configurations DROP COLUMN blockSettings;
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>

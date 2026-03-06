@@ -184,6 +184,8 @@ public class Configuration implements CustomerData, Serializable {
     private String reopenAppPackage;
     @ApiModelProperty("Block adding or switching user")
     private Boolean blockAddUser;
+    @ApiModelProperty("Block access to device Settings app")
+    private Boolean blockSettings;
 
     // This group of settings corresponds to Design settings
     private boolean useDefaultDesignSettings;
@@ -598,6 +600,14 @@ public class Configuration implements CustomerData, Serializable {
         this.blockAddUser = blockAddUser;
     }
 
+    public Boolean getBlockSettings() {
+        return blockSettings;
+    }
+
+    public void setBlockSettings(Boolean blockSettings) {
+        this.blockSettings = blockSettings;
+    }
+
     public String getBaseUrl() {
         return baseUrl;
     }
@@ -964,6 +974,7 @@ public class Configuration implements CustomerData, Serializable {
         copy.setBlockPowerOffTo(getBlockPowerOffTo());
         copy.setReopenAppPackage(getReopenAppPackage());
         copy.setBlockAddUser(getBlockAddUser());
+        copy.setBlockSettings(getBlockSettings());
 
         copy.setGps(getGps());
         copy.setBluetooth(getBluetooth());

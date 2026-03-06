@@ -133,6 +133,7 @@ public interface ConfigurationMapper {
             "blockPowerOffTo=#{blockPowerOffTo}, " +
             "reopenAppPackage=#{reopenAppPackage}, " +
             "blockAddUser=#{blockAddUser}, " +
+            "blockSettings=#{blockSettings}, " +
             "autoUpdate=#{autoUpdate}, " +
             "blockStatusBar=#{blockStatusBar}, " +
             "systemUpdateType=#{systemUpdateType}, " +

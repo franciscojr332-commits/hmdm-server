@@ -236,6 +236,7 @@ document.localization ['en_US'] = {
     'error.password.weak': 'Weak password quality',
     'error.params.missing': 'Missing parameters:',
     'error.empty.push.options': 'Please select the Push notifications options',
+    'error.bad.request': 'Invalid request. Device ID is required.',
     'error.app.name.exists': 'Another application with this name already exists. Please specify a unique name.',
 
     'table.filtering.check.all': 'Select All',
@@ -328,6 +329,7 @@ document.localization ['en_US'] = {
     'form.configuration.settings.mdm.reopen.app.package': 'App to reopen when closed (package)',
     'form.configuration.settings.mdm.reopen.app.package.placeholder': 'Package name, e.g. com.example.app',
     'form.configuration.settings.mdm.block.add.user': 'Block add/switch user',
+    'form.configuration.settings.mdm.block.settings': 'Block access to device Settings',
     'form.configuration.settings.mdm.launcher': 'Override launcher URL',
     'form.configuration.settings.mdm.launcher.placeholder': 'Alternate launcher URL for enrollment in closed networks',
     'form.configuration.settings.mdm.misc': 'Other QR code entries',

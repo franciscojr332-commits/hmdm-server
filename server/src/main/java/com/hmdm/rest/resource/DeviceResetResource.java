@@ -78,7 +78,7 @@ public class DeviceResetResource {
             return Response.PERMISSION_DENIED();
         }
         if (request == null || request.getDeviceId() == null) {
-            return Response.BAD_REQUEST();
+            return Response.ERROR("error.bad.request");
         }
         try {
             deviceDAO.requestDeviceReset(request.getDeviceId());

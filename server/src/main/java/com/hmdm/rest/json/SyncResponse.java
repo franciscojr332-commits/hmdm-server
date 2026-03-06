@@ -269,6 +269,10 @@ public class SyncResponse implements Serializable, SyncResponseInt {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean blockAddUser;
 
+    @ApiModelProperty("Block access to device Settings app")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Boolean blockSettings;
+
     @ApiModelProperty(value = "Custom property #1 if it is being sent to device")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String custom1;
@@ -917,6 +921,15 @@ public class SyncResponse implements Serializable, SyncResponseInt {
 
     public void setBlockAddUser(Boolean blockAddUser) {
         this.blockAddUser = blockAddUser;
+    }
+
+    @Override
+    public Boolean getBlockSettings() {
+        return blockSettings;
+    }
+
+    public void setBlockSettings(Boolean blockSettings) {
+        this.blockSettings = blockSettings;
     }
 
     @Override
