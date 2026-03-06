@@ -66,8 +66,12 @@ public class DeviceResetResource {
     }
 
     /**
-     * Admin requests factory reset for a device. Sets pending flag and sends a configUpdated push
-     * so the device syncs immediately (near real-time). Sync response then sends factoryReset flag.
+     * Admin requests factory reset for a device.
+     * <ul>
+     *   <li><b>Servidor:</b> 1) Marca flag pending_factory_reset = true no BD. 2) Após 10s envia push tipo configUpdated para o dispositivo.</li>
+     *   <li><b>configUpdated:</b> Quem chama é o servidor (thread agendada em scheduleConfigUpdatedPushAfterDelay), 10s depois do clique no botão.</li>
+     *   <li><b>Wipe (reset de fábrica):</b> Quem executa é o app Android no dispositivo: ao receber o push configUpdated, o device faz sync; a resposta do sync traz factoryReset=true; o app então executa o wipe.</li>
+     * </ul>
      * Supports both: PUT /private/reset/{deviceId} (preferred) and PUT /private/reset with body { deviceId }.
      */
     @ApiOperation(value = "Request device factory reset (by path)")
@@ -126,6 +130,9 @@ public class DeviceResetResource {
         return javax.ws.rs.core.Response.ok(result).build();
     }
 
+    /** Delay in milliseconds before sending configUpdated push after setting reset flag (10 seconds). */
+    private static final long RESET_PUSH_DELAY_MS = 10_000L;
+
     private Response doRequestDeviceReset(Integer deviceId) {
         if (!SecurityContext.get().hasPermission("plugin_devicereset_access")
                 && !SecurityContext.get().hasPermission("edit_devices")) {
@@ -136,17 +143,34 @@ public class DeviceResetResource {
         }
         try {
             deviceDAO.requestDeviceReset(deviceId);
-            boolean pushSent = pushService.sendSimpleMessage(deviceId, PushMessage.TYPE_CONFIG_UPDATED);
-            if (!pushSent) {
-                log.warn("Device {} not found for push; reset flag was set, device will get it on next sync", deviceId);
-            } else {
-                log.info("Device reset requested for device id {}, configUpdated push sent", deviceId);
-            }
+            log.info("Device reset requested for device id {}, pending_factory_reset set to true; configUpdated push in {}s", deviceId, RESET_PUSH_DELAY_MS / 1000);
+            scheduleConfigUpdatedPushAfterDelay(deviceId);
             return Response.OK();
         } catch (Exception e) {
             log.error("Failed to request device reset for device id {}", deviceId, e);
             return Response.INTERNAL_ERROR();
         }
+    }
+
+    /**
+     * Sends configUpdated push to the device after a delay so the flag is committed and the device receives the push with the reset instruction.
+     */
+    private void scheduleConfigUpdatedPushAfterDelay(final Integer deviceId) {
+        final PushService push = this.pushService;
+        new Thread(() -> {
+            try {
+                Thread.sleep(RESET_PUSH_DELAY_MS);
+                boolean pushSent = push.sendSimpleMessage(deviceId, PushMessage.TYPE_CONFIG_UPDATED);
+                if (pushSent) {
+                    log.info("Device id {}: configUpdated push sent after delay", deviceId);
+                } else {
+                    log.warn("Device {} not found for push; reset flag was set, device will get it on next sync", deviceId);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.warn("Reset push delay interrupted for device id {}", deviceId);
+            }
+        }, "device-reset-push-" + deviceId).start();
     }
 
     /** Request body for legacy PUT /private/reset (no path param). */

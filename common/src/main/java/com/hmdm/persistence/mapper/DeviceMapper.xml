@@ -80,7 +80,8 @@
         UPDATE devices SET number = #{number}, description = #{description},
                            configurationId = #{configurationId}, imei = #{imei}, phone = #{phone},
                            custom1=#{custom1}, custom2=#{custom2}, custom3=#{custom3},
-                           oldNumber=#{oldNumber}, fastSearch=#{fastSearch} WHERE id = #{id}
+                           oldNumber=#{oldNumber}, fastSearch=#{fastSearch},
+                           pending_factory_reset = COALESCE(#{pendingFactoryReset}, false) WHERE id = #{id}
     </update>
 
     <sql id="allowedDevicesSelect">
