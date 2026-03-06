@@ -23,6 +23,7 @@ package com.hmdm.rest.resource;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.PUT;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -66,13 +67,27 @@ public class DeviceResetResource {
     /**
      * Admin requests factory reset for a device. Sets pending flag and sends a configUpdated push
      * so the device syncs immediately (near real-time). Sync response then sends factoryReset flag.
-     * deviceId is taken from the URL path so the push is reliably sent (avoids body parsing issues).
+     * Supports both: PUT /private/reset/{deviceId} (preferred) and PUT /private/reset with body { deviceId }.
      */
-    @ApiOperation(value = "Request device factory reset")
+    @ApiOperation(value = "Request device factory reset (by path)")
     @PUT
     @Path("/private/reset/{deviceId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response requestDeviceReset(@PathParam("deviceId") Integer deviceId) {
+    public Response requestDeviceResetByPath(@PathParam("deviceId") Integer deviceId) {
+        return doRequestDeviceReset(deviceId);
+    }
+
+    @ApiOperation(value = "Request device factory reset (by body, legacy)")
+    @PUT
+    @Path("/private/reset")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response requestDeviceResetByBody(DeviceResetRequest request) {
+        Integer deviceId = (request != null) ? request.getDeviceId() : null;
+        return doRequestDeviceReset(deviceId);
+    }
+
+    private Response doRequestDeviceReset(Integer deviceId) {
         if (!SecurityContext.get().hasPermission("plugin_devicereset_access")
                 && !SecurityContext.get().hasPermission("edit_devices")) {
             return Response.PERMISSION_DENIED();
@@ -93,6 +108,13 @@ public class DeviceResetResource {
             log.error("Failed to request device reset for device id {}", deviceId, e);
             return Response.INTERNAL_ERROR();
         }
+    }
+
+    /** Request body for legacy PUT /private/reset (no path param). */
+    public static class DeviceResetRequest {
+        private Integer deviceId;
+        public Integer getDeviceId() { return deviceId; }
+        public void setDeviceId(Integer deviceId) { this.deviceId = deviceId; }
     }
 
     /**
