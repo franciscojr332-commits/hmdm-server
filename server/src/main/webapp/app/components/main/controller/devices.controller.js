@@ -966,9 +966,36 @@ angular.module('headwind-kiosk')
         $scope.openDeviceResetModal = function (preselectedDevice) {
             var devicesList = $scope.devices || [];
             var preselected = preselectedDevice || null;
+            var resetModalTemplate =
+                '<div class="modal-header">' +
+                '  <h4 class="modal-title" localized>button.device.reset</h4>' +
+                '  <div ng-show="errorMessage" class="error"><span>{{errorMessage}}</span></div>' +
+                '</div>' +
+                '<div class="modal-body">' +
+                '  <p class="text-muted" localized>form.device.reset.select.hint</p>' +
+                '  <form class="form-horizontal">' +
+                '    <div class="form-group">' +
+                '      <label class="col-sm-3 control-label" localized>form.device.reset.select.device</label>' +
+                '      <div class="col-sm-9">' +
+                '        <select class="form-control" ng-model="selectedDevice" ' +
+                '                ng-options="d as deviceLabel(d) for d in devices" ' +
+                '                ng-disabled="!devices || devices.length === 0">' +
+                '          <option value="">—</option>' +
+                '        </select>' +
+                '        <p ng-if="devices && devices.length === 0" class="help-block" localized>form.device.reset.no.devices</p>' +
+                '      </div>' +
+                '    </div>' +
+                '    <div class="form-group">' +
+                '      <div class="col-sm-offset-3 col-sm-9">' +
+                '        <button type="button" class="btn btn-primary" ng-click="confirm()" ng-disabled="!selectedDevice" localized>button.ok</button>' +
+                '        <button type="button" class="btn btn-default" ng-click="closeModal()" localized>button.cancel</button>' +
+                '      </div>' +
+                '    </div>' +
+                '  </form>' +
+                '</div>';
             $timeout(function () {
                 var modalInstance = $modal.open({
-                    templateUrl: 'app/components/main/view/modal/device.reset.html',
+                    template: resetModalTemplate,
                     controller: 'DeviceResetModalController',
                     size: 'sm',
                     resolve: {
