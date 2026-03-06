@@ -31,6 +31,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.hmdm.notification.PushService;
+import com.hmdm.notification.persistence.domain.PushMessage;
 import com.hmdm.persistence.DeviceDAO;
 import com.hmdm.rest.json.DeviceInfo;
 import com.hmdm.rest.json.Response;
@@ -54,14 +56,17 @@ public class DeviceResetResource {
     private static final Logger log = LoggerFactory.getLogger(DeviceResetResource.class);
 
     private final DeviceDAO deviceDAO;
+    private final PushService pushService;
 
     @Inject
-    public DeviceResetResource(DeviceDAO deviceDAO) {
+    public DeviceResetResource(DeviceDAO deviceDAO, PushService pushService) {
         this.deviceDAO = deviceDAO;
+        this.pushService = pushService;
     }
 
     /**
-     * Admin requests factory reset for a device. Next sync will send factoryReset flag to the device.
+     * Admin requests factory reset for a device. Sets pending flag and sends a configUpdated push
+     * so the device syncs immediately (near real-time). Sync response then sends factoryReset flag.
      */
     @ApiOperation(value = "Request device factory reset")
     @PUT
@@ -77,6 +82,7 @@ public class DeviceResetResource {
         }
         try {
             deviceDAO.requestDeviceReset(request.getDeviceId());
+            pushService.sendSimpleMessage(request.getDeviceId(), PushMessage.TYPE_CONFIG_UPDATED);
             return Response.OK();
         } catch (Exception e) {
             log.error("Failed to request device reset for device id {}", request.getDeviceId(), e);
