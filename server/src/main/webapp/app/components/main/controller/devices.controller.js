@@ -964,21 +964,26 @@ angular.module('headwind-kiosk')
         };
 
         $scope.openDeviceResetModal = function (preselectedDevice) {
-            var modalInstance = $modal.open({
-                templateUrl: 'app/components/main/view/modal/device.reset.html',
-                controller: 'DeviceResetModalController',
-                resolve: {
-                    devices: function () {
-                        return $scope.devices || [];
-                    },
-                    preselectedDevice: function () {
-                        return preselectedDevice || null;
+            var devicesList = $scope.devices || [];
+            var preselected = preselectedDevice || null;
+            $timeout(function () {
+                var modalInstance = $modal.open({
+                    templateUrl: 'app/components/main/view/modal/device.reset.html',
+                    controller: 'DeviceResetModalController',
+                    size: 'sm',
+                    resolve: {
+                        devices: function () {
+                            return devicesList;
+                        },
+                        preselectedDevice: function () {
+                            return preselected;
+                        }
                     }
-                }
-            });
-            modalInstance.result.then(function () {
-                $scope.search();
-            });
+                });
+                modalInstance.result.then(function () {
+                    $scope.search();
+                }, function () {});
+            }, 0);
         };
 
         $scope.notifyPluginOnDevice = function (plugin, device) {
