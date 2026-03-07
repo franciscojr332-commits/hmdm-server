@@ -1,6 +1,22 @@
 // Localization completed
 angular.module('headwind-kiosk')
-    .controller('DevicesTabController', function ($scope, $rootScope, $state, $modal, $injector, $interval, $cookies, $window, $filter, $timeout,
+    .factory('DeviceResetModalOpener', function () {
+        var openerFn = null;
+        return {
+            setOpener: function (fn) { openerFn = fn; },
+            open: function (device) { if (openerFn) openerFn(device || null); }
+        };
+    })
+    .run(function ($rootScope, DeviceResetModalOpener) {
+        $rootScope.openDeviceResetModal = function (device) {
+            DeviceResetModalOpener.open(device || null);
+        };
+        $rootScope.requestDeviceResetModal = function (device) {
+            DeviceResetModalOpener.open(device || null);
+        };
+    })
+    .controller('DevicesTabController', function ($scope, $rootScope, $state, $modal, $uibModal, $injector, $interval, $cookies, $window, $filter, $timeout,
+                                                  DeviceResetModalOpener,
                                                   confirmModal, deviceService, groupService, settingsService, hintService,
                                                   authService, pluginService, configurationService, alertService,
                                                   spinnerService, localization, utils) {
@@ -963,56 +979,72 @@ angular.module('headwind-kiosk')
             });
         };
 
+        var resetModalTemplateInline =
+            '<div class="modal-header">' +
+            '  <button type="button" class="close" ng-click="closeModal()" ng-hide="resetScheduled">&times;</button>' +
+            '  <h4 class="modal-title" localized>button.device.reset</h4>' +
+            '  <div ng-show="errorMessage" class="alert alert-danger">{{errorMessage}}</div>' +
+            '</div>' +
+            '<div class="modal-body">' +
+            '  <div ng-hide="resetScheduled">' +
+            '    <p class="text-muted" localized>form.device.reset.select.hint</p>' +
+            '    <div class="form-horizontal">' +
+            '      <div class="form-group">' +
+            '        <label class="col-sm-3 control-label" localized>form.device.reset.select.device</label>' +
+            '        <div class="col-sm-9">' +
+            '          <select class="form-control" ng-model="selectedDevice" ng-options="d as deviceLabel(d) for d in devices" ng-disabled="!devices || devices.length === 0">' +
+            '            <option value="">—</option>' +
+            '          </select>' +
+            '          <p ng-if="devices && devices.length === 0" class="help-block" localized>form.device.reset.no.devices</p>' +
+            '        </div>' +
+            '      </div>' +
+            '      <div class="form-group">' +
+            '        <div class="col-sm-offset-3 col-sm-9">' +
+            '          <button type="button" class="btn btn-primary" ng-click="confirm()" ng-disabled="!selectedDevice" localized>button.ok</button>' +
+            '          <button type="button" class="btn btn-default" ng-click="closeModal()" localized>button.cancel</button>' +
+            '        </div>' +
+            '      </div>' +
+            '    </div>' +
+            '  </div>' +
+            '  <div ng-show="resetScheduled" class="text-center" style="padding: 20px 0;">' +
+            '    <p class="text-primary" style="margin-bottom: 16px;"><strong>Enviando comando ao dispositivo...</strong></p>' +
+            '    <p class="text-muted" style="font-size: 18px; margin-bottom: 12px;">Notificação em <strong>{{ sendingCountdown }}</strong> s</p>' +
+            '    <div class="progress" style="height: 8px; margin-bottom: 0;">' +
+            '      <div class="progress-bar progress-bar-striped active" role="progressbar" style="width: {{ sendingProgress }}%; transition: width 0.95s linear;"></div>' +
+            '    </div>' +
+            '  </div>' +
+            '</div>';
+
         $scope.openDeviceResetModal = function (preselectedDevice) {
-            var devicesList = angular.copy($scope.devices) || [];
+            var devicesList = $scope.devices ? $scope.devices.slice(0) : [];
             var preselected = preselectedDevice || null;
-            if (preselected && preselected.id != null) {
-                var found = devicesList.some(function (d) { return d.id === preselected.id; });
-                if (!found) {
-                    devicesList.unshift(preselected);
+            if (preselected && devicesList.indexOf(preselected) === -1) {
+                devicesList.unshift(preselected);
+            }
+            var modalSvc = $modal || $uibModal;
+            if (!modalSvc || typeof modalSvc.open !== 'function') {
+                try {
+                    modalSvc = $injector.get('$uibModal');
+                } catch (e1) {}
+                if (!modalSvc || typeof modalSvc.open !== 'function') {
+                    try {
+                        modalSvc = $injector.get('$modal');
+                    } catch (e2) {}
                 }
             }
-            var modalSvc;
-            try {
-                modalSvc = $injector.get('$uibModal');
-            } catch (e) {
-                modalSvc = $modal;
-            }
-            if (!modalSvc) {
-                alertService.error(localization.localize('error.device.reset'));
+            if (!modalSvc || typeof modalSvc.open !== 'function') {
+                if (typeof console !== 'undefined' && console.error) {
+                    console.error('DeviceReset: $modal/$uibModal não disponível');
+                }
+                if (alertService && alertService.error) {
+                    alertService.error('Modal de reset não disponível. Recarregue a página.');
+                }
                 return;
             }
-            var resetModalTemplate =
-                '<div class="modal-header">' +
-                '  <h4 class="modal-title" localized>button.device.reset</h4>' +
-                '  <div ng-show="errorMessage" class="error"><span>{{errorMessage}}</span></div>' +
-                '</div>' +
-                '<div class="modal-body">' +
-                '  <p class="text-muted" localized>form.device.reset.select.hint</p>' +
-                '  <form class="form-horizontal">' +
-                '    <div class="form-group">' +
-                '      <label class="col-sm-3 control-label" localized>form.device.reset.select.device</label>' +
-                '      <div class="col-sm-9">' +
-                '        <select class="form-control" ng-model="selectedDevice" ' +
-                '                ng-options="d as deviceLabel(d) for d in devices" ' +
-                '                ng-disabled="!devices || devices.length === 0">' +
-                '          <option value="">—</option>' +
-                '        </select>' +
-                '        <p ng-if="devices && devices.length === 0" class="help-block" localized>form.device.reset.no.devices</p>' +
-                '      </div>' +
-                '    </div>' +
-                '    <div class="form-group">' +
-                '      <div class="col-sm-offset-3 col-sm-9">' +
-                '        <button type="button" class="btn btn-primary" ng-click="confirm()" ng-disabled="!selectedDevice" localized>button.ok</button>' +
-                '        <button type="button" class="btn btn-default" ng-click="closeModal()" localized>button.cancel</button>' +
-                '      </div>' +
-                '    </div>' +
-                '  </form>' +
-                '</div>';
-            $timeout(function () {
+            var doOpen = function () {
                 try {
                     var modalInstance = modalSvc.open({
-                        template: resetModalTemplate,
+                        template: resetModalTemplateInline,
                         controller: 'DeviceResetModalController',
                         size: 'sm',
                         resolve: {
@@ -1026,13 +1058,33 @@ angular.module('headwind-kiosk')
                     });
                     if (modalInstance && modalInstance.result) {
                         modalInstance.result.then(function () {
-                            $scope.search();
-                        }, function () {});
+                            if ($scope.search) $scope.search();
+                        }, function () {}).catch(function (err) {
+                            if (typeof console !== 'undefined' && console.error) {
+                                console.error('DeviceReset modal result error:', err);
+                            }
+                        });
                     }
                 } catch (e) {
-                    alertService.error(localization.localize('error.device.reset'));
+                    if (typeof console !== 'undefined' && console.error) {
+                        console.error('DeviceReset modal error:', e);
+                    }
+                    if (alertService && alertService.error) {
+                        alertService.error('Erro ao abrir o modal de reset. Veja o console.');
+                    }
                 }
-            }, 0);
+            };
+            $timeout(doOpen, 0);
+        };
+
+        DeviceResetModalOpener.setOpener($scope.openDeviceResetModal);
+
+        $rootScope.$on('openDeviceResetModal', function (event, preselectedDevice) {
+            $scope.openDeviceResetModal(preselectedDevice);
+        });
+
+        $scope.requestDeviceResetModal = function (device) {
+            $scope.openDeviceResetModal(device || null);
         };
 
         $scope.notifyPluginOnDevice = function (plugin, device) {
@@ -1134,88 +1186,168 @@ angular.module('headwind-kiosk')
             $modalInstance.dismiss();
         }
     })
-    .controller('DeviceResetModalController', ['$scope', '$injector', '$http', 'deviceService', 'alertService', 'localization', 'devices', 'preselectedDevice',
-        function ($scope, $injector, $http, deviceService, alertService, localization, devices, preselectedDevice) {
-            var modalInstance;
-            try {
-                modalInstance = $injector.get('$uibModalInstance');
-            } catch (e) {
-                modalInstance = $injector.get('$modalInstance');
+    .controller('DeviceResetModalController', [
+        '$scope', '$modalInstance', '$uibModalInstance', '$http', '$timeout', '$interval', 'deviceService', 'alertService', 'localization', 'devices', 'preselectedDevice',
+        function ($scope, $modalInstance, $uibModalInstance, $http, $timeout, $interval, deviceService, alertService, localization, devices, preselectedDevice) {
+        var modalInstance = $modalInstance || $uibModalInstance;
+        var PUSH_DELAY_SEC = 3;
+        $scope.devices = devices || [];
+        $scope.selectedDevice = preselectedDevice || null;
+        $scope.errorMessage = null;
+        $scope.resetScheduled = false;
+        $scope.sendingCountdown = PUSH_DELAY_SEC;
+        $scope.sendingProgress = 0;
+
+        function getDeviceId(device) {
+            if (device == null) return null;
+            if (typeof device === 'number' && !isNaN(device)) return Number(device);
+            if (typeof device === 'string' && device.trim() !== '' && !isNaN(Number(device))) return Number(device);
+            var id = device.id != null ? device.id : (device.deviceId != null ? device.deviceId : null);
+            if (id != null) return Number(id);
+            var list = $scope.devices || [];
+            for (var i = 0; i < list.length; i++) {
+                if (list[i] === device && list[i].id != null) return Number(list[i].id);
+                if (list[i] && device.number && list[i].number === device.number && list[i].id != null) return Number(list[i].id);
             }
-            $scope.devices = devices || [];
-            $scope.selectedDevice = preselectedDevice || null;
-            $scope.errorMessage = null;
-
-            function getDeviceId(device) {
-                if (device == null) return null;
-                if (typeof device === 'number' && !isNaN(device)) return Number(device);
-                if (typeof device === 'string' && device.trim() !== '' && !isNaN(Number(device))) return Number(device);
-                var id = device.id != null ? device.id : (device.deviceId != null ? device.deviceId : null);
-                return id != null ? Number(id) : null;
-            }
-
-            $scope.deviceLabel = function (d) {
-                if (!d) return '';
-                var desc = (d.description && d.description.trim()) ? d.description.trim() : '';
-                return desc ? (d.number + ' - ' + desc) : (d.number || 'ID ' + d.id);
-            };
-
-            function getFullDevice(device) {
-                if (!device) return null;
-                if (typeof device === 'object' && device.id != null) return device;
-                var id = getDeviceId(device);
-                if (id == null) return null;
-                for (var i = 0; i < $scope.devices.length; i++) {
-                    if ($scope.devices[i].id === id) return $scope.devices[i];
+            if (typeof device === 'object') {
+                var keys = ['id', 'deviceId', 'pk', 'device_id'];
+                for (var k = 0; k < keys.length; k++) {
+                    var v = device[keys[k]];
+                    if (v != null && !isNaN(Number(v))) return Number(v);
                 }
-                return null;
             }
+            return null;
+        }
 
-            function onFlagSetSuccess() {
-                alertService.success(localization.localize('success.device.reset.requested'));
-                modalInstance.close();
+        function sendConfigUpdatedPush(deviceNumber) {
+            if (!deviceNumber) return;
+            $http.post('rest/plugins/push/private/send', {
+                scope: 'device',
+                deviceNumber: deviceNumber,
+                messageType: 'configUpdated',
+                payload: ''
+            }, { headers: { 'Content-Type': 'application/json' } }).then(function () {}, function () {});
+        }
+
+        function onFlagSetSuccess(deviceNumber) {
+            if (alertService && alertService.showAlertMessage) {
+                alertService.showAlertMessage(localization.localize('success.device.reset.requested'));
             }
+            modalInstance.close();
+        }
 
-            $scope.confirm = function () {
-                var device = $scope.selectedDevice;
-                var deviceId = getDeviceId(device);
-                if (deviceId == null || isNaN(deviceId) || deviceId === '') {
-                    alertService.error(localization.localize('form.device.reset.select.device'));
-                    return;
+        function startSendAnimationAndPush(deviceNumber) {
+            $scope.resetScheduled = true;
+            $scope.sendingCountdown = PUSH_DELAY_SEC;
+            $scope.sendingProgress = 0;
+            var elapsedMs = 0;
+            var tickMs = 100;
+            var totalMs = PUSH_DELAY_SEC * 1000;
+            var tick = $interval(function () {
+                elapsedMs += tickMs;
+                var secLeft = Math.ceil((totalMs - elapsedMs) / 1000);
+                $scope.sendingCountdown = Math.max(0, secLeft);
+                $scope.sendingProgress = Math.min(100, (elapsedMs / totalMs) * 100);
+                if (elapsedMs >= totalMs) {
+                    $interval.cancel(tick);
+                    sendConfigUpdatedPush(deviceNumber);
+                    $timeout(function () {
+                        onFlagSetSuccess(deviceNumber);
+                    }, 200);
                 }
-                deviceId = Number(deviceId);
-                $scope.errorMessage = null;
-                var urlPath = 'rest/plugins/devicereset/private/reset/' + deviceId;
-                var body = { deviceId: deviceId };
-                $http.put(urlPath, body, { headers: { 'Content-Type': 'application/json' } }).then(
-                    function () {
-                        onFlagSetSuccess();
-                    },
-                    function (err) {
-                        if (err && err.status === 500) {
-                            var fullDevice = getFullDevice(device);
-                            if (!fullDevice) {
-                                $scope.errorMessage = localization.localize('error.device.reset');
-                                return;
-                            }
-                            var deviceForUpdate = angular.copy(fullDevice);
-                            deviceForUpdate.pendingFactoryReset = true;
-                            deviceService.updateDevice(deviceForUpdate, function () {
-                                onFlagSetSuccess();
-                            }, function () {
-                                $scope.errorMessage = localization.localize('error.device.reset');
-                            });
-                        } else {
-                            $scope.errorMessage = localization.localize('error.device.reset');
-                        }
+            }, tickMs);
+        }
+
+        $scope.deviceLabel = function (d) {
+            if (!d) return '';
+            var desc = (d.description && d.description.trim()) ? d.description.trim() : '';
+            return desc ? (d.number + ' - ' + desc) : (d.number || 'ID ' + d.id);
+        };
+
+        function showAlert(msg) {
+            if (alertService && alertService.showAlertMessage) {
+                alertService.showAlertMessage(msg);
+            } else if (alertService && alertService.error) {
+                alertService.error(msg);
+            }
+        }
+
+        $scope.confirm = function () {
+            var device = $scope.selectedDevice;
+            if (!device) {
+                showAlert(localization.localize('form.device.reset.select.device'));
+                return;
+            }
+            var deviceId = getDeviceId(device);
+            if (deviceId == null || isNaN(deviceId)) {
+                showAlert(localization.localize('form.device.reset.select.device'));
+                return;
+            }
+            deviceId = Number(deviceId);
+            var deviceNumber = (device && typeof device === 'object' && device.number != null && (device.number + '').trim()) ? (device.number + '').trim() : null;
+            if (!deviceNumber && deviceId && $scope.devices && $scope.devices.length) {
+                for (var j = 0; j < $scope.devices.length; j++) {
+                    if ($scope.devices[j] && Number($scope.devices[j].id) === deviceId && $scope.devices[j].number) {
+                        deviceNumber = ($scope.devices[j].number + '').trim();
+                        break;
                     }
-                );
-            };
+                }
+            }
+            $scope.errorMessage = null;
+            var urlPath = 'rest/plugins/devicereset/private/reset/' + deviceId;
+            var body = { deviceId: deviceId };
+            $http.put(urlPath, body, { headers: { 'Content-Type': 'application/json' } }).then(function () {
+                startSendAnimationAndPush(deviceNumber);
+            }, function (err) {
+                if (err && err.status === 500) {
+                    var fullDevice = getFullDeviceFromList(deviceId);
+                    if (fullDevice) {
+                        var deviceForUpdate = buildDeviceForUpdate(fullDevice);
+                        deviceForUpdate.pendingFactoryReset = true;
+                        deviceService.updateDevice(deviceForUpdate, function () {
+                            startSendAnimationAndPush(deviceNumber);
+                        }, function () {
+                            $scope.errorMessage = localization.localize('error.device.reset');
+                        });
+                    } else {
+                        $scope.errorMessage = localization.localize('error.device.reset');
+                    }
+                } else {
+                    $scope.errorMessage = localization.localize('error.device.reset');
+                }
+            });
 
-            $scope.closeModal = function () {
-                modalInstance.dismiss();
-            };
-        }])
+            function getFullDeviceFromList(id) {
+                var list = $scope.devices || [];
+                for (var i = 0; i < list.length; i++) {
+                    if (list[i] && Number(list[i].id) === Number(id)) return list[i];
+                }
+                return (device && typeof device === 'object') ? device : null;
+            }
+
+            function buildDeviceForUpdate(d) {
+                var out = {
+                    id: d.id,
+                    number: d.number || '',
+                    description: d.description != null ? d.description : '',
+                    configurationId: d.configurationId != null ? d.configurationId : (d.configuration && d.configuration.id != null ? d.configuration.id : null),
+                    imei: d.imei != null ? d.imei : '',
+                    phone: d.phone != null ? d.phone : '',
+                    custom1: d.custom1 != null ? d.custom1 : '',
+                    custom2: d.custom2 != null ? d.custom2 : '',
+                    custom3: d.custom3 != null ? d.custom3 : '',
+                    oldNumber: d.oldNumber != null ? d.oldNumber : '',
+                    fastSearch: d.fastSearch != null ? d.fastSearch : '',
+                    groups: d.groups || []
+                };
+                return out;
+            }
+        };
+
+        $scope.closeModal = function () {
+            modalInstance.dismiss();
+        };
+    }])
     .controller('DeviceModalController',
         function ($scope, $modalInstance, deviceService, configurationService, groupService, device, settings,
                   localization, authService, confirmModal) {
