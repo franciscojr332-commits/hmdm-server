@@ -155,7 +155,7 @@ angular.module('headwind-kiosk')
         };
 
         $scope.toggled = function (open) {
-            $log.log('Dropdown is now: ', open);
+            // dropdown state (no $log - not injected)
         };
 
         $scope.toggleDropdown = function ($event) {
