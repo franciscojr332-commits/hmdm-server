@@ -31,22 +31,22 @@
 }
 
 .configuration-hint {
-    color: #a0a0a0;
+    color: var(--hmdm-text-muted, #475569);
 }
 
 .list-desc {
-    color: #888;
+    color: var(--hmdm-text-muted, #475569);
     font-size: 13px;
 }
 
 .field-hint {
-    color: #888;
+    color: var(--hmdm-text-muted, #475569);
     font-size: 13px;
     margin: 5px 0 15px 0;
 }
 
 .field-warning {
-    color: red;
+    color: #a94442;
     font-size: 13px;
     margin: 2px 0 5px 0;
 }
@@ -89,8 +89,9 @@
 }
 
 .header {
-    height: 50px;
-    background-color: #7a9ab9;
+    height: var(--hmdm-header-h, 56px);
+    background-color: var(--hmdm-header-bg, #171717);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
 .navbar-nav .expiry-warning {
@@ -109,7 +110,7 @@
 
 .login-logo .logo {
     font-size: 30px;
-    color: #4c788c;
+    color: var(--hmdm-accent, #D4AF37);
 }
 
 .login-footer {
@@ -119,11 +120,11 @@
     right: 0;
     width: 100%;
     text-align: center;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid var(--hmdm-border, #E5E5E5);
     padding: 12px 16px;
     font-size: 0.8125rem;
-    color: #6c757d;
-    background: #fff;
+    color: var(--hmdm-text-muted, #475569);
+    background: var(--hmdm-bg, #fff);
 }
 
 /* ========== Login page: escopo único .login-page (sem conflito com globais) ========== */
@@ -134,7 +135,7 @@
     justify-content: center;
     padding: 24px 20px 88px;
     box-sizing: border-box;
-    background: #f5f6f8;
+    background: var(--hmdm-surface, #F5F5F5);
 }
 
 .login-page .login-wrapper {
@@ -169,17 +170,17 @@
 .login-page .login-page-logo .login-page-logo-text {
     font-size: 1.25rem;
     font-weight: 600;
-    color: #2c3e50;
+    color: var(--hmdm-primary, #171717);
     line-height: 1.3;
 }
 
 /* Card estilo SaaS */
 .login-page .login-card {
     width: 100%;
-    border-radius: 12px;
+    border-radius: var(--hmdm-radius, 6px);
     overflow: visible;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-    border: 1px solid #e8eaed;
+    border: 1px solid var(--hmdm-border, #E5E5E5);
     margin: 0;
 }
 
@@ -194,21 +195,21 @@
     padding: 28px 24px 24px;
     min-height: 280px;
     box-sizing: border-box;
-    background: #fff;
+    background: var(--hmdm-bg, #fff);
 }
 
 .login-page .login-card-title {
     margin: 0 0 4px 0;
     font-size: 1.5rem;
     font-weight: 600;
-    color: #1a1a1a;
+    color: var(--hmdm-primary, #171717);
     line-height: 1.3;
 }
 
 .login-page .login-card-subtitle {
     margin: 0 0 24px 0;
     font-size: 0.875rem;
-    color: #6c757d;
+    color: var(--hmdm-text-muted, #475569);
     line-height: 1.4;
 }
 
@@ -221,7 +222,7 @@
     margin-bottom: 6px;
     font-size: 0.875rem;
     font-weight: 500;
-    color: #374151;
+    color: var(--hmdm-primary, #171717);
 }
 
 .login-page .login-form .form-control {
@@ -231,22 +232,22 @@
     padding: 12px 14px;
     font-size: 1rem;
     line-height: 1.5;
-    color: #1a1a1a;
-    background: #fff;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
+    color: var(--hmdm-text, #171717);
+    background: var(--hmdm-bg, #fff);
+    border: 1px solid var(--hmdm-border, #E5E5E5);
+    border-radius: var(--hmdm-radius-sm, 4px);
     box-sizing: border-box;
-    transition: border-color 0.15s, box-shadow 0.15s;
+    transition: border-color var(--hmdm-transition), box-shadow var(--hmdm-transition);
 }
 
 .login-page .login-form .form-control::placeholder {
-    color: #9ca3af;
+    color: var(--hmdm-text-muted, #475569);
 }
 
 .login-page .login-form .form-control:focus {
     outline: none;
-    border-color: #4c788c;
-    box-shadow: 0 0 0 3px rgba(76, 120, 140, 0.2);
+    border-color: var(--hmdm-accent, #D4AF37);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
 }
 
 .login-page .login-form .form-control:focus-visible {
@@ -264,12 +265,13 @@
 }
 
 .login-page .login-links .action-link {
-    color: #4c788c;
+    color: var(--hmdm-accent, #D4AF37);
     text-decoration: none;
 }
 
 .login-page .login-links .action-link:hover {
     text-decoration: underline;
+    color: var(--hmdm-accent-hover, #c19d2e);
 }
 
 .login-page .login-submit {
@@ -287,7 +289,7 @@
 
 .login-page .login-submit:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(76, 120, 140, 0.35);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.35);
 }
 
 /* Responsivo: card e logo em viewports pequenos */
@@ -305,43 +307,64 @@
 }
 
 .header .logo-text {
-    margin-top: 10px;
-    padding-left: 15px;
-    color: #afd0df;
-    font-size: 20px;
+    margin-top: 14px;
+    padding-left: var(--hmdm-space-md, 16px);
+    color: var(--hmdm-header-text);
+    font-size: 18px;
+    font-weight: 600;
 }
 
-.header .logo-text a, .header .logo-text a:active {
+.header .logo-text a,
+.header .logo-text a:active {
     text-decoration: none;
-    color: #afd0df !important;
-    font-size: 20px !important;
+    color: var(--hmdm-header-text) !important;
+    font-size: 18px !important;
+    font-weight: 600;
+    transition: color var(--hmdm-transition, 150ms ease);
 }
 
 .header .logo-text a:hover {
     text-decoration: none;
-    color: #d0e3eb !important;
+    color: var(--hmdm-header-text-hover, #e5e5e5) !important;
 }
 
 .header a {
-    color: #ffffff !important;
+    color: var(--hmdm-header-text) !important;
+    transition: color var(--hmdm-transition);
 }
 
-.header .open a, .header .open .dropdown-menu {
-    background-color: #7a9ab9 !important;
+.header .open a {
+    background-color: var(--hmdm-header-bg, #171717) !important;
 }
 
 .header .open .dropdown-menu {
+    background-color: var(--hmdm-bg, #fff) !important;
+    border: 1px solid var(--hmdm-border);
     border-top: none;
-    top: 49px;
+    top: calc(var(--hmdm-header-h, 56px) - 1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-radius: 0 0 var(--hmdm-radius, 6px) var(--hmdm-radius);
 }
 
-.header .selected, .header .open .dropdown-menu a:hover {
-    font-weight: bolder;
+.header .open .dropdown-menu a {
+    color: var(--hmdm-text) !important;
+    padding: 10px 16px;
+}
+
+.header .open .dropdown-menu a:hover {
+    background-color: var(--hmdm-surface) !important;
+    color: var(--hmdm-primary) !important;
+}
+
+.header .selected,
+.header .open .dropdown-menu a:hover {
+    font-weight: 500;
 }
 
 .content-wrapper {
-    padding: 70px 0px 0px 0px;
+    padding: calc(var(--hmdm-header-h, 56px) + 16px) 16px 24px 16px;
     height: 100%;
+    min-height: 100vh;
 }
 
 .width-1000 {
@@ -378,11 +401,13 @@
 }
 
 .btn-promo {
-    background-color: #7a9ab9;
+    background-color: var(--hmdm-accent, #D4AF37);
+    color: var(--hmdm-primary, #171717) !important;
 }
 
 .btn-promo:hover {
-    background-color: #9bb4cc;
+    background-color: var(--hmdm-accent-hover, #c19d2e);
+    color: var(--hmdm-primary, #171717) !important;
 }
 
 .fullscreen {
@@ -391,8 +416,11 @@
 }
 
 .administration {
-    max-width: 1800px;
-    margin: 0px 50px;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--hmdm-space-md, 16px);
+    padding-right: var(--hmdm-space-md, 16px);
 }
 
 .map-wrapper {
@@ -438,25 +466,27 @@
 }
 
 .success-header {
-    background-color: #dff0d8;
+    background-color: #d4edda;
+    border-color: var(--hmdm-border);
 }
 
 .file-checkbox {
     margin-right: 10px !important;
 }
 
-.success{
+.success {
     text-align: center;
-    color: #3c763d;
+    color: #155724;
 }
 
-.error{
+.error {
     text-align: center;
     color: #a94442;
 }
 
 .error-header {
-    background-color: #f2dede;
+    background-color: #f8d7da;
+    border-color: var(--hmdm-border);
 }
 
 .profile form .change-title {
@@ -476,13 +506,13 @@ td.app-desc {
 }
 
 td.app-desc span {
-    color: #888;
+    color: var(--hmdm-text-muted, #475569);
 }
 
 .devices {
     width: 300px;
     height: 100%;
-    background-color: #f8f8f8;
+    background-color: var(--hmdm-surface, #F5F5F5);
     float: left;
 }
 

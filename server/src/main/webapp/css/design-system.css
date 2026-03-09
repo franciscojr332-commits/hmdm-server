@@ -1,0 +1,392 @@
+/**
+ * HMDM Server — Design system base
+ * Minimal, high-contrast, Inter typography, CSS variables for theming
+ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Colors — minimal palette */
+  --hmdm-primary: #171717;
+  --hmdm-secondary: #404040;
+  --hmdm-accent: #D4AF37;
+  --hmdm-accent-hover: #c19d2e;
+  --hmdm-bg: #FFFFFF;
+  --hmdm-surface: #F5F5F5;
+  --hmdm-border: #E5E5E5;
+  --hmdm-text: #171717;
+  --hmdm-text-muted: #475569;
+  --hmdm-header-bg: #171717;
+  --hmdm-header-text: #FFFFFF;
+  --hmdm-header-text-hover: #e5e5e5;
+  /* Spacing */
+  --hmdm-space-xs: 4px;
+  --hmdm-space-sm: 8px;
+  --hmdm-space-md: 16px;
+  --hmdm-space-lg: 24px;
+  --hmdm-space-xl: 32px;
+  --hmdm-header-h: 56px;
+  --hmdm-radius: 6px;
+  --hmdm-radius-sm: 4px;
+  /* Typography */
+  --hmdm-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --hmdm-transition: 150ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --hmdm-transition: 0ms;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--hmdm-font);
+  font-size: 14px;
+  color: var(--hmdm-text);
+  background-color: var(--hmdm-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Override Bootstrap defaults to use design tokens where applicable */
+.btn-primary,
+.btn-primary:focus {
+  background-color: var(--hmdm-accent);
+  border-color: var(--hmdm-accent);
+  color: var(--hmdm-primary);
+  font-weight: 500;
+  transition: background-color var(--hmdm-transition), border-color var(--hmdm-transition);
+}
+.btn-primary:hover,
+.btn-primary:active {
+  background-color: var(--hmdm-accent-hover);
+  border-color: var(--hmdm-accent-hover);
+  color: var(--hmdm-primary);
+}
+
+.form-control:focus {
+  border-color: var(--hmdm-accent);
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+}
+
+a {
+  color: var(--hmdm-accent);
+  transition: color var(--hmdm-transition);
+}
+a:hover {
+  color: var(--hmdm-accent-hover);
+}
+
+/* Content area respects fixed header */
+.content-wrapper {
+  padding-top: calc(var(--hmdm-header-h) + var(--hmdm-space-md));
+  padding-left: var(--hmdm-space-md);
+  padding-right: var(--hmdm-space-md);
+  padding-bottom: var(--hmdm-space-lg);
+  min-height: 100vh;
+}
+
+/* Container max-widths */
+.width-1000 {
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.width-700 {
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.administration {
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--hmdm-space-md);
+  padding-right: var(--hmdm-space-md);
+}
+
+/* Page titles — minimal */
+.hmdm-page-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--hmdm-primary);
+  margin-bottom: var(--hmdm-space-md);
+}
+
+/* Cards — subtle surface */
+.hmdm-card {
+  background: var(--hmdm-bg);
+  border: 1px solid var(--hmdm-border);
+  border-radius: var(--hmdm-radius);
+  padding: var(--hmdm-space-lg);
+}
+
+/* Clickable elements */
+.btn,
+a[ng-click],
+[ng-click],
+.dropdown-toggle {
+  cursor: pointer;
+}
+
+/* Navbar right alignment and spacing */
+.header .navbar-right {
+  margin-right: var(--hmdm-space-sm);
+}
+.header .navbar-right > li > a {
+  padding: 0 var(--hmdm-space-md);
+  line-height: var(--hmdm-header-h);
+  color: var(--hmdm-header-text) !important;
+}
+.header .username-label {
+  font-weight: 500;
+}
+.header .caret.username-caret {
+  border-top-color: var(--hmdm-header-text);
+  margin-left: 4px;
+}
+.header #headerDateTime {
+  color: var(--hmdm-header-text);
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+/* Tables — minimal, readable */
+.table {
+  font-size: 14px;
+}
+.table > thead > tr > th {
+  font-weight: 600;
+  color: var(--hmdm-primary);
+  border-bottom: 1px solid var(--hmdm-border);
+  padding: 12px 16px;
+}
+.table > tbody > tr > td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--hmdm-border);
+  vertical-align: middle;
+}
+.table > tbody > tr:hover > td {
+  background-color: var(--hmdm-surface);
+}
+.table .btn-default {
+  border-color: var(--hmdm-border);
+  color: var(--hmdm-secondary);
+  transition: border-color var(--hmdm-transition), color var(--hmdm-transition);
+}
+.table .btn-default:hover {
+  border-color: var(--hmdm-accent);
+  color: var(--hmdm-primary);
+}
+
+/* Main tab navigation — minimal */
+.content-wrapper .tabset {
+  margin-top: 0;
+}
+.content-wrapper .nav-tabs {
+  border-bottom: 1px solid var(--hmdm-border);
+  padding-bottom: 0;
+  margin-bottom: var(--hmdm-space-lg);
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+.content-wrapper .nav-tabs > li {
+  float: none;
+  display: inline-block;
+  margin-bottom: -1px;
+}
+.content-wrapper .nav-tabs > li > a {
+  padding: 12px 16px;
+  color: var(--hmdm-text-muted);
+  font-weight: 500;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: var(--hmdm-radius-sm) var(--hmdm-radius-sm) 0 0;
+  transition: color var(--hmdm-transition), border-color var(--hmdm-transition);
+}
+.content-wrapper .nav-tabs > li > a:hover {
+  color: var(--hmdm-primary);
+  background: var(--hmdm-surface);
+  border-color: transparent;
+}
+.content-wrapper .nav-tabs > li.active > a,
+.content-wrapper .nav-tabs > li.active > a:hover,
+.content-wrapper .nav-tabs > li.active > a:focus {
+  color: var(--hmdm-primary);
+  background: transparent;
+  border-bottom-color: var(--hmdm-accent);
+}
+.content-wrapper .nav-tabs .dropdown-menu {
+  border: 1px solid var(--hmdm-border);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border-radius: var(--hmdm-radius);
+}
+.content-wrapper .nav-tabs .dropdown-menu a {
+  color: var(--hmdm-text) !important;
+  padding: 10px 16px;
+}
+.content-wrapper .nav-tabs .dropdown-menu a:hover {
+  background: var(--hmdm-surface);
+  color: var(--hmdm-primary) !important;
+}
+
+/* ========== Padrão global: todas as views ========== */
+.hmdm-view {
+  font-family: var(--hmdm-font);
+  color: var(--hmdm-text);
+}
+.hmdm-view .form-group {
+  margin-bottom: var(--hmdm-space-md);
+}
+.hmdm-view .control-label,
+.hmdm-view label {
+  color: var(--hmdm-primary);
+  font-weight: 500;
+}
+.hmdm-view .form-control {
+  border-color: var(--hmdm-border);
+  border-radius: var(--hmdm-radius-sm);
+  transition: border-color var(--hmdm-transition), box-shadow var(--hmdm-transition);
+}
+.hmdm-view .form-control:focus {
+  border-color: var(--hmdm-accent);
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+}
+.hmdm-view select.form-control {
+  cursor: pointer;
+}
+
+/* Modais — padrão do projeto */
+.modal-content {
+  border: 1px solid var(--hmdm-border);
+  border-radius: var(--hmdm-radius);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+.modal-header {
+  border-bottom: 1px solid var(--hmdm-border);
+  padding: var(--hmdm-space-md) var(--hmdm-space-lg);
+  background: var(--hmdm-surface);
+  border-radius: var(--hmdm-radius) var(--hmdm-radius) 0 0;
+}
+.modal-header .modal-title {
+  font-weight: 600;
+  color: var(--hmdm-primary);
+  font-size: 1.125rem;
+}
+.modal-body {
+  padding: var(--hmdm-space-lg);
+  color: var(--hmdm-text);
+}
+.modal-footer {
+  border-top: 1px solid var(--hmdm-border);
+  padding: var(--hmdm-space-md) var(--hmdm-space-lg);
+  background: var(--hmdm-surface);
+  border-radius: 0 0 var(--hmdm-radius) var(--hmdm-radius);
+}
+.modal-footer .btn-default {
+  border-color: var(--hmdm-border);
+  color: var(--hmdm-secondary);
+}
+.modal-footer .btn-default:hover {
+  border-color: var(--hmdm-accent);
+  color: var(--hmdm-primary);
+}
+.modal-footer .btn-primary {
+  background-color: var(--hmdm-accent);
+  border-color: var(--hmdm-accent);
+  color: var(--hmdm-primary);
+}
+
+/* Alertas fixos (toast) */
+.alert {
+  font-family: var(--hmdm-font);
+  border-radius: var(--hmdm-radius);
+  border: 1px solid var(--hmdm-border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+.alert-success {
+  background: #d4edda;
+  color: #155724;
+  border-color: #c3e6cb;
+}
+.alert-danger,
+.alert-error {
+  background: #f8d7da;
+  color: #721c24;
+  border-color: #f5c6cb;
+}
+.alert-info {
+  background: #d1ecf1;
+  color: #0c5460;
+  border-color: #bee5eb;
+}
+
+/* Paginação */
+.pagination > li > a,
+.pagination > li > span {
+  color: var(--hmdm-secondary);
+  border-color: var(--hmdm-border);
+  transition: color var(--hmdm-transition), border-color var(--hmdm-transition), background var(--hmdm-transition);
+}
+.pagination > li > a:hover,
+.pagination > li > span:hover {
+  color: var(--hmdm-primary);
+  border-color: var(--hmdm-accent);
+  background: var(--hmdm-surface);
+}
+.pagination > .active > a,
+.pagination > .active > a:hover,
+.pagination > .active > span,
+.pagination > .active > span:hover {
+  background-color: var(--hmdm-accent);
+  border-color: var(--hmdm-accent);
+  color: var(--hmdm-primary);
+}
+
+/* Breadcrumb */
+.breadcrumb {
+  background: transparent;
+  color: var(--hmdm-text-muted);
+  font-size: 0.875rem;
+  padding: 0 0 var(--hmdm-space-sm);
+}
+.breadcrumb a {
+  color: var(--hmdm-accent);
+}
+.breadcrumb > .active {
+  color: var(--hmdm-primary);
+}
+
+/* Botões padrão (btn-default) em todo o app */
+.btn-default {
+  border-color: var(--hmdm-border);
+  color: var(--hmdm-secondary);
+  transition: border-color var(--hmdm-transition), color var(--hmdm-transition), background var(--hmdm-transition);
+}
+.btn-default:hover {
+  border-color: var(--hmdm-accent);
+  color: var(--hmdm-primary);
+  background: var(--hmdm-surface);
+}
+
+/* Painéis (panel) — signup, recovery, reset, 2FA, signupComplete */
+.hmdm-view .panel-default {
+  border-color: var(--hmdm-border);
+  border-radius: var(--hmdm-radius);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+.hmdm-view .panel-default .panel-heading {
+  background: var(--hmdm-surface);
+  border-bottom: 1px solid var(--hmdm-border);
+  color: var(--hmdm-primary);
+  font-weight: 500;
+}
+.hmdm-view .panel-default .panel-body {
+  background: var(--hmdm-surface);
+  color: var(--hmdm-text);
+}
