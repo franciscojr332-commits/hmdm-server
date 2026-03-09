@@ -20,11 +20,11 @@
                        localized-placeholder="plugin.devicelog.settings.form.rule.device.placeholder"
                        autocomplete="off"
                        class="form-control"
-                       typeahead="app for app in getDevices($viewValue)"
-                       typeahead-loading="loadingDevices"
-                       typeahead-wait-ms="300"
-                       typeahead-focus-first="false"
-                       typeahead-no-results="noResults"/>
+                       uib-typeahead="app for app in getDevices($viewValue)"
+                       uib-typeahead-loading="loadingDevices"
+                       uib-typeahead-wait-ms="300"
+                       uib-typeahead-focus-first="false"
+                       uib-typeahead-no-results="noResults"/>
             </div>
             <div class="cols-sm-3">
                 <button type='submit' class='btn btn-default' ng-click='addNewDevice()'

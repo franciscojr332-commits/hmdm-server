@@ -277,7 +277,7 @@ angular.module('plugin-devicelog', ['ngResource', 'ui.bootstrap', 'ui.router', '
         });
 
     })
-    .controller('PluginDeviceLogSettingsController', function ($scope, $rootScope, $modal,
+    .controller('PluginDeviceLogSettingsController', function ($scope, $rootScope, $uibModal,
                                                                confirmModal, localization, pluginDeviceLogService) {
         $scope.successMessage = undefined;
         $scope.errorMessage = undefined;
@@ -334,7 +334,7 @@ angular.module('plugin-devicelog', ['ngResource', 'ui.bootstrap', 'ui.router', '
         };
 
         $scope.editRule = function (rule) {
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'app/components/plugins/devicelog/views/rule.modal.html',
                 controller: 'PluginDeviceLogEditRuleController',
                 resolve: {
@@ -361,7 +361,7 @@ angular.module('plugin-devicelog', ['ngResource', 'ui.bootstrap', 'ui.router', '
             });
         };
     })
-    .controller('PluginDeviceLogEditRuleController', function ($scope, $modal, $modalInstance, $http,
+    .controller('PluginDeviceLogEditRuleController', function ($scope, $uibModal, $uibModalInstance, $http,
                                                                localization, pluginDeviceLogService, rule) {
 
         var ruleCopy = {};
@@ -421,7 +421,7 @@ angular.module('plugin-devicelog', ['ngResource', 'ui.bootstrap', 'ui.router', '
         };
 
         $scope.editRuleDevices = function () {
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'app/components/plugins/devicelog/views/ruleDevices.modal.html',
                 controller: 'PluginDeviceLogEditRuleDevicesController',
                 resolve: {
@@ -437,7 +437,7 @@ angular.module('plugin-devicelog', ['ngResource', 'ui.bootstrap', 'ui.router', '
         };
 
         $scope.closeModal = function () {
-            $modalInstance.dismiss();
+            $uibModalInstance.dismiss();
         };
 
         $scope.save = function () {
@@ -459,7 +459,7 @@ angular.module('plugin-devicelog', ['ngResource', 'ui.bootstrap', 'ui.router', '
                 pluginDeviceLogService.saveSettingsRule($scope.rule, function (response) {
                     $scope.saving = false;
                     if (response.status === 'OK') {
-                        $modalInstance.close(true);
+                        $uibModalInstance.close(true);
                     } else {
                         $scope.errorMessage = localization.localize(response.message);
                     }
@@ -538,7 +538,7 @@ angular.module('plugin-devicelog', ['ngResource', 'ui.bootstrap', 'ui.router', '
         }
 
     })
-    .controller('PluginDeviceLogEditRuleDevicesController', function ($scope, $modalInstance, $http,
+    .controller('PluginDeviceLogEditRuleDevicesController', function ($scope, $uibModalInstance, $http,
                               localization, pluginDeviceLogService, rule) {
 
         var ruleCopy = {};
@@ -605,11 +605,11 @@ angular.module('plugin-devicelog', ['ngResource', 'ui.bootstrap', 'ui.router', '
         };
 
         $scope.closeModal = function () {
-            $modalInstance.dismiss();
+            $uibModalInstance.dismiss();
         };
 
         $scope.save = function () {
-            $modalInstance.close($scope.rule.devices);
+            $uibModalInstance.close($scope.rule.devices);
         };
     })
     .run(function ($rootScope, $location, localization) {

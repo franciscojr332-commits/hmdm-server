@@ -29,13 +29,13 @@
                        autocomplete="off"
                        localized-placeholder="search.placeholder.application"
                        class="form-control"
-                       typeahead="app as (app.name + (app.version && app.version !== '0' ? ' ' + app.version : '')) for app in getApps($viewValue)"
-                       typeahead-loading="loadingApps"
-                       typeahead-wait-ms="300"
-                       typeahead-input-formatter="appLookupFormatter($model)"
-                       typeahead-focus-first="false"
-                       typeahead-on-select="onMainAppSelected($item)"
-                       typeahead-no-results="noResults">
+                       uib-typeahead="app as (app.name + (app.version && app.version !== '0' ? ' ' + app.version : '')) for app in getApps($viewValue)"
+                       uib-typeahead-loading="loadingApps"
+                       uib-typeahead-wait-ms="300"
+                       uib-typeahead-input-formatter="appLookupFormatter($model)"
+                       uib-typeahead-focus-first="false"
+                       uib-typeahead-on-select="onMainAppSelected($item)"
+                       uib-typeahead-no-results="noResults">
             </div>
         </div>
         <div class="form-group">

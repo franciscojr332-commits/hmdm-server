@@ -1,9 +1,9 @@
 // Localization completed
 angular.module('headwind-kiosk')
-    .factory('alertService', function ($modal, localization) {
+    .factory('alertService', function ($uibModal, localization) {
 
         var showAlert = function (message, callback, okButtonTextKey) {
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'app/shared/view/alert.html',
                 controller: 'AlertController',
                 resolve: {
@@ -37,10 +37,10 @@ angular.module('headwind-kiosk')
             }
         }
     })
-    .controller('AlertController', function ($scope, $modalInstance, message, okButtonTextKey) {
+    .controller('AlertController', function ($scope, $uibModalInstance, message, okButtonTextKey) {
         $scope.message = message;
         $scope.okButtonTextKey = okButtonTextKey;
         $scope.OK = function () {
-            $modalInstance.close();
+            $uibModalInstance.close();
         }
     });

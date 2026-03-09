@@ -50,7 +50,7 @@
             </div>
             <div class='col-sm-2  margin-bottom'>
                 <div class='min-padding date-picker date-picker-input'>
-                    <input class='form-control' datepicker-popup='{{dateFormat}}'
+                    <input class='form-control' uib-datepicker-popup='{{dateFormat}}'
                            localized-placeholder="search.placeholder.from"
                            ng-enter='initSearch()'
                            ng-model='additionalParams.dateFrom' is-open='openDatePickers.dateFrom' show-button-bar='false'
@@ -64,7 +64,7 @@
             </div>
             <div class='col-sm-2  margin-bottom'>
                 <div class='min-padding date-picker date-picker-input'>
-                    <input class='form-control' datepicker-popup='{{dateFormat}}'
+                    <input class='form-control' uib-datepicker-popup='{{dateFormat}}'
                            localized-placeholder="search.placeholder.to"
                            ng-enter='initSearch()'
                            ng-model='additionalParams.dateTo' is-open='openDatePickers.dateTo' show-button-bar='false'

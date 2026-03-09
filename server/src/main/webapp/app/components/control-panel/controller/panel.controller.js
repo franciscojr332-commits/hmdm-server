@@ -1,6 +1,6 @@
 // Localization completed
 angular.module('headwind-kiosk')
-    .controller('CustomersTabController', function ($scope, $rootScope, $state, $modal, alertService, confirmModal,
+    .controller('CustomersTabController', function ($scope, $rootScope, $state, $uibModal, alertService, confirmModal,
                                                     customerService, authService, $window, localization) {
         if (!authService.isSuperAdmin()) {
             $state.transitionTo( 'main' );
@@ -123,7 +123,7 @@ angular.module('headwind-kiosk')
 
         $scope.editCustomer = function (customer) {
 
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'app/components/main/view/modal/customer.html',
                 controller: 'CustomerModalController',
                 resolve: {
@@ -150,7 +150,7 @@ angular.module('headwind-kiosk')
         };
 
         $scope.changePassword = function (customer) {
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'app/components/control-panel/view/modal/password.html',
                 controller: 'CustomerPasswordModalController',
                 resolve: {
@@ -165,7 +165,7 @@ angular.module('headwind-kiosk')
             });
         }
     })
-    .controller("CustomerPasswordModalController", function ($scope, customer, alertService, userService, $modalInstance,
+    .controller("CustomerPasswordModalController", function ($scope, customer, alertService, userService, $uibModalInstance,
                                                      localization, settingsService, passwordService) {
         var resetMessages = function () {
             $scope.errorMessage = '';
@@ -194,7 +194,7 @@ angular.module('headwind-kiosk')
         });
 
         $scope.cancel = function () {
-            $modalInstance.close();
+            $uibModalInstance.close();
         };
 
         $scope.save = function () {
@@ -226,7 +226,7 @@ angular.module('headwind-kiosk')
 
                     if (response.status === 'OK') {
                         $scope.completeMessage = localization.localizeServerResponse(response);
-                        $modalInstance.close();
+                        $uibModalInstance.close();
                     } else if (response.status === 'ERROR') {
                         $scope.errorMessage = localization.localizeServerResponse(response);
                     }
@@ -237,7 +237,7 @@ angular.module('headwind-kiosk')
     })
     // *****************************************************************************************************************
     .controller('CustomerModalController',
-        function ($scope, $filter, $modalInstance, customerService, customer, alertService, configurationService, localization) {
+        function ($scope, $filter, $uibModalInstance, customerService, customer, alertService, configurationService, localization) {
 
             var copyCustomer = function (original) {
                 var copy = {};
@@ -356,7 +356,7 @@ angular.module('headwind-kiosk')
 
                 customerService.updateCustomer(request, function (response) {
                     if (response.status === 'OK') {
-                        $modalInstance.close();
+                        $uibModalInstance.close();
                         if (response.data && response.data['adminCredentials']) {
                             let localizedText = localization.localize('success.admin.created').replace('${adminCredentials}', response.data['adminCredentials']);
                             alertService.showAlertMessage(localizedText);
@@ -400,7 +400,7 @@ angular.module('headwind-kiosk')
             };
 
             $scope.closeModal = function () {
-                $modalInstance.dismiss();
+                $uibModalInstance.dismiss();
             }
         })
     // *****************************************************************************************************************
@@ -408,7 +408,7 @@ angular.module('headwind-kiosk')
         $scope.localization = localization;
     })
     // *****************************************************************************************************************
-    .controller('ControlPanelApplicationsTabController', function ($scope, $rootScope, $modal, confirmModal, applicationService,
+    .controller('ControlPanelApplicationsTabController', function ($scope, $rootScope, $uibModal, confirmModal, applicationService,
                                                                    alertService, $window, localization) {
         $scope.search = {};
 
@@ -460,7 +460,7 @@ angular.module('headwind-kiosk')
         };
 
         $scope.editApplication = function (application) {
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'app/components/main/view/modal/application.html',
                 controller: 'ApplicationModalController',
                 resolve: {

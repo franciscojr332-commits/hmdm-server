@@ -15,7 +15,7 @@ angular.module('headwind-kiosk')
             DeviceResetModalOpener.open(device || null);
         };
     })
-    .controller('DevicesTabController', function ($scope, $rootScope, $state, $modal, $uibModal, $injector, $interval, $cookies, $window, $filter, $timeout,
+    .controller('DevicesTabController', function ($scope, $rootScope, $state, $uibModal, $injector, $interval, $cookies, $window, $filter, $timeout,
                                                   DeviceResetModalOpener,
                                                   confirmModal, deviceService, groupService, settingsService, hintService,
                                                   authService, pluginService, configurationService, alertService,
@@ -899,7 +899,7 @@ angular.module('headwind-kiosk')
         };
 
         $scope.openBulkUpdateModal = function () {
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'app/components/main/view/modal/device.update.html',
                 controller: 'DeviceUpdateModalController',
                 resolve: {
@@ -915,7 +915,7 @@ angular.module('headwind-kiosk')
         };
 
         $scope.openBulkGroupModal = function () {
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'app/components/main/view/modal/device.group.html',
                 controller: 'DeviceGroupModalController',
                 resolve: {
@@ -948,7 +948,7 @@ angular.module('headwind-kiosk')
         };
 
         $scope.editDevice = function (device) {
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'app/components/main/view/modal/device.html',
                 controller: 'DeviceModalController',
                 resolve: {
@@ -1021,20 +1021,20 @@ angular.module('headwind-kiosk')
             if (preselected && devicesList.indexOf(preselected) === -1) {
                 devicesList.unshift(preselected);
             }
-            var modalSvc = $modal || $uibModal;
+            var modalSvc = $uibModal || $uibModal;
             if (!modalSvc || typeof modalSvc.open !== 'function') {
                 try {
                     modalSvc = $injector.get('$uibModal');
                 } catch (e1) {}
                 if (!modalSvc || typeof modalSvc.open !== 'function') {
                     try {
-                        modalSvc = $injector.get('$modal');
+                        modalSvc = $injector.get('$uibModal');
                     } catch (e2) {}
                 }
             }
             if (!modalSvc || typeof modalSvc.open !== 'function') {
                 if (typeof console !== 'undefined' && console.error) {
-                    console.error('DeviceReset: $modal/$uibModal não disponível');
+                    console.error('DeviceReset: $uibModal/$uibModal não disponível');
                 }
                 if (alertService && alertService.error) {
                     alertService.error('Modal de reset não disponível. Recarregue a página.');
@@ -1096,7 +1096,7 @@ angular.module('headwind-kiosk')
         };
 
         $scope.manageApplicationSettings = function (device) {
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'app/components/main/view/modal/device.applicationSettings.html',
                 controller: 'DeviceApplicationSettingsModalController',
                 size: 'lg',
@@ -1126,7 +1126,7 @@ angular.module('headwind-kiosk')
 
         $scope.init();
     })
-    .controller('DeviceUpdateModalController', function ($scope, $modalInstance, configurationService, deviceService, devices) {
+    .controller('DeviceUpdateModalController', function ($scope, $uibModalInstance, configurationService, deviceService, devices) {
         $scope.device = {};
 
         configurationService.getAllConfigurations(function (response) {
@@ -1144,15 +1144,15 @@ angular.module('headwind-kiosk')
 
             var device = {'ids': ids, configurationId: $scope.device.configurationId};
             deviceService.updateDevice(device, function () {
-                $modalInstance.close();
+                $uibModalInstance.close();
             });
         };
 
         $scope.closeModal = function () {
-            $modalInstance.dismiss();
+            $uibModalInstance.dismiss();
         }
     })
-    .controller('DeviceGroupModalController', function ($scope, $modalInstance, groupService, deviceService, devices) {
+    .controller('DeviceGroupModalController', function ($scope, $uibModalInstance, groupService, deviceService, devices) {
         $scope.device = {};
         $scope.groupAction = 'set';
 
@@ -1178,18 +1178,18 @@ angular.module('headwind-kiosk')
                 'groups': $scope.groupsSelection
             };
             deviceService.updateDeviceGroupBulk(device, function () {
-                $modalInstance.close();
+                $uibModalInstance.close();
             });
         };
 
         $scope.closeModal = function () {
-            $modalInstance.dismiss();
+            $uibModalInstance.dismiss();
         }
     })
     .controller('DeviceResetModalController', [
-        '$scope', '$modalInstance', '$uibModalInstance', '$http', '$timeout', '$interval', 'deviceService', 'alertService', 'localization', 'devices', 'preselectedDevice',
-        function ($scope, $modalInstance, $uibModalInstance, $http, $timeout, $interval, deviceService, alertService, localization, devices, preselectedDevice) {
-        var modalInstance = $modalInstance || $uibModalInstance;
+        '$scope', '$uibModalInstance', '$uibModalInstance', '$http', '$timeout', '$interval', 'deviceService', 'alertService', 'localization', 'devices', 'preselectedDevice',
+        function ($scope, $uibModalInstance, $uibModalInstance, $http, $timeout, $interval, deviceService, alertService, localization, devices, preselectedDevice) {
+        var modalInstance = $uibModalInstance || $uibModalInstance;
         var PUSH_DELAY_SEC = 3;
         $scope.devices = devices || [];
         $scope.selectedDevice = preselectedDevice || null;
@@ -1349,7 +1349,7 @@ angular.module('headwind-kiosk')
         };
     }])
     .controller('DeviceModalController',
-        function ($scope, $modalInstance, deviceService, configurationService, groupService, device, settings,
+        function ($scope, $uibModalInstance, deviceService, configurationService, groupService, device, settings,
                   localization, authService, confirmModal) {
 
             $scope.canEditDevice = authService.hasPermission('edit_devices');
@@ -1395,7 +1395,7 @@ angular.module('headwind-kiosk')
                 targetService(pathParams, request, function (response) {
                     $scope.loading = false;
                     if (response.status === 'OK') {
-                        $modalInstance.close();
+                        $uibModalInstance.close();
                     } else {
                         $scope.errorMessage = localization.localizeServerResponse(response);
                     }
@@ -1455,7 +1455,7 @@ angular.module('headwind-kiosk')
             };
 
             $scope.closeModal = function () {
-                $modalInstance.dismiss();
+                $uibModalInstance.dismiss();
             };
 
             configurationService.getAllConfigurations(function (response) {
@@ -1466,7 +1466,7 @@ angular.module('headwind-kiosk')
                 $scope.groups = response.data;
             });
         })
-    .controller('DeviceApplicationSettingsModalController', function ($scope, $modal, $modalInstance,
+    .controller('DeviceApplicationSettingsModalController', function ($scope, $uibModalInstance,
                                                                       localization, deviceService,
                                                                       applicationService, alertService,
                                                                       device) {
@@ -1535,7 +1535,7 @@ angular.module('headwind-kiosk')
         };
 
         $scope.addApplicationSetting = function () {
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'app/components/main/view/modal/applicationSetting.html',
                 controller: 'ApplicationSettingEditorController',
                 resolve: {
@@ -1558,7 +1558,7 @@ angular.module('headwind-kiosk')
         };
 
         $scope.editApplicationSetting = function (setting) {
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'app/components/main/view/modal/applicationSetting.html',
                 controller: 'ApplicationSettingEditorController',
                 resolve: {
@@ -1607,7 +1607,7 @@ angular.module('headwind-kiosk')
         };
 
         $scope.closeModal = function () {
-            $modalInstance.dismiss();
+            $uibModalInstance.dismiss();
         };
 
         $scope.save = function () {
@@ -1617,7 +1617,7 @@ angular.module('headwind-kiosk')
 
             deviceService.saveDeviceApplicationSettings({id: device.id}, allApplicationSettings, function (response) {
                 if (response.status === 'OK') {
-                    $modalInstance.close();
+                    $uibModalInstance.close();
                 } else {
                     $scope.errorMessage = localization.localize(response.message);
                 }

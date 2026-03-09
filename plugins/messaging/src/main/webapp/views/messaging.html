@@ -20,12 +20,12 @@
                        localized-placeholder="search.placeholder.device"
                        autocomplete="off"
                        class="form-control"
-                       typeahead="device for device in getDevices($viewValue)"
-                       typeahead-loading="loadingDevices"
-                       typeahead-wait-ms="300"
-                       typeahead-focus-first="false"
-                       typeahead-input-formatter="deviceLookupFormatter($model)"
-                       typeahead-no-results="noResults">
+                       uib-typeahead="device for device in getDevices($viewValue)"
+                       uib-typeahead-loading="loadingDevices"
+                       uib-typeahead-wait-ms="300"
+                       uib-typeahead-focus-first="false"
+                       uib-typeahead-input-formatter="deviceLookupFormatter($model)"
+                       uib-typeahead-no-results="noResults">
             </div>
             <div class="col-sm-3">
                 &nbsp;
@@ -45,7 +45,7 @@
         <div class="form-group">
             <div class='col-sm-3'>
                 <div class='min-padding date-picker date-picker-input'>
-                    <input class='form-control' datepicker-popup='{{dateFormat}}' localized-placeholder="search.placeholder.from"
+                    <input class='form-control' uib-datepicker-popup='{{dateFormat}}' localized-placeholder="search.placeholder.from"
                            ng-model='paging.dateFrom' is-open='openDatePickers.dateFrom' show-button-bar='false'
                            datepicker-options='datePickerOptions'/>
                 </div>
@@ -57,7 +57,7 @@
             </div>
             <div class='col-sm-3'>
                 <div class='min-padding date-picker date-picker-input'>
-                    <input class='form-control' datepicker-popup='{{dateFormat}}' localized-placeholder="search.placeholder.to"
+                    <input class='form-control' uib-datepicker-popup='{{dateFormat}}' localized-placeholder="search.placeholder.to"
                            ng-model='paging.dateTo' is-open='openDatePickers.dateTo' show-button-bar='false'
                            datepicker-options='datePickerOptions'/>
                 </div>

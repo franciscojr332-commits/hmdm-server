@@ -18,12 +18,12 @@
                 </div>
             </div>
 
-            <tabset class='tabset'>
+            <uib-tabset class='tabset'>
 
                 <!-- COMMON SETTINGS -->
-                <tab>
+                <uib-tab>
 
-                    <tab-heading localized>tab.configeditor.common.settings</tab-heading>
+                    <uib-tab-heading localized>tab.configeditor.common.settings</uib-tab-heading>
 
                     <div class='form-group'>
                         <label class='col-sm-3 control-label' localized>form.configuration.settings.common.name</label>
@@ -419,12 +419,12 @@
                             <button type='button' class='btn btn-default' ng-click='close()' localized>button.cancel</button>
                         </div>
                     </div>
-                </tab>
+                </uib-tab>
 
                 <!-- DESIGN SETTINGS -->
-                <tab>
+                <uib-tab>
 
-                    <tab-heading localized>tab.configeditor.design.settings</tab-heading>
+                    <uib-tab-heading localized>tab.configeditor.design.settings</uib-tab-heading>
 
                     <div class='form-group'>
                         <label class='col-sm-3 control-label' for="cc1" localized>form.configuration.settings.design.use.default</label>
@@ -552,12 +552,12 @@
                             <button type='button' class='btn btn-default' ng-click='close()' localized>button.cancel</button>
                         </div>
                     </div>
-                </tab>
+                </uib-tab>
 
                 <!-- APPLICATIONS -->
-                <tab>
+                <uib-tab>
 
-                    <tab-heading localized>tab.configeditor.applications</tab-heading>
+                    <uib-tab-heading localized>tab.configeditor.applications</uib-tab-heading>
 
                     <div class='form-group'>
                         <div class='col-sm-12'>
@@ -713,12 +713,12 @@
                         </div>
                     </div>
 
-                </tab>
+                </uib-tab>
 
                 <!-- MDM SETTINGS -->
-                <tab>
+                <uib-tab>
 
-                    <tab-heading localized>tab.configeditor.mdm.settings</tab-heading>
+                    <uib-tab-heading localized>tab.configeditor.mdm.settings</uib-tab-heading>
 
                     <div class='form-group'>
                         <label class='col-sm-3 control-label' localized>form.configuration.settings.mdm.kiosk.mode</label>
@@ -735,13 +735,13 @@
                                    autocomplete="off"
                                    localized-placeholder="search.placeholder.application"
                                    class="form-control"
-                                   typeahead="app as (app.name + (app.version && app.version !== '0' ? ' ' + app.version : '')) for app in getApps($viewValue)"
-                                   typeahead-loading="loadingApps"
-                                   typeahead-wait-ms="300"
-                                   typeahead-input-formatter="appLookupFormatter($model)"
-                                   typeahead-focus-first="false"
-                                   typeahead-on-select="onMainAppSelected($item)"
-                                   typeahead-no-results="noResults">
+                                   uib-typeahead="app as (app.name + (app.version && app.version !== '0' ? ' ' + app.version : '')) for app in getApps($viewValue)"
+                                   uib-typeahead-loading="loadingApps"
+                                   uib-typeahead-wait-ms="300"
+                                   uib-typeahead-input-formatter="appLookupFormatter($model)"
+                                   uib-typeahead-focus-first="false"
+                                   uib-typeahead-on-select="onMainAppSelected($item)"
+                                   uib-typeahead-no-results="noResults">
                             <span>{{trackMainApp(mainApp.id > 0)}}</span>
                         </div>
                     </div>
@@ -763,13 +763,13 @@
                                    ng-model="contentApp"
                                    localized-placeholder="search.placeholder.application"
                                    class="form-control"
-                                   typeahead="app as (app.name + (app.version && app.version !== '0' ? ' ' + app.version : '')) for app in getApps($viewValue)"
-                                   typeahead-loading="loadingApps"
-                                   typeahead-wait-ms="300"
-                                   typeahead-input-formatter="appLookupFormatter($model)"
-                                   typeahead-focus-first="false"
-                                   typeahead-on-select="onContentAppSelected($item)"
-                                   typeahead-no-results="noResults2">
+                                   uib-typeahead="app as (app.name + (app.version && app.version !== '0' ? ' ' + app.version : '')) for app in getApps($viewValue)"
+                                   uib-typeahead-loading="loadingApps"
+                                   uib-typeahead-wait-ms="300"
+                                   uib-typeahead-input-formatter="appLookupFormatter($model)"
+                                   uib-typeahead-focus-first="false"
+                                   uib-typeahead-on-select="onContentAppSelected($item)"
+                                   uib-typeahead-no-results="noResults2">
                             <span>{{trackContentApp(contentApp.id > 0)}}</span>
                         </div>
                     </div>
@@ -1008,11 +1008,11 @@
                             <button type='button' class='btn btn-default' ng-click='close()' localized>button.cancel</button>
                         </div>
                     </div>
-                </tab>
+                </uib-tab>
 
                 <!-- APP SETTINGS -->
-                <tab>
-                    <tab-heading localized>tab.configeditor.app.settings</tab-heading>
+                <uib-tab>
+                    <uib-tab-heading localized>tab.configeditor.app.settings</uib-tab-heading>
 
                     <div class="form-group">
                         <div class="col-sm-12">
@@ -1039,13 +1039,13 @@
                                                    autocomplete="off"
                                                    localized-placeholder="search.placeholder.application"
                                                    class="form-control"
-                                                   typeahead="app as (app.pkg) for app in getAppSettingsApps($viewValue)"
-                                                   typeahead-loading="loadingApps"
-                                                   typeahead-wait-ms="300"
-                                                   typeahead-input-formatter="appSettingsAppLookupFormatter($model)"
-                                                   typeahead-focus-first="false"
-                                                   typeahead-on-select="onAppSettingsFilterAppSelected($item)"
-                                                   typeahead-no-results="noResults">
+                                                   uib-typeahead="app as (app.pkg) for app in getAppSettingsApps($viewValue)"
+                                                   uib-typeahead-loading="loadingApps"
+                                                   uib-typeahead-wait-ms="300"
+                                                   uib-typeahead-input-formatter="appSettingsAppLookupFormatter($model)"
+                                                   uib-typeahead-focus-first="false"
+                                                   uib-typeahead-on-select="onAppSettingsFilterAppSelected($item)"
+                                                   uib-typeahead-no-results="noResults">
                                         </div>
                                         <div class="col-sm-5">
                                             <input type="text" class="form-control"
@@ -1121,11 +1121,11 @@
                         </div>
                     </div>
 
-                </tab>
+                </uib-tab>
 
                 <!-- FILES -->
-                <tab>
-                    <tab-heading localized>tab.configeditor.files</tab-heading>
+                <uib-tab>
+                    <uib-tab-heading localized>tab.configeditor.files</uib-tab-heading>
 
                     <div class='form-group' style="padding-top: 5px">
                         <label class='col-sm-4 control-label' localized>form.configuration.settings.files.default.path</label>
@@ -1222,9 +1222,9 @@
                         </div>
                     </div>
 
-                </tab>
+                </uib-tab>
 
-            </tabset>
+            </uib-tabset>
         </form>
     </div>
 </div>

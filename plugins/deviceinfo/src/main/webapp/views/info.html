@@ -15,12 +15,12 @@
                    localized-placeholder="search.placeholder.device"
                    autocomplete="off"
                    class="form-control"
-                   typeahead="address for address in searchDevices($viewValue)"
-                   typeahead-loading="loadingDevices"
-                   typeahead-wait-ms="300"
-                   typeahead-focus-first="false"
-                   typeahead-input-formatter="deviceLookupFormatter($model)"
-                   typeahead-no-results="noResults">
+                   uib-typeahead="address for address in searchDevices($viewValue)"
+                   uib-typeahead-loading="loadingDevices"
+                   uib-typeahead-wait-ms="300"
+                   uib-typeahead-focus-first="false"
+                   uib-typeahead-input-formatter="deviceLookupFormatter($model)"
+                   uib-typeahead-no-results="noResults">
         </div>
 
         <div class="col-sm-4 text-right">

@@ -1,9 +1,9 @@
 // Localization completed
 angular.module('headwind-kiosk')
-    .factory('confirmModal', function ($modal) {
+    .factory('confirmModal', function ($uibModal) {
         return {
             getUserConfirmation: function (message, callback, okButtonTextKey) {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'app/shared/view/confirm.html',
                     controller: 'ConfirmController',
                     resolve: {
@@ -26,14 +26,14 @@ angular.module('headwind-kiosk')
             }
         }
     })
-    .controller('ConfirmController', function ($scope, $modalInstance, message, okButtonTextKey) {
+    .controller('ConfirmController', function ($scope, $uibModalInstance, message, okButtonTextKey) {
         $scope.message = message;
         $scope.okButtonTextKey = okButtonTextKey;
 
         $scope.OK = function () {
-            $modalInstance.close();
+            $uibModalInstance.close();
         }
         $scope.cancel = function () {
-            $modalInstance.dismiss()
+            $uibModalInstance.dismiss()
         }
     });

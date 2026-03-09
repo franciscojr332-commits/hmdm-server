@@ -1,6 +1,6 @@
 // Localization completed
 angular.module('headwind-kiosk')
-    .controller('AboutController', function ($scope, $rootScope, $modalInstance, APP_VERSION, localization,
+    .controller('AboutController', function ($scope, $rootScope, $uibModalInstance, APP_VERSION, localization,
                                              pluginService, rebranding) {
 
         rebranding.query(function(value) {
@@ -17,10 +17,10 @@ angular.module('headwind-kiosk')
             }
         });
 
-        var listener = $scope.$on('aero_USER_LOGOUT', $modalInstance.dismiss);
+        var listener = $scope.$on('aero_USER_LOGOUT', $uibModalInstance.dismiss);
         $scope.$on("$destroy", listener);
         
         $scope.closeModal = function () {
-            $modalInstance.dismiss();
+            $uibModalInstance.dismiss();
         }
     });

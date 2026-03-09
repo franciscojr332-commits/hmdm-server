@@ -109,7 +109,7 @@ angular.module('plugin-messaging', ['ngResource', 'ui.bootstrap', 'ui.router', '
             }
         };
     })
-    .controller('PluginMessagingTabController', function ($scope, $rootScope, $window, $location, $modal, $timeout, $interval,
+    .controller('PluginMessagingTabController', function ($scope, $rootScope, $window, $location, $uibModal, $timeout, $interval,
                                                           pluginMessagingService, getDevicesService, confirmModal,
                                                           authService, localization) {
 
@@ -182,7 +182,7 @@ angular.module('plugin-messaging', ['ngResource', 'ui.bootstrap', 'ui.router', '
         });
 
         $scope.newMessage = function (message) {
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'app/components/plugins/messaging/views/message.modal.html',
                 controller: 'NewMessageController',
                 resolve: {
@@ -240,7 +240,7 @@ angular.module('plugin-messaging', ['ngResource', 'ui.bootstrap', 'ui.router', '
             if (autoUpdateInterval) $interval.cancel(autoUpdateInterval);
         });
     })
-    .controller('PluginMessagingSettingsController', function ($scope, $rootScope, $modal,
+    .controller('PluginMessagingSettingsController', function ($scope, $rootScope, $uibModal,
                                                                confirmModal, localization, pluginMessagingService) {
         $scope.successMessage = undefined;
         $scope.errorMessage = undefined;
@@ -269,7 +269,7 @@ angular.module('plugin-messaging', ['ngResource', 'ui.bootstrap', 'ui.router', '
             });
         };
     })
-    .controller('NewMessageController', function ($scope, $rootScope, $modalInstance, configurationService, groupService,
+    .controller('NewMessageController', function ($scope, $rootScope, $uibModalInstance, configurationService, groupService,
                                                   confirmModal, localization, pluginMessagingService, getDevicesService) {
 
         $scope.sending = false;
@@ -323,7 +323,7 @@ angular.module('plugin-messaging', ['ngResource', 'ui.bootstrap', 'ui.router', '
             pluginMessagingService.sendMessage($scope.message).$promise.then(function(response) {
                 $scope.sending = false;
                 if (response.status === 'OK') {
-                    $modalInstance.close();
+                    $uibModalInstance.close();
                 } else {
                     $scope.errorMessage = localization.localizeServerResponse(response);
                 }
@@ -334,7 +334,7 @@ angular.module('plugin-messaging', ['ngResource', 'ui.bootstrap', 'ui.router', '
         };
 
         $scope.closeModal = function () {
-            $modalInstance.dismiss();
+            $uibModalInstance.dismiss();
         };
     })
     .run(function ($rootScope, $location, localization) {

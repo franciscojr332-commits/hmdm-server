@@ -46,7 +46,7 @@ angular.module('plugin-audit', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTa
             getLogs: {url: 'rest/plugins/audit/private/log/search', method: 'POST'},
         });
     })
-    .controller('PluginAuditTabController', function ($scope, $rootScope, $window, $location, $interval, $http, $modal,
+    .controller('PluginAuditTabController', function ($scope, $rootScope, $window, $location, $interval, $http, $uibModal,
                                                       pluginAuditService, confirmModal, authService, localization) {
 
         $scope.hasPermission = authService.hasPermission;
@@ -140,7 +140,7 @@ angular.module('plugin-audit', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTa
         };
 
         $scope.viewLog = function (log) {
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'app/components/plugins/audit/views/audit.modal.html',
                 controller: 'PluginAuditModalController',
                 resolve: {
@@ -209,11 +209,11 @@ angular.module('plugin-audit', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTa
 
     })
     .controller('PluginAuditModalController',
-        function ($scope, $modalInstance, log, localization) {
+        function ($scope, $uibModalInstance, log, localization) {
             $scope.createTimeFormat = localization.localize('format.date.plugin.audit.createTime');
             $scope.log = log;
             $scope.closeModal = function () {
-                $modalInstance.dismiss();
+                $uibModalInstance.dismiss();
             };
     })
     .run(function ($rootScope, $location, localization) {

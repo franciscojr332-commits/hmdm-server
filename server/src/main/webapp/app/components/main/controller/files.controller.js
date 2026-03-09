@@ -1,6 +1,6 @@
 // Localization completed
 angular.module('headwind-kiosk')
-    .controller('FilesTabController', function ($scope, $rootScope, $state, $modal, alertService, confirmModal, fileService,
+    .controller('FilesTabController', function ($scope, $rootScope, $state, $uibModal, alertService, confirmModal, fileService,
                                                 authService, $window, localization, storageService) {
         $scope.search = {};
 
@@ -91,7 +91,7 @@ angular.module('headwind-kiosk')
             if (file && file.external) {
                 file.externalUrl = file.url;
             }
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'app/components/main/view/modal/file.html',
                 controller: 'FileModalController',
                 resolve: {
@@ -128,7 +128,7 @@ angular.module('headwind-kiosk')
         };
 
         $scope.editConfiguration = function(file) {
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'app/components/main/view/modal/fileConfigurations.html',
                 controller: 'FileConfigurationsModalController',
                 resolve: {
@@ -146,7 +146,7 @@ angular.module('headwind-kiosk')
         $scope.showApps = function (file) {
             fileService.getApps({value: encodeURIComponent(file.url)}, function (response) {
                 if (response.status === 'OK') {
-                    var modalInstance = $modal.open({
+                    var modalInstance = $uibModal.open({
                         templateUrl: 'app/components/main/view/modal/fileApps.html',
                         controller: 'FileAppsModalController',
                         resolve: {
@@ -163,14 +163,14 @@ angular.module('headwind-kiosk')
 
         $scope.init();
     })
-    .controller('FileAppsModalController', function ($scope, $modalInstance, apps) {
+    .controller('FileAppsModalController', function ($scope, $uibModalInstance, apps) {
         $scope.apps = apps;
 
         $scope.closeModal = function () {
-            $modalInstance.dismiss();
+            $uibModalInstance.dismiss();
         }
     })
-    .controller('FileModalController', function ($scope, $modalInstance, fileService, file, localization) {
+    .controller('FileModalController', function ($scope, $uibModalInstance, fileService, file, localization) {
         $scope.file = file !== null ? angular.copy(file, {}) : {};
 
         fileService.getLimit(function(response) {
@@ -203,7 +203,7 @@ angular.module('headwind-kiosk')
 
                 fileService.updateFile(request, function (response) {
                     if (response.status === 'OK') {
-                        $modalInstance.close(response.data);
+                        $uibModalInstance.close(response.data);
                     } else {
                         $scope.errorMessage = localization.localize(response.message);
                     }
@@ -240,10 +240,10 @@ angular.module('headwind-kiosk')
         };
 
         $scope.closeModal = function () {
-            $modalInstance.dismiss();
+            $uibModalInstance.dismiss();
         }
     })
-    .controller('FileConfigurationsModalController', function ($scope, $modalInstance, fileService, file, localization) {
+    .controller('FileConfigurationsModalController', function ($scope, $uibModalInstance, fileService, file, localization) {
         $scope.file = angular.copy(file);
 
         var loadData = function () {
@@ -277,7 +277,7 @@ angular.module('headwind-kiosk')
 
             fileService.updateConfigurations(request, function (response) {
                 if (response.status === 'OK') {
-                    $modalInstance.close();
+                    $uibModalInstance.close();
                 } else {
                     $scope.errorMessage = localization.localizeServerResponse(response);
                 }
@@ -285,7 +285,7 @@ angular.module('headwind-kiosk')
         };
 
         $scope.closeModal = function () {
-            $modalInstance.dismiss();
+            $uibModalInstance.dismiss();
         }
 
     });

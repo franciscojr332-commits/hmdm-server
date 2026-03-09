@@ -22,13 +22,13 @@
                                        autocomplete="off"
                                        localized-placeholder="search.placeholder.application"
                                        class="form-control"
-                                       typeahead="app as (app.pkg) for app in getAppSettingsApps($viewValue)"
-                                       typeahead-loading="loadingApps"
-                                       typeahead-wait-ms="300"
-                                       typeahead-input-formatter="appSettingsAppLookupFormatter($model)"
-                                       typeahead-focus-first="false"
-                                       typeahead-on-select="onAppSettingsFilterAppSelected($item)"
-                                       typeahead-no-results="noResults">
+                                       uib-typeahead="app as (app.pkg) for app in getAppSettingsApps($viewValue)"
+                                       uib-typeahead-loading="loadingApps"
+                                       uib-typeahead-wait-ms="300"
+                                       uib-typeahead-input-formatter="appSettingsAppLookupFormatter($model)"
+                                       uib-typeahead-focus-first="false"
+                                       uib-typeahead-on-select="onAppSettingsFilterAppSelected($item)"
+                                       uib-typeahead-no-results="noResults">
                             </div>
                             <div class="col-sm-5">
                                 <input type="text" class="form-control"

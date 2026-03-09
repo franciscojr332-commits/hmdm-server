@@ -194,7 +194,7 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
             $scope.errorMessage = undefined;
             
             if (loading) {
-                console.log("Skipping query for message list since a previous request is pending");
+                // console.log("Skipping query for message list since a previous request is pending");
                 return;
             }
 
@@ -293,7 +293,7 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
             $scope.errorMessage = undefined;
 
             if (loading) {
-                console.log("Skipping query for task list since a previous request is pending");
+                // console.log("Skipping query for task list since a previous request is pending");
                 return;
             }
 
@@ -351,9 +351,8 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
             });
         };
     })
-    .controller('NewPushMessageController', function ($scope, $rootScope, $uibModalInstance, message, configurationService, groupService,
+    .controller('NewPushMessageController', function ($scope, $rootScope, $uibModalInstance, configurationService, groupService,
                                                   confirmModal, localization, pluginPushService, getDevicesService) {
-        var modalInstance = $uibModalInstance;
 
         $scope.sending = false;
 
@@ -370,21 +369,17 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
 
         $scope.message = {
             scope: "device",
-            deviceNumber: (message && message.deviceNumber) ? (message.deviceNumber + "") : "",
+            deviceNumber: "",
             groupId: "",
             configurationId: "",
-            messageType: (message && message.messageType) ? message.messageType : "notification",
+            messageType: "configUpdated",
             customMessageType: "",
-            payload: (message && message.payload) ? message.payload : ""
+            payload: ""
         };
-        if ($scope.message.payload === "" && $scope.message.messageType === "notification") {
-            $scope.message.payload = '{"text": "Mensagem para o usuário"}';
-        }
 
         var samplePayloads = {
-            notification: '{"text": "Mensagem para o usuário"}',
             configUpdated: "",
-            runApp: "{\"pkg\": \"app.package.id\", \"background\": false}",
+            runApp: "{\"pkg\": \"app.package.id\"}",
             uninstallApp: "{\"pkg\": \"app.package.id\"}",
             deleteFile: "{\"path\": \"/path/to/file\"}",
             deleteDir: "{\"path\": \"/path/to/dir\"}",
@@ -402,7 +397,7 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
         };
 
         $scope.typeChanged = function() {
-            $scope.message.payload = samplePayloads[$scope.message.messageType] || "";
+            $scope.message.payload = samplePayloads[$scope.message.messageType];
         };
 
         $scope.send = function () {
@@ -427,10 +422,7 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
 
             $scope.sending = true;
 
-            if ($scope.message.messageType === 'notification' && (!$scope.message.payload || $scope.message.payload.trim() === '')) {
-            $scope.message.payload = '{"text": "Mensagem para o usuário"}';
-        }
-        if ($scope.message.messageType == '(custom)') {
+            if ($scope.message.messageType == '(custom)') {
                 if (!$scope.message.customMessageType) {
                     $scope.errorMessage = localization.localize('plugin.push.error.empty.messageType');
                     return;
@@ -441,7 +433,7 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
             pluginPushService.sendMessage($scope.message).$promise.then(function(response) {
                 $scope.sending = false;
                 if (response.status === 'OK') {
-                    modalInstance.close();
+                    $uibModalInstance.close();
                 } else {
                     $scope.errorMessage = localization.localizeServerResponse(response);
                 }
@@ -452,12 +444,12 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
         };
 
         $scope.closeModal = function () {
-            modalInstance.dismiss();
+            $uibModalInstance.dismiss();
         };
     })
     .controller('NewPushScheduleController', function ($scope, $rootScope, $uibModalInstance, configurationService, groupService,
                                                       confirmModal, localization, pluginPushService, getDevicesService, task) {
-        var modalInstance = $uibModalInstance;
+
         var taskCopy = {};
         for (var p in task) {
             if (task.hasOwnProperty(p)) {
@@ -517,7 +509,7 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
 
         var samplePayloads = {
             configUpdated: "",
-            runApp: "{\"pkg\": \"app.package.id\", \"background\": false}",
+            runApp: "{\"pkg\": \"app.package.id\"}",
             uninstallApp: "{\"pkg\": \"app.package.id\"}",
             deleteFile: "{\"path\": \"/path/to/file\"}",
             deleteDir: "{\"path\": \"/path/to/dir\"}",
@@ -535,7 +527,7 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
         };
 
         $scope.typeChanged = function() {
-            $scope.task.payload = samplePayloads[$scope.task.messageType] || "";
+            $scope.task.payload = samplePayloads[$scope.task.messageType];
         };
 
         $scope.save = function () {
@@ -571,7 +563,7 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
             pluginPushService.saveTask($scope.task).$promise.then(function(response) {
                 $scope.saving = false;
                 if (response.status === 'OK') {
-                    modalInstance.close();
+                    $uibModalInstance.close();
                 } else {
                     $scope.errorMessage = localization.localize('plugin.push.invalid.mask');
                 }
@@ -582,7 +574,7 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
         };
 
         $scope.closeModal = function () {
-            modalInstance.dismiss();
+            $uibModalInstance.dismiss();
         };
     })
     .run(function ($rootScope, $location, localization) {
@@ -591,5 +583,4 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
         })
         localization.loadPluginResourceBundles("push");
     });
-
 

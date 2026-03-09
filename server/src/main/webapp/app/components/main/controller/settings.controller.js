@@ -1,6 +1,6 @@
 // Localization completed
 angular.module('headwind-kiosk')
-    .controller('SettingsTabController', function ($scope, $rootScope, $timeout, $modal, hintService, settingsService,
+    .controller('SettingsTabController', function ($scope, $rootScope, $timeout, $uibModal, hintService, settingsService,
                                                    localization, authService, userService, confirmModal, Idle,
                                                    groupService, configurationService, twoFactorAuthService) {
         $scope.settings = {};
@@ -179,7 +179,7 @@ angular.module('headwind-kiosk')
         };
 
         $scope.uploadBackground = function () {
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'app/components/main/view/modal/file.html',
                 // Defined in files.controller.js
                 controller: 'FileModalController',

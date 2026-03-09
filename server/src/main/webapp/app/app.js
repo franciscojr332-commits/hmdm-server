@@ -525,7 +525,7 @@ angular.module('headwind-kiosk',
                 if (response.data) {
                     response.data.forEach(function (plugin) {
                         try {
-                            $ocLazyLoad.load(plugin.javascriptModuleFile);
+                            $ocLazyLoad.load(plugin.javascriptModuleFile + '?v=6');
                         } catch (e) {
                             console.error('Failed to load plugin module', e);
                         }

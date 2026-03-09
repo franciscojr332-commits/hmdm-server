@@ -1,9 +1,9 @@
 // Localization completed
 angular.module('headwind-kiosk')
-    .factory('progressDialog', function ($modal) {
+    .factory('progressDialog', function ($uibModal) {
         return {
             show: function (message) {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'app/shared/view/progress.html',
                     controller: 'ProgressDialogController',
                     resolve: {
@@ -17,9 +17,9 @@ angular.module('headwind-kiosk')
             }
         }
     })
-    .controller('ProgressDialogController', function ($scope, $modalInstance, message) {
+    .controller('ProgressDialogController', function ($scope, $uibModalInstance, message) {
         $scope.message = message;
         $scope.OK = function () {
-            $modalInstance.close();
+            $uibModalInstance.close();
         }
     });

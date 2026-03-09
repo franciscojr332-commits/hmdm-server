@@ -109,7 +109,7 @@ angular.module('headwind-kiosk')
                         console.log("Initial resource bundles are NOT loaded yet. Waiting for " + delay + "ms");
                         $timeout(waitAndLoadLocalizationBundles, delay);
                     } else {
-                        console.log("Loading resource bundles for plugin: ", pluginId);
+                        // console.log("Loading resource bundles for plugin: ", pluginId);
                         LOCALIZATION_BUNDLES.forEach(loadLocalizationBundle);
                     }
                 };
