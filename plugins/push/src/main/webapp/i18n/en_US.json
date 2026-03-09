@@ -19,6 +19,7 @@
   "plugin.push.button.send": "Send",
   "plugin.push.label.device": "Device",
   "plugin.push.label.messageType": "Type",
+  "plugin.push.type.notification": "Notification (show message to user)",
   "plugin.push.label.messageType.custom": "Custom",
   "plugin.push.label.enter.type": "Enter message type",
   "plugin.push.label.payload": "Payload",

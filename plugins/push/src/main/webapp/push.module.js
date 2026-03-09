@@ -369,15 +369,19 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
 
         $scope.message = {
             scope: "device",
-            deviceNumber: "",
+            deviceNumber: (message && message.deviceNumber) ? (message.deviceNumber + "") : "",
             groupId: "",
             configurationId: "",
-            messageType: "configUpdated",
+            messageType: (message && message.messageType) ? message.messageType : "notification",
             customMessageType: "",
-            payload: ""
+            payload: (message && message.payload) ? message.payload : ""
         };
+        if ($scope.message.payload === "" && $scope.message.messageType === "notification") {
+            $scope.message.payload = '{"text": "Mensagem para o usuário"}';
+        }
 
         var samplePayloads = {
+            notification: '{"text": "Mensagem para o usuário"}',
             configUpdated: "",
             runApp: "{\"pkg\": \"app.package.id\", \"background\": false}",
             uninstallApp: "{\"pkg\": \"app.package.id\"}",
@@ -422,7 +426,10 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
 
             $scope.sending = true;
 
-            if ($scope.message.messageType == '(custom)') {
+            if ($scope.message.messageType === 'notification' && (!$scope.message.payload || $scope.message.payload.trim() === '')) {
+            $scope.message.payload = '{"text": "Mensagem para o usuário"}';
+        }
+        if ($scope.message.messageType == '(custom)') {
                 if (!$scope.message.customMessageType) {
                     $scope.errorMessage = localization.localize('plugin.push.error.empty.messageType');
                     return;

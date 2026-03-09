@@ -19,6 +19,7 @@
   "plugin.push.button.send": "Enviar",
   "plugin.push.label.device": "Dispositivo",
   "plugin.push.label.messageType": "Tipo",
+  "plugin.push.type.notification": "Notificação (mostrar mensagem ao usuário)",
   "plugin.push.label.messageType.custom": "Personalizado",
   "plugin.push.label.enter.type": "Digite o tipo de mensagem",
   "plugin.push.label.payload": "Carga útil",
