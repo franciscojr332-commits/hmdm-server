@@ -100,7 +100,7 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
             }
         }
     }])
-    .controller('PluginPushTabController', function ($scope, $rootScope, $window, $location, $modal, $timeout, $interval,
+    .controller('PluginPushTabController', function ($scope, $rootScope, $window, $location, $uibModal, $timeout, $interval,
                                                           pluginPushService, getDevicesService, confirmModal,
                                                           authService, localization) {
 
@@ -172,7 +172,7 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
         });
 
         $scope.newMessage = function (message) {
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'app/components/plugins/push/views/push.modal.html',
                 controller: 'NewPushMessageController',
                 resolve: {
@@ -225,7 +225,7 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
 
         loadData();
     })
-    .controller('PluginPushScheduleTabController', function ($scope, $rootScope, $window, $location, $modal, $timeout, $interval,
+    .controller('PluginPushScheduleTabController', function ($scope, $rootScope, $window, $location, $uibModal, $timeout, $interval,
                                                      pluginPushService, confirmModal, authService, localization) {
 
         $scope.hasPermission = authService.hasPermission;
@@ -271,7 +271,7 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
         };
 
         $scope.editTask = function (task) {
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'app/components/plugins/push/views/schedule.modal.html',
                 controller: 'NewPushScheduleController',
                 resolve: {
@@ -322,7 +322,7 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
 
         loadData();
     })
-    .controller('PluginPushSettingsController', function ($scope, $rootScope, $modal,
+    .controller('PluginPushSettingsController', function ($scope, $rootScope, $uibModal,
                                                                confirmModal, localization, pluginPushService) {
         $scope.successMessage = undefined;
         $scope.errorMessage = undefined;
@@ -351,8 +351,9 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
             });
         };
     })
-    .controller('NewPushMessageController', function ($scope, $rootScope, $modalInstance, configurationService, groupService,
+    .controller('NewPushMessageController', function ($scope, $rootScope, $uibModalInstance, message, configurationService, groupService,
                                                   confirmModal, localization, pluginPushService, getDevicesService) {
+        var modalInstance = $uibModalInstance;
 
         $scope.sending = false;
 
@@ -440,7 +441,7 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
             pluginPushService.sendMessage($scope.message).$promise.then(function(response) {
                 $scope.sending = false;
                 if (response.status === 'OK') {
-                    $modalInstance.close();
+                    modalInstance.close();
                 } else {
                     $scope.errorMessage = localization.localizeServerResponse(response);
                 }
@@ -451,12 +452,12 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
         };
 
         $scope.closeModal = function () {
-            $modalInstance.dismiss();
+            modalInstance.dismiss();
         };
     })
-    .controller('NewPushScheduleController', function ($scope, $rootScope, $modalInstance, configurationService, groupService,
+    .controller('NewPushScheduleController', function ($scope, $rootScope, $uibModalInstance, configurationService, groupService,
                                                       confirmModal, localization, pluginPushService, getDevicesService, task) {
-
+        var modalInstance = $uibModalInstance;
         var taskCopy = {};
         for (var p in task) {
             if (task.hasOwnProperty(p)) {
@@ -570,7 +571,7 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
             pluginPushService.saveTask($scope.task).$promise.then(function(response) {
                 $scope.saving = false;
                 if (response.status === 'OK') {
-                    $modalInstance.close();
+                    modalInstance.close();
                 } else {
                     $scope.errorMessage = localization.localize('plugin.push.invalid.mask');
                 }
@@ -581,7 +582,7 @@ angular.module('plugin-push', ['ngResource', 'ui.bootstrap', 'ui.router', 'ngTag
         };
 
         $scope.closeModal = function () {
-            $modalInstance.dismiss();
+            modalInstance.dismiss();
         };
     })
     .run(function ($rootScope, $location, localization) {
