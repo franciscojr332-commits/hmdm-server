@@ -212,6 +212,21 @@ angular.module('headwind-kiosk')
     .controller('AddConfigurationAppModalController', function ($scope, localization, configurationService, authService,
                                                                 applications, configuration, $uibModalInstance, $uibModal) {
 
+        var appFieldToDisplayString = function (v) {
+            if (v == null || v === '') return '';
+            if (typeof v === 'object') {
+                return (v.versionStr || v.text || v.label || v.name || '').toString();
+            }
+            return String(v);
+        };
+
+        var formatApplicationLabel = function (app) {
+            if (!app) return '';
+            var name = appFieldToDisplayString(app.name);
+            var ver = appFieldToDisplayString(app.version);
+            return name + (ver && ver !== '0' ? ' ' + ver : '');
+        };
+
         // TODO : ISV : Update this controller
         // $scope.mainAppSelected = false;
         $scope.mainApp = {id: -1, name: ""};
@@ -219,8 +234,10 @@ angular.module('headwind-kiosk')
         $scope.hasPermission = authService.hasPermission;
 
         $scope.appLookupFormatter = function (val) {
-            return val.name + (val.version && val.version !== '0' ? " " + val.version : "");
+            return formatApplicationLabel(val);
         };
+
+        $scope.formatApplicationTypeaheadLabel = formatApplicationLabel;
 
         // $scope.trackMainApp = function (val) {
         //     $scope.mainAppSelected = val;
@@ -237,9 +254,10 @@ angular.module('headwind-kiosk')
             var apps = $scope.availableApplications.filter(function (app) {
                 // Here we select all apps including web because this function is used to add a new app to the desktop
                 // Intentionally using app.action == 1 but not app.action === 1
-                return (app.name.toLowerCase().indexOf(lower) > -1
+                var verStr = appFieldToDisplayString(app.version);
+                return (app.name && app.name.toLowerCase().indexOf(lower) > -1
                     || app.pkg && app.pkg.toLowerCase().indexOf(lower) > -1
-                    || app.version && app.version.toLowerCase().indexOf(lower) > -1);
+                    || verStr && verStr.toLowerCase().indexOf(lower) > -1);
             });
 
             apps.sort(function (a, b) {
@@ -314,6 +332,28 @@ angular.module('headwind-kiosk')
     .controller('ConfigurationEditorController',
         function ($scope, configurationService, settingsService, $stateParams, $state, $rootScope, $window, $timeout,
                   $transitions, localization, confirmModal, alertService, $uibModal, appVersionComparisonService, settingsService) {
+
+            // API may return ids as numbers or strings; strict === breaks save validation and main-app matching.
+            var sameUsedVersionId = function (a, b) {
+                if (a == null || b == null) return false;
+                return String(a) === String(b);
+            };
+
+            // Some APIs return name/version as nested objects; avoid "[object Object]" in typeahead and filters.
+            var appFieldToDisplayString = function (v) {
+                if (v == null || v === '') return '';
+                if (typeof v === 'object') {
+                    return (v.versionStr || v.text || v.label || v.name || '').toString();
+                }
+                return String(v);
+            };
+
+            var formatApplicationLabel = function (app) {
+                if (!app) return '';
+                var name = appFieldToDisplayString(app.name);
+                var ver = appFieldToDisplayString(app.version);
+                return name + (ver && ver !== '0' ? ' ' + ver : '');
+            };
 
             $scope.successMessage = null;
 
@@ -519,9 +559,10 @@ angular.module('headwind-kiosk')
                 var apps = allApplications.filter(function (app) {
                     // Here we select only native apps because this function is used to select main and content apps
                     // Intentionally using app.action == 1 but not app.action === 1
-                    return app.type === 'app' && (app.action == 1) && (app.name.toLowerCase().indexOf(lower) > -1
+                    var verStr = appFieldToDisplayString(app.version);
+                    return app.type === 'app' && (app.action == 1) && (app.name && app.name.toLowerCase().indexOf(lower) > -1
                         || app.pkg && app.pkg.toLowerCase().indexOf(lower) > -1
-                        || app.version && app.version.toLowerCase().indexOf(lower) > -1);
+                        || verStr && verStr.toLowerCase().indexOf(lower) > -1);
                 });
 
                 apps.sort(function (a, b) {
@@ -554,16 +595,19 @@ angular.module('headwind-kiosk')
             };
 
             $scope.appLookupFormatter = function (val) {
-                return val.name + (val.version && val.version !== '0' ? " " + val.version : "");
+                return formatApplicationLabel(val);
             };
+
+            $scope.formatApplicationTypeaheadLabel = formatApplicationLabel;
 
             var getAppSettingsApps = function (filter) {
                 var lower = filter.toLowerCase();
                 var apps = allApplications.filter(function (app) {
                     // Intentionally using app.action == 1 but not app.action === 1
-                    return app.type === 'app' && (app.name.toLowerCase().indexOf(lower) > -1
+                    var verStr = appFieldToDisplayString(app.version);
+                    return app.type === 'app' && (app.name && app.name.toLowerCase().indexOf(lower) > -1
                         || app.pkg && app.pkg.toLowerCase().indexOf(lower) > -1
-                        || app.version && app.version.toLowerCase().indexOf(lower) > -1);
+                        || verStr && verStr.toLowerCase().indexOf(lower) > -1);
                 });
 
                 apps.sort(function (a, b) {
@@ -643,7 +687,7 @@ angular.module('headwind-kiosk')
 
                         if ($scope.configuration.mainAppId) {
                             let mainApps = response.data.filter(function (app) {
-                                return app.usedVersionId === $scope.configuration.mainAppId;
+                                return sameUsedVersionId(app.usedVersionId, $scope.configuration.mainAppId);
                             });
 
                             if (mainApps.length > 0) {
@@ -654,7 +698,7 @@ angular.module('headwind-kiosk')
 
                         if ($scope.configuration.contentAppId) {
                             let contentApps = response.data.filter(function (app) {
-                                return app.usedVersionId === $scope.configuration.contentAppId;
+                                return sameUsedVersionId(app.usedVersionId, $scope.configuration.contentAppId);
                             });
 
                             if (contentApps.length > 0) {
@@ -692,7 +736,7 @@ angular.module('headwind-kiosk')
                     if (mainAppSelected) {
                         var apps = allApplications.filter(function (app) {
                             // Intentionally using app.action == 1 but not app.action === 1
-                            return (app.action == 1) && (app.usedVersionId === $scope.mainApp.usedVersionId);
+                            return (app.action == 1) && sameUsedVersionId(app.usedVersionId, $scope.mainApp.usedVersionId);
                         });
 
                         if (apps.length === 0) {
@@ -708,7 +752,7 @@ angular.module('headwind-kiosk')
                     if (contentAppSelected) {
                         var apps = allApplications.filter(function (app) {
                             // Intentionally using app.action == 1 but not app.action === 1
-                            return (app.action == 1) && (app.usedVersionId === $scope.contentApp.usedVersionId);
+                            return (app.action == 1) && sameUsedVersionId(app.usedVersionId, $scope.contentApp.usedVersionId);
                         });
 
                         if (apps.length === 0) {
@@ -954,7 +998,7 @@ angular.module('headwind-kiosk')
                                     if (result2 <= 0) {
                                         var alreadyListed = false;
                                         allApplications.filter(function (app) {
-                                            return app.id === newAppVersion.applicationId && (app.usedVersionId === availableAppVersion.id);
+                                            return app.id === newAppVersion.applicationId && sameUsedVersionId(app.usedVersionId, availableAppVersion.id);
                                         }).forEach(function (app) {
                                             alreadyListed = true;
                                             app.action = 2;

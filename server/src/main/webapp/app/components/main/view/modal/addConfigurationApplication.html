@@ -29,7 +29,7 @@
                        autocomplete="off"
                        localized-placeholder="search.placeholder.application"
                        class="form-control"
-                       uib-typeahead="app as (app.name + (app.version && app.version !== '0' ? ' ' + app.version : '')) for app in getApps($viewValue)"
+                       uib-typeahead="app as formatApplicationTypeaheadLabel(app) for app in getApps($viewValue)"
                        uib-typeahead-loading="loadingApps"
                        uib-typeahead-wait-ms="300"
                        uib-typeahead-input-formatter="appLookupFormatter($model)"
