@@ -500,6 +500,39 @@
         </div>
     </div>
 
+
+<!-- BULK MODALS: Bootstrap puro, zero $uibModal -->
+<div ng-show="bulkModal.show" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center" ng-style="{'display': bulkModal.show ? 'flex' : 'none'}">
+  <div style="background:#fff;border-radius:4px;width:420px;max-width:95%;box-shadow:0 5px 30px rgba(0,0,0,.3)">
+    <div style="padding:15px 20px;border-bottom:1px solid #e5e5e5;display:flex;justify-content:space-between;align-items:center">
+      <h4 style="margin:0">{{bulkModal.title}}</h4>
+      <button type="button" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999" ng-click="bulkClose()">&times;</button>
+    </div>
+    <div style="padding:20px">
+      <div class="alert alert-danger" ng-if="bulkModal.error">{{bulkModal.error}}</div>
+      <div class="alert alert-success" ng-if="bulkModal.success">{{bulkModal.success}}</div>
+      <div ng-if="bulkModal.type === 'notification'" style="margin-bottom:12px">
+        <label>Mensagem:</label>
+        <textarea class="form-control" rows="3" ng-model="bulkModal.msg" placeholder="Digite o texto..."></textarea>
+      </div>
+      <label><strong>Selecionar grupos:</strong></label>
+      <div style="margin:4px 0">
+        <label><input type="checkbox" ng-model="bulkModal.all" ng-change="bulkToggleAll()"> <strong>Selecionar Todos</strong></label>
+      </div>
+      <hr style="margin:6px 0">
+      <div ng-repeat="c in bulkModal.cfgs">
+        <label><input type="checkbox" ng-model="c.selected"> {{c.name}}</label>
+      </div>
+    </div>
+    <div style="padding:12px 20px;border-top:1px solid #e5e5e5;text-align:right">
+      <button type="button" class="btn btn-default" ng-click="bulkClose()" ng-disabled="bulkModal.sending">Cancelar</button>
+      <button type="button" class="btn btn-primary" ng-click="bulkSend()" ng-disabled="bulkModal.sending" style="margin-left:8px">
+        {{bulkModal.sending ? 'Enviando...' : 'Enviar'}}
+      </button>
+    </div>
+  </div>
+</div>
+
 </div>
 <style>
 @-webkit-keyframes spin { 0%{-webkit-transform:rotate(0deg)} 100%{-webkit-transform:rotate(360deg)} }

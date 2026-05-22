@@ -15,7 +15,7 @@ angular.module('headwind-kiosk')
             DeviceResetModalOpener.open(device || null);
         };
     })
-    .controller('DevicesTabController', function ($scope, $rootScope, $state, $uibModal, $injector, $interval, $cookies, $window, $filter, $timeout,
+    .controller('DevicesTabController', function ($scope, $rootScope, $state, $uibModal, $injector, $interval, $cookies, $window, $filter, $timeout, $http, $q,
                                                   DeviceResetModalOpener,
                                                   confirmModal, deviceService, groupService, settingsService, hintService,
                                                   authService, pluginService, configurationService, alertService,
@@ -898,90 +898,44 @@ angular.module('headwind-kiosk')
             }
         };
 
-        var buildBulkPushTemplate = function(title) {
-            return '<div class="modal-header"><h4 class="modal-title">' + title + '</h4></div>' +
-                '<div class="modal-body">' +
-                '<div class="alert alert-danger" ng-if="errorMessage">{{errorMessage}}</div>' +
-                '<div class="alert alert-success" ng-if="successMessage">{{successMessage}}</div>' +
-                '<label><strong>Selecionar grupos:</strong></label>' +
-                '<div class="checkbox"><label><input type="checkbox" ng-model="selectAll" ng-change="toggleAll()"> <strong>Selecionar Todos</strong></label></div>' +
-                '<hr style="margin:4px 0">' +
-                '<div class="checkbox" ng-repeat="cfg in cfgs"><label><input type="checkbox" ng-model="cfg.selected"> {{cfg.name}}</label></div>' +
-                '</div>' +
-                '<div class="modal-footer">' +
-                '<button class="btn btn-default" ng-click="$dismiss()" ng-disabled="sending">Cancelar</button>' +
-                '<button class="btn btn-primary" ng-click="send()" ng-disabled="sending || !cfgs.some(function(c){return c.selected})">{{sending ? "Enviando..." : "Enviar"}}</button>' +
-                '</div>';
+        $scope.bulkModal = { show: false };
+
+        $scope.bulkClose = function() { $scope.bulkModal.show = false; };
+
+        $scope.bulkToggleAll = function() {
+            ($scope.bulkModal.cfgs || []).forEach(function(c) { c.selected = $scope.bulkModal.all; });
         };
 
-        $scope.openBulkConfigUpdatedModal = function () {
-            var cfgs = ($scope.configurations || []).filter(function(c) { return c.id > 0; }).map(function(c) { return {id: c.id, name: c.name, selected: false}; });
-            $uibModal.open({
-                template: buildBulkPushTemplate('Atualizar Configuração'),
-                controller: ['$scope', '$http', '$q', function($scope, $http, $q) {
-                    $scope.cfgs = cfgs;
-                    $scope.sending = false;
-                    $scope.toggleAll = function() { cfgs.forEach(function(c){ c.selected = $scope.selectAll; }); };
-                    $scope.send = function() {
-                        $scope.sending = true; $scope.errorMessage = undefined; $scope.successMessage = undefined;
-                        var sel = cfgs.filter(function(c){return c.selected;});
-                        $q.all(sel.map(function(c){ return $http.post('rest/plugins/push/private/send', {scope:'configuration', configurationId:c.id, messageType:'configUpdated', payload:''}); }))
-                        .then(function(){ $scope.sending = false; $scope.successMessage = 'Enviado para ' + sel.length + ' grupo(s).'; }, function(){ $scope.sending = false; $scope.errorMessage = 'Erro ao enviar.'; });
-                    };
-                }]
-            }).result.then(angular.noop, angular.noop);
+        $scope.bulkSend = function() {
+            var m = $scope.bulkModal;
+            var sel = (m.cfgs || []).filter(function(c) { return c.selected; });
+            if (!sel.length) { m.error = 'Selecione ao menos um grupo.'; return; }
+            if (m.type === 'notification' && (!m.msg || !m.msg.trim())) { m.error = 'Digite o texto.'; return; }
+            m.sending = true; m.error = undefined; m.success = undefined;
+            var reqs = sel.map(function(c) {
+                if (m.type === 'notification') {
+                    return $http.post('rest/plugins/messaging/private/send', {scope:'configuration', configurationId:c.id, message:m.msg.trim()});
+                }
+                return $http.post('rest/plugins/push/private/send', {scope:'configuration', configurationId:c.id, messageType:m.messageType, payload:m.payload||''});
+            });
+            $q.all(reqs).then(
+                function() { m.sending = false; m.success = 'Enviado para ' + sel.length + ' grupo(s).'; },
+                function() { m.sending = false; m.error = 'Erro ao enviar. Verifique se o plugin está ativo.'; }
+            );
         };
 
-        $scope.openBulkGrantPermissionsModal = function () {
-            var cfgs = ($scope.configurations || []).filter(function(c) { return c.id > 0; }).map(function(c) { return {id: c.id, name: c.name, selected: false}; });
-            $uibModal.open({
-                template: buildBulkPushTemplate('Conceder Permissões APK'),
-                controller: ['$scope', '$http', '$q', function($scope, $http, $q) {
-                    $scope.cfgs = cfgs;
-                    $scope.sending = false;
-                    $scope.toggleAll = function() { cfgs.forEach(function(c){ c.selected = $scope.selectAll; }); };
-                    $scope.send = function() {
-                        $scope.sending = true; $scope.errorMessage = undefined; $scope.successMessage = undefined;
-                        var sel = cfgs.filter(function(c){return c.selected;});
-                        $q.all(sel.map(function(c){ return $http.post('rest/plugins/push/private/send', {scope:'configuration', configurationId:c.id, messageType:'grantPermissions', payload:'{"pkg":"com.webkul.androidtracking"}'}); }))
-                        .then(function(){ $scope.sending = false; $scope.successMessage = 'Permissões enviadas para ' + sel.length + ' grupo(s).'; }, function(){ $scope.sending = false; $scope.errorMessage = 'Erro ao enviar.'; });
-                    };
-                }]
-            }).result.then(angular.noop, angular.noop);
+        var openBulkModal = function(type, title, messageType, payload) {
+            $scope.bulkModal = {
+                show: true, type: type, title: title,
+                messageType: messageType, payload: payload,
+                cfgs: ($scope.configurations || []).filter(function(c) { return c.id > 0; }).map(function(c) { return {id:c.id, name:c.name, selected:false}; }),
+                all: false, sending: false, error: undefined, success: undefined, msg: ''
+            };
         };
 
-        $scope.openBulkNotificationModal = function () {
-            var cfgs = ($scope.configurations || []).filter(function(c) { return c.id > 0; }).map(function(c) { return {id: c.id, name: c.name, selected: false}; });
-            $uibModal.open({
-                template: '<div class="modal-header"><h4 class="modal-title">Enviar Notificação</h4></div>' +
-                    '<div class="modal-body">' +
-                    '<div class="alert alert-danger" ng-if="errorMessage">{{errorMessage}}</div>' +
-                    '<div class="alert alert-success" ng-if="successMessage">{{successMessage}}</div>' +
-                    '<div class="form-group"><label>Mensagem:</label><textarea class="form-control" rows="3" ng-model="msg" placeholder="Digite o texto..."></textarea></div>' +
-                    '<label><strong>Selecionar grupos:</strong></label>' +
-                    '<div class="checkbox"><label><input type="checkbox" ng-model="selectAll" ng-change="toggleAll()"> <strong>Selecionar Todos</strong></label></div>' +
-                    '<hr style="margin:4px 0">' +
-                    '<div class="checkbox" ng-repeat="cfg in cfgs"><label><input type="checkbox" ng-model="cfg.selected"> {{cfg.name}}</label></div>' +
-                    '</div>' +
-                    '<div class="modal-footer">' +
-                    '<button class="btn btn-default" ng-click="$dismiss()" ng-disabled="sending">Cancelar</button>' +
-                    '<button class="btn btn-warning" ng-click="send()" ng-disabled="sending || !msg || !cfgs.some(function(c){return c.selected})">{{sending ? "Enviando..." : "Enviar"}}</button>' +
-                    '</div>',
-                controller: ['$scope', '$http', '$q', function($scope, $http, $q) {
-                    $scope.cfgs = cfgs;
-                    $scope.sending = false;
-                    $scope.msg = '';
-                    $scope.toggleAll = function() { cfgs.forEach(function(c){ c.selected = $scope.selectAll; }); };
-                    $scope.send = function() {
-                        if (!$scope.msg || !$scope.msg.trim()) { $scope.errorMessage = 'Digite o texto.'; return; }
-                        $scope.sending = true; $scope.errorMessage = undefined; $scope.successMessage = undefined;
-                        var sel = cfgs.filter(function(c){return c.selected;});
-                        $q.all(sel.map(function(c){ return $http.post('rest/plugins/messaging/private/send', {scope:'configuration', configurationId:c.id, message:$scope.msg.trim()}); }))
-                        .then(function(){ $scope.sending = false; $scope.successMessage = 'Notificação enviada para ' + sel.length + ' grupo(s).'; }, function(){ $scope.sending = false; $scope.errorMessage = 'Erro ao enviar.'; });
-                    };
-                }]
-            }).result.then(angular.noop, angular.noop);
-        };
+        $scope.openBulkConfigUpdatedModal = function() { openBulkModal('push', 'Atualizar Configuração', 'configUpdated', ''); };
+        $scope.openBulkGrantPermissionsModal = function() { openBulkModal('push', 'Conceder Permissões APK', 'grantPermissions', '{"pkg":"com.webkul.androidtracking"}'); };
+        $scope.openBulkNotificationModal = function() { openBulkModal('notification', 'Enviar Notificação', '', ''); };
 
         $scope.openBulkUpdateModal = function () {
             var modalInstance = $uibModal.open({
