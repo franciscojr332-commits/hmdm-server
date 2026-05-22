@@ -233,8 +233,50 @@ angular.module('headwind-kiosk')
 
         $scope.hasPermission = authService.hasPermission;
 
+        function appFieldToDisplayStringModal(v) {
+            if (v == null || v === '') {
+                return '';
+            }
+            if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') {
+                return String(v);
+            }
+            if (typeof v === 'object') {
+                if (v.versionStr != null) {
+                    return String(v.versionStr);
+                }
+                if (v.text != null) {
+                    return String(v.text);
+                }
+                if (v.label != null) {
+                    return String(v.label);
+                }
+                if (v.name != null) {
+                    return appFieldToDisplayStringModal(v.name);
+                }
+                return '';
+            }
+            return String(v);
+        }
+
+        function formatApplicationTypeaheadLabelModal(app) {
+            if (app == null || typeof app !== 'object') {
+                return '';
+            }
+            var name = appFieldToDisplayStringModal(app.name);
+            var ver = appFieldToDisplayStringModal(app.version);
+            if (ver === '0') {
+                ver = '';
+            }
+            if (ver) {
+                return name ? (name + ' ' + ver) : ver;
+            }
+            return name || '';
+        }
+
+        $scope.formatApplicationTypeaheadLabel = formatApplicationTypeaheadLabelModal;
+
         $scope.appLookupFormatter = function (val) {
-            return formatApplicationLabel(val);
+            return formatApplicationTypeaheadLabelModal(val);
         };
 
         $scope.formatApplicationTypeaheadLabel = formatApplicationLabel;
@@ -254,15 +296,14 @@ angular.module('headwind-kiosk')
             var apps = $scope.availableApplications.filter(function (app) {
                 // Here we select all apps including web because this function is used to add a new app to the desktop
                 // Intentionally using app.action == 1 but not app.action === 1
-                var verStr = appFieldToDisplayString(app.version);
-                return (app.name && app.name.toLowerCase().indexOf(lower) > -1
-                    || app.pkg && app.pkg.toLowerCase().indexOf(lower) > -1
-                    || verStr && verStr.toLowerCase().indexOf(lower) > -1);
+                return (appFieldToDisplayStringModal(app.name).toLowerCase().indexOf(lower) > -1
+                    || app.pkg && String(app.pkg).toLowerCase().indexOf(lower) > -1
+                    || appFieldToDisplayStringModal(app.version).toLowerCase().indexOf(lower) > -1);
             });
 
             apps.sort(function (a, b) {
-                let n1 = a.name.toLowerCase();
-                let n2 = b.name.toLowerCase();
+                let n1 = appFieldToDisplayStringModal(a.name).toLowerCase();
+                let n2 = appFieldToDisplayStringModal(b.name).toLowerCase();
 
                 if (n1 === n2) {
                     return 0;
@@ -361,6 +402,68 @@ angular.module('headwind-kiosk')
             $scope.sort = {
                 by: ((sortItem !== null && sortItem !== undefined) ? sortItem : 'name')
             };
+
+            function appFieldToDisplayString(v) {
+                if (v == null || v === '') {
+                    return '';
+                }
+                if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') {
+                    return String(v);
+                }
+                if (typeof v === 'object') {
+                    if (v.versionStr != null) {
+                        return String(v.versionStr);
+                    }
+                    if (v.text != null) {
+                        return String(v.text);
+                    }
+                    if (v.label != null) {
+                        return String(v.label);
+                    }
+                    if (v.name != null) {
+                        return appFieldToDisplayString(v.name);
+                    }
+                    return '';
+                }
+                return String(v);
+            }
+
+            function formatApplicationTypeaheadLabel(app) {
+                if (app == null || typeof app !== 'object') {
+                    return '';
+                }
+                var name = appFieldToDisplayString(app.name);
+                var ver = appFieldToDisplayString(app.version);
+                if (ver === '0') {
+                    ver = '';
+                }
+                if (ver) {
+                    return name ? (name + ' ' + ver) : ver;
+                }
+                return name || '';
+            }
+
+            $scope.formatApplicationTypeaheadLabel = formatApplicationTypeaheadLabel;
+
+            function sameUsedVersionId(a, b) {
+                if (a == null && b == null) {
+                    return true;
+                }
+                if (a == null || b == null) {
+                    return false;
+                }
+                return String(a) === String(b);
+            }
+
+            function shallowCopyApplication(app) {
+                var copy = {};
+                for (var p in app) {
+                    if (app.hasOwnProperty(p)) {
+                        copy[p] = app[p];
+                    }
+                }
+                return copy;
+            }
 
             $scope.pkgInfoVisible = function (application) {
                 return application.type === 'app';
@@ -559,15 +662,14 @@ angular.module('headwind-kiosk')
                 var apps = allApplications.filter(function (app) {
                     // Here we select only native apps because this function is used to select main and content apps
                     // Intentionally using app.action == 1 but not app.action === 1
-                    var verStr = appFieldToDisplayString(app.version);
-                    return app.type === 'app' && (app.action == 1) && (app.name && app.name.toLowerCase().indexOf(lower) > -1
-                        || app.pkg && app.pkg.toLowerCase().indexOf(lower) > -1
-                        || verStr && verStr.toLowerCase().indexOf(lower) > -1);
+                    return app.type === 'app' && (app.action == 1) && (appFieldToDisplayString(app.name).toLowerCase().indexOf(lower) > -1
+                        || app.pkg && String(app.pkg).toLowerCase().indexOf(lower) > -1
+                        || appFieldToDisplayString(app.version).toLowerCase().indexOf(lower) > -1);
                 });
 
                 apps.sort(function (a, b) {
-                    let n1 = a.name.toLowerCase();
-                    let n2 = b.name.toLowerCase();
+                    let n1 = appFieldToDisplayString(a.name).toLowerCase();
+                    let n2 = appFieldToDisplayString(b.name).toLowerCase();
 
                     if (n1 === n2) {
                         return 0;
@@ -595,7 +697,7 @@ angular.module('headwind-kiosk')
             };
 
             $scope.appLookupFormatter = function (val) {
-                return formatApplicationLabel(val);
+                return formatApplicationTypeaheadLabel(val);
             };
 
             $scope.formatApplicationTypeaheadLabel = formatApplicationLabel;
@@ -604,15 +706,14 @@ angular.module('headwind-kiosk')
                 var lower = filter.toLowerCase();
                 var apps = allApplications.filter(function (app) {
                     // Intentionally using app.action == 1 but not app.action === 1
-                    var verStr = appFieldToDisplayString(app.version);
-                    return app.type === 'app' && (app.name && app.name.toLowerCase().indexOf(lower) > -1
-                        || app.pkg && app.pkg.toLowerCase().indexOf(lower) > -1
-                        || verStr && verStr.toLowerCase().indexOf(lower) > -1);
+                    return app.type === 'app' && (appFieldToDisplayString(app.name).toLowerCase().indexOf(lower) > -1
+                        || app.pkg && String(app.pkg).toLowerCase().indexOf(lower) > -1
+                        || appFieldToDisplayString(app.version).toLowerCase().indexOf(lower) > -1);
                 });
 
                 apps.sort(function (a, b) {
-                    let n1 = a.name.toLowerCase();
-                    let n2 = b.name.toLowerCase();
+                    let n1 = appFieldToDisplayString(a.name).toLowerCase();
+                    let n2 = appFieldToDisplayString(b.name).toLowerCase();
 
                     if (n1 === n2) {
                         return 0;
@@ -691,8 +792,14 @@ angular.module('headwind-kiosk')
                             });
 
                             if (mainApps.length > 0) {
-                                $scope.mainApp = mainApps[0];
-                                mainAppSelected = true;
+                                var mainInstallRow = mainApps.find(function (a) {
+                                    return a.action == 1;
+                                });
+                                $scope.mainApp = mainInstallRow || mainApps[0];
+                                mainAppSelected = !!mainInstallRow;
+                            } else {
+                                $scope.mainApp = {id: -1, name: ''};
+                                mainAppSelected = false;
                             }
                         }
 
@@ -702,10 +809,19 @@ angular.module('headwind-kiosk')
                             });
 
                             if (contentApps.length > 0) {
-                                $scope.contentApp = contentApps[0];
-                                contentAppSelected = true;
+                                var contentInstallRow = contentApps.find(function (a) {
+                                    return a.action == 1;
+                                });
+                                $scope.contentApp = contentInstallRow || contentApps[0];
+                                contentAppSelected = !!contentInstallRow;
+                            } else {
+                                $scope.contentApp = {id: -1, name: ''};
+                                contentAppSelected = false;
                             }
                         }
+
+                        syncMainApp();
+                        syncContentApp();
                     } else {
                         $scope.errorMessage = localization.localize(response.message);
                     }
@@ -734,9 +850,12 @@ angular.module('headwind-kiosk')
                     }
 
                     if (mainAppSelected) {
+                        var mainUid = ($scope.mainApp && $scope.mainApp.usedVersionId != null && $scope.mainApp.usedVersionId !== '')
+                            ? $scope.mainApp.usedVersionId
+                            : $scope.configuration.mainAppId;
                         var apps = allApplications.filter(function (app) {
                             // Intentionally using app.action == 1 but not app.action === 1
-                            return (app.action == 1) && sameUsedVersionId(app.usedVersionId, $scope.mainApp.usedVersionId);
+                            return (app.action == 1) && sameUsedVersionId(app.usedVersionId, mainUid);
                         });
 
                         if (apps.length === 0) {
@@ -744,15 +863,18 @@ angular.module('headwind-kiosk')
                             return;
                         }
 
-                        request["mainAppId"] = $scope.mainApp.usedVersionId;
+                        request["mainAppId"] = apps[0].usedVersionId;
                     } else {
                         request["mainAppId"] = null;
                     }
 
                     if (contentAppSelected) {
+                        var contentUid = ($scope.contentApp && $scope.contentApp.usedVersionId != null && $scope.contentApp.usedVersionId !== '')
+                            ? $scope.contentApp.usedVersionId
+                            : $scope.configuration.contentAppId;
                         var apps = allApplications.filter(function (app) {
                             // Intentionally using app.action == 1 but not app.action === 1
-                            return (app.action == 1) && sameUsedVersionId(app.usedVersionId, $scope.contentApp.usedVersionId);
+                            return (app.action == 1) && sameUsedVersionId(app.usedVersionId, contentUid);
                         });
 
                         if (apps.length === 0) {
@@ -760,7 +882,7 @@ angular.module('headwind-kiosk')
                             return;
                         }
 
-                        request["contentAppId"] = $scope.contentApp.usedVersionId;
+                        request["contentAppId"] = apps[0].usedVersionId;
                     } else {
                         request["contentAppId"] = null;
                     }
@@ -1072,41 +1194,77 @@ angular.module('headwind-kiosk')
             };
 
             var syncMainApp = function () {
-                if ($scope.configuration.mainAppId) {
-                    let mainAppInstalledVersion = $scope.applications.find(function (app) {
-                        // return app.id === $scope.mainApp.id && app.action == 1;
-                        return app.pkg === $scope.mainApp.pkg && app.action == 1;
+                if (!$scope.configuration.mainAppId) {
+                    return;
+                }
+                var mid = $scope.configuration.mainAppId;
+                var searchLists = [$scope.applications, allApplications];
+                for (var si = 0; si < searchLists.length; si++) {
+                    var list = searchLists[si];
+                    if (!list) {
+                        continue;
+                    }
+                    var byConfigVersion = list.find(function (app) {
+                        return app.action == 1 && sameUsedVersionId(app.usedVersionId, mid);
                     });
-
-                    if (mainAppInstalledVersion) {
-                        var copy = {};
-                        for (var p in mainAppInstalledVersion) {
-                            if (mainAppInstalledVersion.hasOwnProperty(p)) {
-                                copy[p] = mainAppInstalledVersion[p];
-                            }
-                        }
-                        $scope.mainApp = copy;
+                    if (byConfigVersion) {
+                        $scope.mainApp = shallowCopyApplication(byConfigVersion);
                         mainAppSelected = true;
+                        return;
+                    }
+                }
+                if ($scope.mainApp && $scope.mainApp.pkg) {
+                    for (var sj = 0; sj < searchLists.length; sj++) {
+                        var listP = searchLists[sj];
+                        if (!listP) {
+                            continue;
+                        }
+                        var byPkg = listP.find(function (app) {
+                            return app.pkg === $scope.mainApp.pkg && app.action == 1;
+                        });
+                        if (byPkg) {
+                            $scope.mainApp = shallowCopyApplication(byPkg);
+                            mainAppSelected = true;
+                            return;
+                        }
                     }
                 }
             };
 
             var syncContentApp = function () {
-                if ($scope.configuration.contentAppId) {
-                    let contentAppInstalledVersion = $scope.applications.find(function (app) {
-                        // return app.id === $scope.contentApp.id && app.action == 1;
-                        return app.pkg === $scope.contentApp.pkg && app.action == 1;
+                if (!$scope.configuration.contentAppId) {
+                    return;
+                }
+                var cid = $scope.configuration.contentAppId;
+                var searchListsC = [$scope.applications, allApplications];
+                for (var ci = 0; ci < searchListsC.length; ci++) {
+                    var listC = searchListsC[ci];
+                    if (!listC) {
+                        continue;
+                    }
+                    var byConfigVersionC = listC.find(function (app) {
+                        return app.action == 1 && sameUsedVersionId(app.usedVersionId, cid);
                     });
-
-                    if (contentAppInstalledVersion) {
-                        var copy = {};
-                        for (var p in contentAppInstalledVersion) {
-                            if (contentAppInstalledVersion.hasOwnProperty(p)) {
-                                copy[p] = contentAppInstalledVersion[p];
-                            }
-                        }
-                        $scope.contentApp = copy;
+                    if (byConfigVersionC) {
+                        $scope.contentApp = shallowCopyApplication(byConfigVersionC);
                         contentAppSelected = true;
+                        return;
+                    }
+                }
+                if ($scope.contentApp && $scope.contentApp.pkg) {
+                    for (var cj = 0; cj < searchListsC.length; cj++) {
+                        var listCP = searchListsC[cj];
+                        if (!listCP) {
+                            continue;
+                        }
+                        var byPkgC = listCP.find(function (app) {
+                            return app.pkg === $scope.contentApp.pkg && app.action == 1;
+                        });
+                        if (byPkgC) {
+                            $scope.contentApp = shallowCopyApplication(byPkgC);
+                            contentAppSelected = true;
+                            return;
+                        }
                     }
                 }
             };

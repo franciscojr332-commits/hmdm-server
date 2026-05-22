@@ -742,7 +742,7 @@
                                    uib-typeahead-focus-first="false"
                                    uib-typeahead-on-select="onMainAppSelected($item)"
                                    uib-typeahead-no-results="noResults">
-                            <span>{{trackMainApp(mainApp.id > 0)}}</span>
+                            <span>{{trackMainApp(mainApp.id > 0 && mainApp.action == 1)}}</span>
                         </div>
                     </div>
 
@@ -770,7 +770,7 @@
                                    uib-typeahead-focus-first="false"
                                    uib-typeahead-on-select="onContentAppSelected($item)"
                                    uib-typeahead-no-results="noResults2">
-                            <span>{{trackContentApp(contentApp.id > 0)}}</span>
+                            <span>{{trackContentApp(contentApp.id > 0 && contentApp.action == 1)}}</span>
                         </div>
                     </div>
 
