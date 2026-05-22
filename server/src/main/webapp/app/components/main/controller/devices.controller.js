@@ -913,10 +913,13 @@ angular.module('headwind-kiosk')
             if (m.type === 'notification' && (!m.msg || !m.msg.trim())) { m.error = 'Digite o texto.'; return; }
             m.sending = true; m.error = undefined; m.success = undefined;
             var reqs = sel.map(function(c) {
+                var messageType = m.messageType;
+                var payload = m.payload || '';
                 if (m.type === 'notification') {
-                    return $http.post('rest/plugins/messaging/private/send', {scope:'configuration', configurationId:c.id, message:m.msg.trim()});
+                    messageType = 'notification';
+                    payload = JSON.stringify({text: m.msg.trim()});
                 }
-                return $http.post('rest/plugins/push/private/send', {scope:'configuration', configurationId:c.id, messageType:m.messageType, payload:m.payload||''});
+                return $http.post('rest/plugins/push/private/send', {scope:'configuration', configurationId:c.id, messageType:messageType, payload:payload});
             });
             $q.all(reqs).then(
                 function() { m.sending = false; m.success = 'Enviado para ' + sel.length + ' grupo(s).'; },
