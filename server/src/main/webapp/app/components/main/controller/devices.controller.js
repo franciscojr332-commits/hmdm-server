@@ -898,6 +898,50 @@ angular.module('headwind-kiosk')
             }
         };
 
+        $scope.openBulkConfigUpdatedModal = function () {
+            $uibModal.open({
+                templateUrl: 'app/components/main/view/modal/device.bulkpush.html',
+                controller: 'BulkPushModalController',
+                resolve: {
+                    pushConfig: function () {
+                        return {
+                            title: 'Atualizar Configuração',
+                            messageType: 'configUpdated',
+                            payload: ''
+                        };
+                    },
+                    configurations: function () { return $scope.configurations; }
+                }
+            });
+        };
+
+        $scope.openBulkGrantPermissionsModal = function () {
+            $uibModal.open({
+                templateUrl: 'app/components/main/view/modal/device.bulkpush.html',
+                controller: 'BulkPushModalController',
+                resolve: {
+                    pushConfig: function () {
+                        return {
+                            title: 'Conceder Permissões',
+                            messageType: 'grantPermissions',
+                            payload: '{"pkg": "com.webkul.androidtracking"}'
+                        };
+                    },
+                    configurations: function () { return $scope.configurations; }
+                }
+            });
+        };
+
+        $scope.openBulkNotificationModal = function () {
+            $uibModal.open({
+                templateUrl: 'app/components/main/view/modal/device.notification.html',
+                controller: 'BulkNotificationModalController',
+                resolve: {
+                    configurations: function () { return $scope.configurations; }
+                }
+            });
+        };
+
         $scope.openBulkUpdateModal = function () {
             var modalInstance = $uibModal.open({
                 templateUrl: 'app/components/main/view/modal/device.update.html',
@@ -1690,4 +1734,120 @@ angular.module('headwind-kiosk')
 
         loadData();
 
+    })
+    .controller('BulkPushModalController', function ($scope, $uibModalInstance, $http, $q, pushConfig, configurations) {
+
+        $scope.modalTitle = pushConfig.title;
+        $scope.sending = false;
+        $scope.errorMessage = undefined;
+        $scope.successMessage = undefined;
+        $scope.selectAll = false;
+
+        $scope.configurations = (configurations || []).map(function (c) {
+            return { id: c.id, name: c.name, selected: false };
+        });
+
+        $scope.toggleAll = function () {
+            $scope.configurations.forEach(function (c) { c.selected = $scope.selectAll; });
+        };
+
+        $scope.onItemChange = function () {
+            $scope.selectAll = $scope.configurations.every(function (c) { return c.selected; });
+        };
+
+        $scope.noneSelected = function () {
+            return !$scope.configurations.some(function (c) { return c.selected; });
+        };
+
+        $scope.send = function () {
+            $scope.errorMessage = undefined;
+            $scope.successMessage = undefined;
+            $scope.sending = true;
+
+            var selected = $scope.configurations.filter(function (c) { return c.selected; });
+            var promises = selected.map(function (cfg) {
+                return $http.post('rest/plugins/push/private/send', {
+                    scope: 'configuration',
+                    configurationId: cfg.id,
+                    messageType: pushConfig.messageType,
+                    payload: pushConfig.payload
+                });
+            });
+
+            $q.all(promises).then(function (results) {
+                $scope.sending = false;
+                var errors = results.filter(function (r) { return r.data && r.data.status !== 'OK'; });
+                if (errors.length === 0) {
+                    $scope.successMessage = 'Enviado para ' + selected.length + ' grupo(s) com sucesso.';
+                } else {
+                    $scope.errorMessage = 'Erro em ' + errors.length + ' grupo(s). Verifique o plugin Push está ativo.';
+                }
+            }, function () {
+                $scope.sending = false;
+                $scope.errorMessage = 'Erro de comunicação com o servidor.';
+            });
+        };
+
+        $scope.closeModal = function () { $uibModalInstance.dismiss(); };
+    })
+    .controller('BulkNotificationModalController', function ($scope, $uibModalInstance, $http, $q, configurations) {
+
+        $scope.sending = false;
+        $scope.errorMessage = undefined;
+        $scope.successMessage = undefined;
+        $scope.selectAll = false;
+        $scope.messageText = '';
+
+        $scope.configurations = (configurations || []).map(function (c) {
+            return { id: c.id, name: c.name, selected: false };
+        });
+
+        $scope.toggleAll = function () {
+            $scope.configurations.forEach(function (c) { c.selected = $scope.selectAll; });
+        };
+
+        $scope.onItemChange = function () {
+            $scope.selectAll = $scope.configurations.every(function (c) { return c.selected; });
+        };
+
+        $scope.noneSelected = function () {
+            return !$scope.configurations.some(function (c) { return c.selected; });
+        };
+
+        $scope.send = function () {
+            $scope.errorMessage = undefined;
+            $scope.successMessage = undefined;
+
+            if (!$scope.messageText || $scope.messageText.trim() === '') {
+                $scope.errorMessage = 'Digite o texto da notificação.';
+                return;
+            }
+
+            $scope.sending = true;
+
+            var selected = $scope.configurations.filter(function (c) { return c.selected; });
+            var promises = selected.map(function (cfg) {
+                return $http.post('rest/plugins/messaging/private/send', {
+                    scope: 'configuration',
+                    configurationId: cfg.id,
+                    message: $scope.messageText.trim()
+                });
+            });
+
+            $q.all(promises).then(function (results) {
+                $scope.sending = false;
+                var errors = results.filter(function (r) { return r.data && r.data.status !== 'OK'; });
+                if (errors.length === 0) {
+                    $scope.successMessage = 'Notificação enviada para ' + selected.length + ' grupo(s).';
+                    $scope.messageText = '';
+                } else {
+                    $scope.errorMessage = 'Erro em ' + errors.length + ' grupo(s). Verifique o plugin Messaging está ativo.';
+                }
+            }, function () {
+                $scope.sending = false;
+                $scope.errorMessage = 'Erro de comunicação com o servidor.';
+            });
+        };
+
+        $scope.closeModal = function () { $uibModalInstance.dismiss(); };
     });

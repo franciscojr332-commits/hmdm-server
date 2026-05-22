@@ -1,0 +1,29 @@
+<div class="modal-header">
+    <h4 class="modal-title">{{modalTitle}}</h4>
+</div>
+<div class="modal-body">
+    <div class="alert alert-danger" ng-if="errorMessage">{{errorMessage}}</div>
+    <div class="alert alert-success" ng-if="successMessage">{{successMessage}}</div>
+
+    <div class="form-group">
+        <label><strong>Selecionar grupos:</strong></label>
+        <div class="checkbox" style="margin-bottom:4px">
+            <label style="font-weight:600">
+                <input type="checkbox" ng-model="selectAll" ng-change="toggleAll()"> Selecionar Todos
+            </label>
+        </div>
+        <hr style="margin:6px 0 8px 0">
+        <div class="checkbox" ng-repeat="cfg in configurations" style="margin-bottom:4px">
+            <label>
+                <input type="checkbox" ng-model="cfg.selected" ng-change="onItemChange()"> {{cfg.name}}
+            </label>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-default" ng-click="closeModal()" ng-disabled="sending">Cancelar</button>
+    <button type="button" class="btn btn-primary" ng-click="send()" ng-disabled="sending || noneSelected()">
+        <span ng-if="!sending">Enviar</span>
+        <span ng-if="sending"><span class="glyphicon glyphicon-refresh spinning"></span> Enviando...</span>
+    </button>
+</div>
