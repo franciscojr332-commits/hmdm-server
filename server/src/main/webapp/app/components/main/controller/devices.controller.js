@@ -914,12 +914,14 @@ angular.module('headwind-kiosk')
             m.sending = true; m.error = undefined; m.success = undefined;
             var reqs = sel.map(function(c) {
                 var messageType = m.messageType;
-                var payload = m.payload || '';
+                var payload = m.payload;
                 if (m.type === 'notification') {
                     messageType = 'notification';
                     payload = JSON.stringify({text: m.msg.trim()});
                 }
-                return $http.post('rest/plugins/push/private/send', {scope:'configuration', configurationId:c.id, messageType:messageType, payload:payload});
+                var body = {scope:'configuration', configurationId:c.id, messageType:messageType};
+                if (payload) { body.payload = payload; }
+                return $http.post('rest/plugins/push/private/send', body);
             });
             $q.all(reqs).then(
                 function() { m.sending = false; m.success = 'Enviado para ' + sel.length + ' grupo(s).'; },
@@ -936,7 +938,7 @@ angular.module('headwind-kiosk')
             };
         };
 
-        $scope.openBulkConfigUpdatedModal = function() { openBulkModal('push', 'Atualizar Configuração', 'configUpdated', ''); };
+        $scope.openBulkConfigUpdatedModal = function() { openBulkModal('push', 'Atualizar Configuração', 'configUpdated', null); };
         $scope.openBulkGrantPermissionsModal = function() { openBulkModal('push', 'Conceder Permissões APK', 'grantPermissions', '{"pkg":"com.webkul.androidtracking"}'); };
         $scope.openBulkNotificationModal = function() { openBulkModal('notification', 'Enviar Notificação', '', ''); };
 
