@@ -12,6 +12,7 @@ import com.hmdm.persistence.domain.Device;
 import org.mybatis.guice.transactional.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.List;
 
@@ -36,8 +37,18 @@ public class PushService {
 
     // Use both ways to send a message, because the decision how to receive messages is done on the device (configuration)
     public int send(PushMessage message) {
-        pushSenderMqtt.send(message);
-        return pushSenderPolling.send(message);
+        // HMDM-EVOLUTION F1.7: MDC for correlation (commandId is set after polling.send returns since it inserts)
+        try (MDC.MDCCloseable mdc1 = MDC.putCloseable("deviceId", String.valueOf(message.getDeviceId()))) {
+            log.debug("Dispatching push type={} deviceId={}", message.getMessageType(), message.getDeviceId());
+            pushSenderMqtt.send(message);
+            int result = pushSenderPolling.send(message);
+            if (message.getId() != null) {
+                MDC.put("commandId", String.valueOf(message.getId()));
+                log.debug("Push dispatched commandId={} type={}", message.getId(), message.getMessageType());
+                MDC.remove("commandId");
+            }
+            return result;
+        }
     }
 
     /**

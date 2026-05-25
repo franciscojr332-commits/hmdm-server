@@ -102,10 +102,16 @@ public class PushMessage implements Serializable {
     }
 
     public String toJsonString() {
+        // HMDM-EVOLUTION F1: include id for command tracking + F2 ACK protocol.
+        // Backward compatible: legacy agents ignore unknown 'id' field.
         StringBuilder sb = new StringBuilder();
-        sb.append("{\"messageType\":\"" + StringUtil.jsonEscape(messageType) + "\",\"payload\":");
+        sb.append("{");
+        if (id != null) {
+            sb.append("\"id\":").append(id).append(",");
+        }
+        sb.append("\"messageType\":\"").append(StringUtil.jsonEscape(messageType)).append("\",\"payload\":");
         if (payload != null) {
-            sb.append("\"" + StringUtil.jsonEscape(payload) + "\"");
+            sb.append("\"").append(StringUtil.jsonEscape(payload)).append("\"");
         } else {
             sb.append("null");
         }

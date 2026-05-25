@@ -36,6 +36,9 @@ import java.io.Serializable;
 public class PlainPushMessage implements Serializable {
 
     private static final long serialVersionUID = 5860815657249909466L;
+    // HMDM-EVOLUTION F1: include server-side id for command tracking + F2 ACK
+    @ApiModelProperty("Server-side message id (used for ACK in F2+)")
+    private Integer id;
     @ApiModelProperty("A type of the message")
     private String messageType;
     @ApiModelProperty("A payload for the message")
@@ -45,8 +48,17 @@ public class PlainPushMessage implements Serializable {
      * <p>Constructs new <code>PlainPushMessage</code> instance. This implementation does nothing.</p>
      */
     public PlainPushMessage(PushMessage original) {
+        this.id = original.getId();
         this.messageType = original.getMessageType();
         this.payload = original.getPayload();
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getMessageType() {
@@ -69,7 +81,8 @@ public class PlainPushMessage implements Serializable {
     @Override
     public String toString() {
         return "PlainPushMessage{" +
-                "messageType='" + messageType + '\'' +
+                "id=" + id +
+                ", messageType='" + messageType + '\'' +
                 ", payload='" + payload + '\'' +
                 '}';
     }

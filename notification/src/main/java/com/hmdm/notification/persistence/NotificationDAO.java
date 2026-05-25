@@ -23,9 +23,13 @@ package com.hmdm.notification.persistence;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.hmdm.notification.persistence.domain.CommandAuditEvent;
 import com.hmdm.notification.persistence.domain.PushMessage;
 import com.hmdm.notification.persistence.mapper.NotificationMapper;
 import org.mybatis.guice.transactional.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,14 +42,18 @@ import java.util.stream.Collectors;
 @Singleton
 public class NotificationDAO {
 
+    private static final Logger log = LoggerFactory.getLogger(NotificationDAO.class);
+
     private final NotificationMapper notificationMapper;
+    private final CommandAuditDAO auditDAO;
 
     /**
      * <p>Constructs new <code>NotificationDAO</code> instance. This implementation does nothing.</p>
      */
     @Inject
-    public NotificationDAO(NotificationMapper notificationMapper) {
+    public NotificationDAO(NotificationMapper notificationMapper, CommandAuditDAO auditDAO) {
         this.notificationMapper = notificationMapper;
+        this.auditDAO = auditDAO;
     }
 
     /**
@@ -61,6 +69,13 @@ public class NotificationDAO {
         if (!messages.isEmpty()) {
             final List<Integer> messageIds = messages.stream().map(PushMessage::getId).collect(Collectors.toList());
             this.notificationMapper.markMessagesAsDelivered(messageIds);
+            // HMDM-EVOLUTION F1.4: audit transition ENQUEUED → IN_FLIGHT
+            for (PushMessage m : messages) {
+                auditDAO.logTransition(m.getId(),
+                        CommandAuditEvent.STATE_ENQUEUED,
+                        CommandAuditEvent.STATE_IN_FLIGHT,
+                        "system:polling:" + deviceNumber);
+            }
         }
         return messages;
     }
@@ -78,6 +93,13 @@ public class NotificationDAO {
         if (!messages.isEmpty()) {
             final List<Integer> messageIds = messages.stream().map(PushMessage::getId).collect(Collectors.toList());
             this.notificationMapper.markMessagesAsDelivered(messageIds);
+            // HMDM-EVOLUTION F1.4: audit transition ENQUEUED → IN_FLIGHT
+            for (PushMessage m : messages) {
+                auditDAO.logTransition(m.getId(),
+                        CommandAuditEvent.STATE_ENQUEUED,
+                        CommandAuditEvent.STATE_IN_FLIGHT,
+                        "system:polling:deviceId=" + deviceId);
+            }
         }
         return messages;
     }
@@ -92,6 +114,16 @@ public class NotificationDAO {
     public int send(PushMessage message) {
         this.notificationMapper.insertPushMessage(message);
         this.notificationMapper.insertPendingPush(message.getId());
+        // HMDM-EVOLUTION F1.4 + F1.7: audit transition CREATED → ENQUEUED + MDC
+        try (MDC.MDCCloseable mdc1 = MDC.putCloseable("commandId", String.valueOf(message.getId()));
+             MDC.MDCCloseable mdc2 = MDC.putCloseable("deviceId", String.valueOf(message.getDeviceId()))) {
+            log.info("Command persisted type={} deviceId={}", message.getMessageType(), message.getDeviceId());
+            auditDAO.logTransition(message.getId(),
+                    CommandAuditEvent.STATE_CREATED,
+                    CommandAuditEvent.STATE_ENQUEUED,
+                    "system:send",
+                    "{\"messageType\":\"" + message.getMessageType() + "\"}");
+        }
         return message.getId();
     }
 
@@ -114,6 +146,8 @@ public class NotificationDAO {
      */
     @Transactional
     public void purgeMessages(int nonDeliveredMessagesLifeSpan, int deliveredMessagesLifeSpan) {
-        this.notificationMapper.purgeMessages(nonDeliveredMessagesLifeSpan * 1000, deliveredMessagesLifeSpan * 1000);
+        // HMDM-EVOLUTION F1.4: count purges for visibility (do not audit each — could be thousands)
+        // Future: insert audit row per purged messageId if business needs it
+        this.notificationMapper.purgeMessages(nonDeliveredMessagesLifeSpan * 1000L, deliveredMessagesLifeSpan * 1000L);
     }
 }

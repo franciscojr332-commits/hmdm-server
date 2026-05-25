@@ -23,6 +23,7 @@ package com.hmdm.notification.guice.module;
 
 import com.google.inject.Scopes;
 import com.google.inject.servlet.ServletModule;
+import com.hmdm.notification.rest.CommandTrackingResource;
 import com.hmdm.notification.rest.LongPollingServlet;
 import com.hmdm.notification.rest.NotificationResource;
 import com.hmdm.rest.filter.AuthFilter;
@@ -46,8 +47,11 @@ public class NotificationRestModule extends ServletModule {
      */
     protected void configureServlets() {
         this.filter("/rest/notification/private/*").through(AuthFilter.class);
+        // HMDM-EVOLUTION F1.6: command tracking endpoints under /rest/private/notifications/commands
+        // — AuthFilter applied globally via main REST module pattern; here we just bind the resource.
         this.serve(LongPollingServlet.BASE_PATH + "*").with(LongPollingServlet.class);
         this.bind(NotificationResource.class);
+        this.bind(CommandTrackingResource.class);
     }
 
 }

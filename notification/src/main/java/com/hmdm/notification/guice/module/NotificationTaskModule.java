@@ -23,6 +23,7 @@ package com.hmdm.notification.guice.module;
 
 import com.google.inject.Inject;
 import com.hmdm.notification.persistence.NotificationDAO;
+import com.hmdm.notification.task.CommandReconciliationTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,22 +39,32 @@ import java.util.concurrent.TimeUnit;
 public class NotificationTaskModule {
 
     private final ScheduledExecutorService messagePurgeService = Executors.newScheduledThreadPool(1);
+    // HMDM-EVOLUTION F1.5: separate scheduler for reconciliation
+    private final ScheduledExecutorService reconciliationService = Executors.newScheduledThreadPool(1);
 
     private final NotificationDAO notificationDAO;
+    private final CommandReconciliationTask reconciliationTask;
 
     /**
      * <p>Constructs new <code>NotificationTaskModule</code> instance. This implementation does nothing.</p>
      */
     @Inject
-    public NotificationTaskModule(NotificationDAO notificationDAO) {
+    public NotificationTaskModule(NotificationDAO notificationDAO, CommandReconciliationTask reconciliationTask) {
         this.notificationDAO = notificationDAO;
+        this.reconciliationTask = reconciliationTask;
     }
 
     public void init() {
         messagePurgeService.scheduleWithFixedDelay(new MessagePurgeWorker(notificationDAO),
                 1, 1, TimeUnit.HOURS);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(messagePurgeService::shutdown));
+        // HMDM-EVOLUTION F1.5: reconciliation every 60s, initial delay 30s
+        reconciliationService.scheduleWithFixedDelay(reconciliationTask, 30, 60, TimeUnit.SECONDS);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            messagePurgeService.shutdown();
+            reconciliationService.shutdown();
+        }));
     }
 
     /**

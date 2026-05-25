@@ -22,9 +22,12 @@
 package com.hmdm.notification.persistence.mapper;
 
 import com.hmdm.notification.persistence.domain.PushMessage;
+import com.hmdm.notification.rest.json.CommandStateView;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Result;
+import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.SelectKey;
 
@@ -81,4 +84,88 @@ public interface NotificationMapper {
             "     )" +
             ")")
     void purgeMessages(@Param("d1") long nonDeliveredMessagesLifeSpan, @Param("d2") long deliveredMessagesLifeSpan);
+
+    // HMDM-EVOLUTION F1.5: reconciliation queries
+
+    @Select("SELECT p.messageId " +
+            "FROM pendingPushes p " +
+            "WHERE p.status = 1 " +
+            "  AND p.sendTime IS NOT NULL " +
+            "  AND p.sendTime < #{staleBoundary} " +
+            "  AND p.delivered_ack_at IS NULL " +
+            "  AND NOT EXISTS (" +
+            "    SELECT 1 FROM mdm_command_audit a " +
+            "    WHERE a.message_id = p.messageId " +
+            "      AND a.event_type = 'RECONCILIATION' " +
+            "      AND a.to_state = 'IN_FLIGHT_STALE'" +
+            "  ) " +
+            "LIMIT 100")
+    List<Integer> findStaleInFlightIds(@Param("staleBoundary") long staleBoundaryMs);
+
+    @Select("SELECT p.messageId " +
+            "FROM pendingPushes p " +
+            "WHERE p.expires_at IS NOT NULL " +
+            "  AND p.expires_at < #{now} " +
+            "  AND p.executed_ack_at IS NULL " +
+            "  AND p.failed_at IS NULL " +
+            "  AND NOT EXISTS (" +
+            "    SELECT 1 FROM mdm_command_audit a " +
+            "    WHERE a.message_id = p.messageId " +
+            "      AND a.event_type = 'STATE_TRANSITION' " +
+            "      AND a.to_state = 'EXPIRED'" +
+            "  ) " +
+            "LIMIT 100")
+    List<Integer> findExpiredIds(@Param("now") long nowMs);
+
+    // HMDM-EVOLUTION F1.6: command tracking queries (via v_command_state view)
+
+    @Select("<script>" +
+            "SELECT messageId, pending_id AS pendingId, deviceId, messageType, payload, " +
+            "       created_at AS createdAt, sent_at AS sentAt, delivered_ack_at AS deliveredAckAt, " +
+            "       executed_ack_at AS executedAckAt, failed_at AS failedAt, expires_at AS expiresAt, " +
+            "       retry_count AS retryCount, max_retries AS maxRetries, " +
+            "       failure_code AS failureCode, failure_message AS failureMessage, " +
+            "       device_sequence_num AS deviceSequenceNum, " +
+            "       correlation_id::TEXT AS correlationId, " +
+            "       created_by_user_id AS createdByUserId, created_by_source AS createdBySource, " +
+            "       state " +
+            "FROM v_command_state " +
+            "<where>" +
+            "  <if test='deviceId != null'>AND deviceId = #{deviceId}</if>" +
+            "  <if test='state != null'>AND state = #{state}</if>" +
+            "  <if test='messageType != null'>AND messageType = #{messageType}</if>" +
+            "  <if test='since != null'>AND created_at &gt;= #{since}</if>" +
+            "</where>" +
+            "ORDER BY created_at DESC " +
+            "LIMIT #{limit} OFFSET #{offset}" +
+            "</script>")
+    List<CommandStateView> findCommands(@Param("deviceId") Integer deviceId,
+                                         @Param("state") String state,
+                                         @Param("messageType") String messageType,
+                                         @Param("since") Long since,
+                                         @Param("limit") int limit,
+                                         @Param("offset") int offset);
+
+    @Select("SELECT messageId, pending_id AS pendingId, deviceId, messageType, payload, " +
+            "       created_at AS createdAt, sent_at AS sentAt, delivered_ack_at AS deliveredAckAt, " +
+            "       executed_ack_at AS executedAckAt, failed_at AS failedAt, expires_at AS expiresAt, " +
+            "       retry_count AS retryCount, max_retries AS maxRetries, " +
+            "       failure_code AS failureCode, failure_message AS failureMessage, " +
+            "       device_sequence_num AS deviceSequenceNum, " +
+            "       correlation_id::TEXT AS correlationId, " +
+            "       created_by_user_id AS createdByUserId, created_by_source AS createdBySource, " +
+            "       state " +
+            "FROM v_command_state WHERE messageId = #{messageId}")
+    CommandStateView findCommandById(@Param("messageId") int messageId);
+
+    @Select("SELECT state, COUNT(*) AS count FROM v_command_state " +
+            "<script>" +
+            "  <where>" +
+            "    <if test='since != null'>AND created_at &gt;= #{since}</if>" +
+            "    <if test='deviceId != null'>AND deviceId = #{deviceId}</if>" +
+            "  </where>" +
+            "</script>" +
+            " GROUP BY state ORDER BY state")
+    List<java.util.Map<String, Object>> countByState(@Param("since") Long since,
+                                                       @Param("deviceId") Integer deviceId);
 }
