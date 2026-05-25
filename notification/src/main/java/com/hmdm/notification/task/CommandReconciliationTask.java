@@ -60,18 +60,54 @@ public class CommandReconciliationTask implements Runnable {
     }
 
     private int checkStaleInFlight(long staleBoundary) {
-        List<Integer> staleIds = mapper.findStaleInFlightIds(staleBoundary);
-        for (Integer messageId : staleIds) {
-            log.warn("Stale IN_FLIGHT detected: messageId={} no_ack_for_{}ms", messageId, STALE_THRESHOLD_MS);
+        // HMDM-EVOLUTION F2 DUAL MODE:
+        //   Legacy devices (agent_supports_ack=FALSE) — OBSERVE-ONLY, no reset
+        //   F2+ devices (agent_supports_ack=TRUE) — RESET status=1→0 for retry
+
+        // BRANCH 1: legacy devices — log + audit only (zero impact)
+        List<Integer> legacyStaleIds = mapper.findStaleInFlightIds(staleBoundary);
+        for (Integer messageId : legacyStaleIds) {
+            log.warn("Stale IN_FLIGHT (legacy device, no reset): messageId={} no_ack_for_{}ms",
+                    messageId, STALE_THRESHOLD_MS);
             auditDAO.logEvent(messageId,
                     CommandAuditEvent.EVENT_RECONCILIATION,
                     CommandAuditEvent.STATE_IN_FLIGHT,
                     "IN_FLIGHT_STALE",
                     "system:reconciliation",
-                    "{\"reason\":\"no_delivery_ack_within_threshold\",\"threshold_ms\":" + STALE_THRESHOLD_MS + "}",
+                    "{\"reason\":\"no_delivery_ack_within_threshold\",\"threshold_ms\":" +
+                        STALE_THRESHOLD_MS + ",\"reset\":false}",
                     null);
         }
-        return staleIds.size();
+
+        // BRANCH 2: F2 devices — reset to ENQUEUED for retry
+        List<Integer> resetableIds = mapper.findResetableStaleInFlightIds(staleBoundary);
+        int resetCount = 0;
+        for (Integer messageId : resetableIds) {
+            log.warn("Stale IN_FLIGHT (F2 device, resetting): messageId={}", messageId);
+            int reset = mapper.resetStaleInFlight(messageId);
+            if (reset > 0) {
+                resetCount++;
+                auditDAO.logEvent(messageId,
+                        CommandAuditEvent.EVENT_RECONCILIATION,
+                        CommandAuditEvent.STATE_IN_FLIGHT,
+                        "IN_FLIGHT_STALE_RESET",
+                        "system:reconciliation",
+                        "{\"reason\":\"stale_in_flight_reset\",\"threshold_ms\":" +
+                            STALE_THRESHOLD_MS + ",\"reset\":true}",
+                        null);
+            } else {
+                // Race condition: ACK arrived between SELECT and UPDATE
+                auditDAO.logEvent(messageId,
+                        CommandAuditEvent.EVENT_RECONCILIATION,
+                        CommandAuditEvent.STATE_IN_FLIGHT,
+                        "IN_FLIGHT_RACE_ACKED",
+                        "system:reconciliation",
+                        "{\"reason\":\"ack_arrived_during_reset\"}",
+                        null);
+            }
+        }
+
+        return legacyStaleIds.size() + resetCount;
     }
 
     private int checkExpired(long now) {

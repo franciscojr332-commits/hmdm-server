@@ -178,6 +178,24 @@
         </rollback>
     </changeSet>
 
+    <changeSet id="notification-2026-05-25-device-ack-flag" author="hmdm-evolution" context="common">
+        <comment>F2.1.0: per-device flag for ACK protocol support.
+                 Reconciliation reset acts ONLY on devices with flag=TRUE (avoids breaking legacy APKs).</comment>
+        <sql>
+            ALTER TABLE devices ADD COLUMN agent_supports_ack BOOLEAN NOT NULL DEFAULT FALSE;
+            ALTER TABLE devices ADD COLUMN agent_supports_ack_since BIGINT;
+
+            CREATE INDEX idx_devices_supports_ack
+                ON devices (agent_supports_ack)
+                WHERE agent_supports_ack = TRUE;
+        </sql>
+        <rollback>
+            DROP INDEX IF EXISTS idx_devices_supports_ack;
+            ALTER TABLE devices DROP COLUMN agent_supports_ack;
+            ALTER TABLE devices DROP COLUMN agent_supports_ack_since;
+        </rollback>
+    </changeSet>
+
     <changeSet id="notification-2026-05-25-state-view" author="hmdm-evolution" context="common">
         <comment>F1.5: Derived state view (no schema impact, helper for queries and admin UI)</comment>
         <sql>

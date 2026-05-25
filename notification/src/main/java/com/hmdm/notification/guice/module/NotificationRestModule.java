@@ -23,6 +23,7 @@ package com.hmdm.notification.guice.module;
 
 import com.google.inject.Scopes;
 import com.google.inject.servlet.ServletModule;
+import com.hmdm.notification.rest.AckResource;
 import com.hmdm.notification.rest.CommandTrackingResource;
 import com.hmdm.notification.rest.LongPollingServlet;
 import com.hmdm.notification.rest.NotificationResource;
@@ -52,6 +53,8 @@ public class NotificationRestModule extends ServletModule {
         this.serve(LongPollingServlet.BASE_PATH + "*").with(LongPollingServlet.class);
         this.bind(NotificationResource.class);
         this.bind(CommandTrackingResource.class);
+        // HMDM-EVOLUTION F2: ACK endpoints
+        this.bind(AckResource.class);
     }
 
 }

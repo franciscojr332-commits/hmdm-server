@@ -47,6 +47,7 @@ import com.hmdm.event.DeviceBatteryLevelUpdatedEvent;
 import com.hmdm.event.DeviceInfoUpdatedEvent;
 import com.hmdm.event.DeviceLocationUpdatedEvent;
 import com.hmdm.event.EventService;
+import com.hmdm.notification.persistence.mapper.NotificationMapper;
 import com.hmdm.persistence.CustomerDAO;
 import com.hmdm.persistence.DeviceDAO;
 import com.hmdm.persistence.domain.ApplicationSetting;
@@ -91,6 +92,9 @@ public class SyncResource {
 
     private CustomerDAO customerDAO;
 
+    // HMDM-EVOLUTION F2: mark devices supporting ACK protocol on sync
+    private NotificationMapper notificationMapper;
+
     /**
      * <p>A service used for sending notifications on battery level update for device</p>
      */
@@ -113,6 +117,8 @@ public class SyncResource {
     private static final String HEADER_CPU_ARCH = "X-CPU-Arch";
     private static final String HEADER_ENROLLMENT_SIGNATURE = "X-Request-Signature";
     private static final String HEADER_RESPONSE_SIGNATURE = "X-Response-Signature";
+    // HMDM-EVOLUTION F2: agent capability declaration
+    private static final String HEADER_AGENT_ACK_CAPABLE = "X-Agent-Ack-Capable";
 
     private String mobileAppName;
     private String vendor;
@@ -132,6 +138,7 @@ public class SyncResource {
                         Injector injector,
                         CustomerDAO customerDAO,
                         DeviceDAO deviceDAO,
+                        NotificationMapper notificationMapper,
                         @Named("base.url") String baseUrl,
                         @Named("secure.enrollment") boolean secureEnrollment,
                         @Named("hash.secret") String hashSecret,
@@ -144,6 +151,7 @@ public class SyncResource {
         this.eventService = eventService;
         this.customerDAO = customerDAO;
         this.deviceDAO = deviceDAO;
+        this.notificationMapper = notificationMapper;
         this.baseUrl = baseUrl;
         this.secureEnrollment = secureEnrollment;
         this.hashSecret = hashSecret;
@@ -301,6 +309,20 @@ public class SyncResource {
             // If a device requested the configuration by new device ID, the migration is completed
             unsecureDAO.completeDeviceMigration(dbDevice.getId());
             dbDevice.setOldNumber(null);
+        }
+
+        // HMDM-EVOLUTION F2: detect ACK-capable agent and mark flag.
+        // Idempotent — only updates if currently FALSE.
+        String ackCapable = request != null ? request.getHeader(HEADER_AGENT_ACK_CAPABLE) : null;
+        if (ackCapable != null && ("1".equals(ackCapable) || "true".equalsIgnoreCase(ackCapable))) {
+            try {
+                int updated = notificationMapper.markDeviceAckCapable(dbDevice.getId(), System.currentTimeMillis());
+                if (updated > 0) {
+                    logger.info("Device {} marked as ACK-capable (F2 agent detected)", dbDevice.getNumber());
+                }
+            } catch (Exception e) {
+                logger.warn("Failed to mark device {} as ACK-capable: {}", dbDevice.getNumber(), e.getMessage());
+            }
         }
 
         final Customer customer = this.customerDAO.findById(dbDevice.getCustomerId());

@@ -9,8 +9,6 @@
 
 package com.hmdm.notification.rest;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.hmdm.notification.persistence.CommandAuditDAO;
 import com.hmdm.notification.persistence.domain.CommandAuditEvent;
 import com.hmdm.notification.persistence.mapper.NotificationMapper;
@@ -20,6 +18,8 @@ import com.hmdm.rest.json.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -37,8 +37,11 @@ public class CommandTrackingResource {
 
     private static final Logger log = LoggerFactory.getLogger(CommandTrackingResource.class);
 
-    private final NotificationMapper mapper;
-    private final CommandAuditDAO auditDAO;
+    private NotificationMapper mapper;
+    private CommandAuditDAO auditDAO;
+
+    public CommandTrackingResource() {
+    }
 
     @Inject
     public CommandTrackingResource(NotificationMapper mapper, CommandAuditDAO auditDAO) {

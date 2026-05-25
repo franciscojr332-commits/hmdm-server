@@ -30,6 +30,7 @@ import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.SelectKey;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -168,4 +169,55 @@ public interface NotificationMapper {
             " GROUP BY state ORDER BY state")
     List<java.util.Map<String, Object>> countByState(@Param("since") Long since,
                                                        @Param("deviceId") Integer deviceId);
+
+    // HMDM-EVOLUTION F2: ACK protocol state transitions (idempotent updates)
+
+    @Update("UPDATE pendingPushes SET delivered_ack_at = #{ackAt} " +
+            "WHERE messageId = #{messageId} AND delivered_ack_at IS NULL")
+    int markDelivered(@Param("messageId") int messageId, @Param("ackAt") long ackAt);
+
+    @Update("UPDATE pendingPushes SET executed_ack_at = #{ackAt} " +
+            "WHERE messageId = #{messageId} AND executed_ack_at IS NULL AND failed_at IS NULL")
+    int markExecuted(@Param("messageId") int messageId, @Param("ackAt") long ackAt);
+
+    @Update("UPDATE pendingPushes SET failed_at = #{failedAt}, failure_code = #{code}, failure_message = #{msg} " +
+            "WHERE messageId = #{messageId} AND executed_ack_at IS NULL AND failed_at IS NULL")
+    int markFailed(@Param("messageId") int messageId,
+                    @Param("failedAt") long failedAt,
+                    @Param("code") String code,
+                    @Param("msg") String msg);
+
+    @Update("UPDATE pendingPushes SET status = 0, sendTime = NULL " +
+            "WHERE messageId = #{messageId} AND status = 1 AND delivered_ack_at IS NULL")
+    int resetStaleInFlight(@Param("messageId") int messageId);
+
+    @Select("SELECT deviceId FROM pushMessages WHERE id = #{messageId}")
+    Integer findDeviceIdByMessageId(@Param("messageId") int messageId);
+
+    // F2 mitigation: stale IN_FLIGHT for devices WITH agent_supports_ack=TRUE only.
+    // Legacy devices stay observed-only via findStaleInFlightIds (no reset).
+    @Select("SELECT p.messageId " +
+            "FROM pendingPushes p " +
+            "INNER JOIN pushMessages m ON m.id = p.messageId " +
+            "INNER JOIN devices d ON d.id = m.deviceId " +
+            "WHERE p.status = 1 " +
+            "  AND p.sendTime IS NOT NULL " +
+            "  AND p.sendTime < #{staleBoundary} " +
+            "  AND p.delivered_ack_at IS NULL " +
+            "  AND d.agent_supports_ack = TRUE " +
+            "  AND NOT EXISTS (" +
+            "    SELECT 1 FROM mdm_command_audit a " +
+            "    WHERE a.message_id = p.messageId " +
+            "      AND a.event_type = 'RECONCILIATION' " +
+            "      AND a.to_state = 'IN_FLIGHT_STALE_RESET' " +
+            "      AND a.event_at > p.sendTime " +
+            "  ) " +
+            "LIMIT 100")
+    List<Integer> findResetableStaleInFlightIds(@Param("staleBoundary") long staleBoundaryMs);
+
+    // Mark device agent capability — called when agent sends X-Agent-Ack-Capable header.
+    @Update("UPDATE devices SET agent_supports_ack = TRUE, " +
+            "agent_supports_ack_since = COALESCE(agent_supports_ack_since, #{now}) " +
+            "WHERE id = #{deviceId} AND agent_supports_ack = FALSE")
+    int markDeviceAckCapable(@Param("deviceId") int deviceId, @Param("now") long now);
 }
