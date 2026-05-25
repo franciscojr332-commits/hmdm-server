@@ -59,4 +59,163 @@
         </rollback>
     </changeSet>
 
+    <changeSet id="notification-2026-05-25-extend-pendingpushes" author="hmdm-evolution" context="common">
+        <comment>F1.1: Extend pendingPushes for command lifecycle tracking (ACK protocol prep)</comment>
+        <sql>
+            ALTER TABLE pendingPushes
+                ADD COLUMN device_sequence_num BIGINT,
+                ADD COLUMN delivered_ack_at BIGINT,
+                ADD COLUMN executed_ack_at BIGINT,
+                ADD COLUMN failed_at BIGINT,
+                ADD COLUMN failure_code VARCHAR(64),
+                ADD COLUMN failure_message TEXT,
+                ADD COLUMN retry_count INT NOT NULL DEFAULT 0,
+                ADD COLUMN max_retries INT NOT NULL DEFAULT 3,
+                ADD COLUMN next_attempt_at BIGINT,
+                ADD COLUMN expires_at BIGINT,
+                ADD COLUMN correlation_id UUID,
+                ADD COLUMN created_by_user_id INT REFERENCES users(id),
+                ADD COLUMN created_by_source VARCHAR(32);
+
+            CREATE INDEX idx_pending_state_device
+                ON pendingPushes (status, messageId);
+
+            CREATE INDEX idx_pending_next_attempt
+                ON pendingPushes (next_attempt_at)
+                WHERE next_attempt_at IS NOT NULL;
+
+            CREATE INDEX idx_pending_expires
+                ON pendingPushes (expires_at)
+                WHERE expires_at IS NOT NULL;
+        </sql>
+        <rollback>
+            DROP INDEX IF EXISTS idx_pending_state_device;
+            DROP INDEX IF EXISTS idx_pending_next_attempt;
+            DROP INDEX IF EXISTS idx_pending_expires;
+            ALTER TABLE pendingPushes
+                DROP COLUMN device_sequence_num,
+                DROP COLUMN delivered_ack_at,
+                DROP COLUMN executed_ack_at,
+                DROP COLUMN failed_at,
+                DROP COLUMN failure_code,
+                DROP COLUMN failure_message,
+                DROP COLUMN retry_count,
+                DROP COLUMN max_retries,
+                DROP COLUMN next_attempt_at,
+                DROP COLUMN expires_at,
+                DROP COLUMN correlation_id,
+                DROP COLUMN created_by_user_id,
+                DROP COLUMN created_by_source;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="notification-2026-05-25-device-sequence-trigger" author="hmdm-evolution" context="common">
+        <comment>F1.2: Trigger to populate device_sequence_num and expires_at on insert</comment>
+        <sql splitStatements="false">
+            CREATE OR REPLACE FUNCTION fn_pending_pushes_set_sequence()
+            RETURNS TRIGGER AS $$
+            DECLARE
+                v_device_id INT;
+                v_next_seq BIGINT;
+            BEGIN
+                SELECT deviceId INTO v_device_id FROM pushMessages WHERE id = NEW.messageId;
+
+                SELECT COALESCE(MAX(p.device_sequence_num), 0) + 1
+                INTO v_next_seq
+                FROM pendingPushes p
+                INNER JOIN pushMessages m ON m.id = p.messageId
+                WHERE m.deviceId = v_device_id;
+
+                NEW.device_sequence_num := v_next_seq;
+                NEW.expires_at := COALESCE(NEW.expires_at, NEW.createTime + (7 * 24 * 3600 * 1000));
+                RETURN NEW;
+            END;
+            $$ LANGUAGE plpgsql;
+
+            CREATE TRIGGER trg_pending_pushes_sequence
+            BEFORE INSERT ON pendingPushes
+            FOR EACH ROW EXECUTE FUNCTION fn_pending_pushes_set_sequence();
+        </sql>
+        <rollback>
+            DROP TRIGGER IF EXISTS trg_pending_pushes_sequence ON pendingPushes;
+            DROP FUNCTION IF EXISTS fn_pending_pushes_set_sequence();
+        </rollback>
+    </changeSet>
+
+    <changeSet id="notification-2026-05-25-command-audit-table" author="hmdm-evolution" context="common">
+        <comment>F1.3: Append-only audit log for command state transitions</comment>
+        <sql>
+            CREATE TABLE mdm_command_audit (
+                id BIGSERIAL PRIMARY KEY,
+                message_id INT NOT NULL,
+                event_type VARCHAR(32) NOT NULL,
+                from_state VARCHAR(24),
+                to_state VARCHAR(24),
+                event_at BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM NOW()) * 1000)::BIGINT,
+                actor VARCHAR(128),
+                details JSONB,
+                ip_address INET
+            );
+
+            CREATE INDEX idx_audit_message ON mdm_command_audit (message_id, event_at);
+            CREATE INDEX idx_audit_event_at ON mdm_command_audit (event_at);
+            CREATE INDEX idx_audit_event_type ON mdm_command_audit (event_type);
+        </sql>
+        <rollback>
+            DROP TABLE mdm_command_audit;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="notification-2026-05-25-backfill-expires-at" author="hmdm-evolution" context="common">
+        <comment>F1.4: Backfill expires_at for existing rows (7d from createTime)</comment>
+        <sql>
+            UPDATE pendingPushes
+            SET expires_at = createTime + (7 * 24 * 3600 * 1000)
+            WHERE expires_at IS NULL;
+        </sql>
+        <rollback>
+            UPDATE pendingPushes SET expires_at = NULL;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="notification-2026-05-25-state-view" author="hmdm-evolution" context="common">
+        <comment>F1.5: Derived state view (no schema impact, helper for queries and admin UI)</comment>
+        <sql>
+            CREATE OR REPLACE VIEW v_command_state AS
+            SELECT
+                p.messageId,
+                p.id AS pending_id,
+                m.deviceId,
+                m.messageType,
+                m.payload,
+                p.createTime AS created_at,
+                p.sendTime AS sent_at,
+                p.delivered_ack_at,
+                p.executed_ack_at,
+                p.failed_at,
+                p.expires_at,
+                p.retry_count,
+                p.max_retries,
+                p.failure_code,
+                p.failure_message,
+                p.device_sequence_num,
+                p.correlation_id,
+                p.created_by_user_id,
+                p.created_by_source,
+                CASE
+                    WHEN p.executed_ack_at IS NOT NULL THEN 'EXECUTED'
+                    WHEN p.failed_at IS NOT NULL THEN 'FAILED'
+                    WHEN p.delivered_ack_at IS NOT NULL THEN 'DELIVERED'
+                    WHEN p.expires_at IS NOT NULL AND p.expires_at &lt; EXTRACT(EPOCH FROM NOW()) * 1000 THEN 'EXPIRED'
+                    WHEN p.status = 1 THEN 'IN_FLIGHT'
+                    ELSE 'ENQUEUED'
+                END AS state
+            FROM pendingPushes p
+            INNER JOIN pushMessages m ON m.id = p.messageId;
+        </sql>
+        <rollback>
+            DROP VIEW IF EXISTS v_command_state;
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>

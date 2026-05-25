@@ -67,11 +67,16 @@ public class NotificationTaskModule {
             this.notificationDAO = notificationDAO;
         }
 
+        // HMDM-EVOLUTION F0.1: non-delivered TTL raised from 1h to 7 days
+        // to survive weekend offline periods. Pair with reconciliation job (F1) for retry coverage.
+        private static final int NON_DELIVERED_LIFESPAN_SEC = 7 * 24 * 3600;
+        private static final int DELIVERED_LIFESPAN_SEC = 7 * 24 * 3600;
+
         @Override
         public void run() {
             log.info("Starting the iteration ...");
             try {
-                this.notificationDAO.purgeMessages(3600, 7 * 24 * 3600);
+                this.notificationDAO.purgeMessages(NON_DELIVERED_LIFESPAN_SEC, DELIVERED_LIFESPAN_SEC);
                 log.info("Finished the iteration.");
             } catch (Exception e) {
                 log.error("Unexpected error when purging the push messages", e);
