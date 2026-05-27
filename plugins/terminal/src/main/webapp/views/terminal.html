@@ -1,0 +1,373 @@
+<div ng-controller="PluginTerminalTabController">
+
+    <style>
+        .term-wrap { display:flex; gap:8px; height: calc(100vh - 220px); min-height: 480px; }
+        .term-col { background:#161b22; border:1px solid #30363d; border-radius:6px; padding:8px; }
+        .term-col-devices { flex: 0 0 240px; overflow-y:auto; }
+        .term-col-console { flex: 1 1 auto; display:flex; flex-direction:column; min-width:0; }
+        .term-col-snippets { flex: 0 0 280px; overflow-y:auto; }
+        .term-col h4 { color:#c9d1d9; font-size:13px; margin:4px 0 8px; border-bottom:1px solid #30363d; padding-bottom:4px; }
+
+        .term-device-row { display:flex; align-items:center; gap:6px; padding:4px 2px; border-bottom:1px dotted #21262d; color:#c9d1d9; font-size:12px; cursor:pointer; }
+        .term-device-row:hover { background:#21262d; }
+        .term-device-row input[type=checkbox] { margin:0; }
+        .term-dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+        .term-dot.on  { background:#3fb950; }
+        .term-dot.off { background:#8b949e; }
+        .term-device-meta { color:#8b949e; font-size:10px; }
+
+        .term-console { flex:1; background:#0d1117; color:#c9d1d9; font-family: 'Fira Code','JetBrains Mono','Courier New', monospace; font-size:12px; padding:8px; overflow-y:scroll; border-radius:4px; white-space:pre-wrap; }
+        .term-line { padding:2px 0; border-bottom:1px solid #161b22; }
+        .term-prefix { color:#58a6ff; }
+        .term-ts { color:#6e7681; margin-right:6px; }
+        .term-ok      { color:#3fb950; }
+        .term-error   { color:#f85149; }
+        .term-pending { color:#d29922; }
+        .term-info    { color:#58a6ff; }
+        .term-local   { color:#bc8cff; }
+        .term-log     { color:#c9d1d9; }
+
+        .term-input-row { display:flex; gap:6px; margin-top:6px; }
+        .term-input { flex:1; background:#0d1117; color:#c9d1d9; border:1px solid #30363d; border-radius:4px; padding:8px; font-family: 'Fira Code','JetBrains Mono','Courier New', monospace; font-size:12px; min-height:64px; resize:vertical; }
+        .term-input:focus { outline:none; border-color:#58a6ff; }
+
+        .term-btn { background:#238636; color:white; border:none; border-radius:4px; padding:8px 14px; cursor:pointer; font-size:12px; }
+        .term-btn:hover { background:#2ea043; }
+        .term-btn:disabled { background:#30363d; cursor:not-allowed; }
+        .term-btn-ghost { background:transparent; color:#c9d1d9; border:1px solid #30363d; }
+        .term-btn-ghost:hover { background:#21262d; }
+        .term-btn-warn { background:#9e1f1f; }
+
+        .term-snip-cat { color:#7d8590; font-size:11px; text-transform:uppercase; margin-top:8px; padding:2px; }
+        .term-snip-item { display:flex; align-items:center; padding:4px 6px; border-radius:3px; cursor:pointer; color:#c9d1d9; font-size:12px; }
+        .term-snip-item:hover { background:#21262d; }
+        .term-snip-item.destructive { color:#f85149; }
+        .term-snip-item .term-snip-go { color:#58a6ff; margin-left:auto; }
+
+        .term-statusbar { display:flex; gap:14px; color:#8b949e; font-size:11px; padding:6px 8px; background:#161b22; border-top:1px solid #30363d; border-radius:0 0 6px 6px; }
+        .term-statusbar b { color:#c9d1d9; }
+
+        .term-tabs { display:flex; gap:2px; padding:0 4px; margin-bottom:4px; flex-wrap:wrap; }
+        .term-tab { background:#161b22; color:#8b949e; border:1px solid #30363d; border-radius:4px 4px 0 0; padding:4px 10px; cursor:pointer; font-size:11px; display:flex; align-items:center; gap:6px; }
+        .term-tab:hover { background:#21262d; color:#c9d1d9; }
+        .term-tab.active { background:#0d1117; color:#58a6ff; border-bottom-color:#0d1117; }
+        .term-tab .badge { background:#d29922; color:#0d1117; font-weight:bold; border-radius:8px; padding:0 6px; font-size:10px; }
+
+        .term-toolbar { display:flex; gap:6px; align-items:center; margin-bottom:4px; }
+        .term-grep { flex:1; background:#0d1117; color:#c9d1d9; border:1px solid #30363d; border-radius:4px; padding:4px 8px; font-size:11px; font-family: 'Fira Code', monospace; }
+        .term-scroll-pill { color:#d29922; background:#3d2e0a; padding:1px 6px; border-radius:8px; font-size:10px; }
+    </style>
+
+    <h3 style="color:#c9d1d9; margin-top:6px; display:flex; align-items:center; gap:10px;">
+        <i class="fa fa-terminal"></i>
+        <span>{{"plugin.terminal.title" | localize}}</span>
+        <button class="term-btn term-btn-ghost" ng-click="openHistory()" style="margin-left:auto;" title="{{'plugin.terminal.history' | localize}}">📜 {{"plugin.terminal.history" | localize}}</button>
+    </h3>
+
+    <div class="term-wrap">
+
+        <!-- ─── DEVICES ─────────────────────────────────────────── -->
+        <div class="term-col term-col-devices">
+            <h4>{{"plugin.terminal.devices" | localize}}</h4>
+            <div style="display:flex; gap:4px; margin-bottom:6px;">
+                <button class="term-btn term-btn-ghost" ng-click="selectAll()" title="{{'plugin.terminal.select.all' | localize}}">▣</button>
+                <button class="term-btn term-btn-ghost" ng-click="selectOnline()" title="{{'plugin.terminal.select.online' | localize}}">🟢</button>
+                <button class="term-btn term-btn-ghost" ng-click="selectNone()" title="{{'plugin.terminal.select.none' | localize}}">✖</button>
+                <button class="term-btn term-btn-ghost" ng-click="refreshDevices()" title="↻">↻</button>
+            </div>
+            <div class="term-device-row" ng-repeat="d in devices track by d.id"
+                 ng-click="selectedDevices[d.id] = !selectedDevices[d.id]">
+                <input type="checkbox" ng-model="selectedDevices[d.id]" ng-click="$event.stopPropagation()" />
+                <span class="term-dot" ng-class="d.online ? 'on' : 'off'"></span>
+                <div style="flex:1; min-width:0;">
+                    <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{d.number}}</div>
+                    <div class="term-device-meta">cfg #{{d.configurationId}} · pend {{d.pendingCount || 0}}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── CONSOLE ─────────────────────────────────────────── -->
+        <div class="term-col term-col-console">
+            <h4 style="display:flex; align-items:center; gap:8px;">
+                {{"plugin.terminal.console" | localize}}
+                <span style="margin-left:auto;">
+                    <button class="term-btn term-btn-ghost" ng-click="clearConsole()" title="Ctrl+L">⌫</button>
+                    <button class="term-btn term-btn-ghost" ng-click="exportConsole()" title="Exportar .txt">⤓</button>
+                </span>
+            </h4>
+
+            <!-- TABS -->
+            <div class="term-tabs">
+                <div class="term-tab" ng-class="{active: activeTabDeviceId === null}" ng-click="selectTab(null)">
+                    ALL <span ng-if="outputs.length" style="color:#6e7681;">({{outputs.length}})</span>
+                </div>
+                <div class="term-tab"
+                     ng-repeat="t in openTabs() track by t.id"
+                     ng-class="{active: activeTabDeviceId === t.id}"
+                     ng-click="selectTab(t.id)">
+                    {{t.label}}
+                    <span class="badge" ng-if="t.badge > 0">{{t.badge}}</span>
+                </div>
+            </div>
+
+            <!-- TOOLBAR (grep + scroll lock indicator) -->
+            <div class="term-toolbar">
+                <input class="term-grep" type="text" ng-model="grepFilter" placeholder="{{'plugin.terminal.grep.placeholder' | localize}}"/>
+                <span class="term-scroll-pill" ng-if="!autoScroll" ng-click="autoScroll = true; $timeout(function(){var el=document.getElementById('terminal-console'); if(el)el.scrollTop=el.scrollHeight;}, 50)" style="cursor:pointer;">
+                    {{"plugin.terminal.scroll.paused" | localize}}
+                </span>
+                <span style="color:#6e7681; font-size:10px;">{{filteredOutputs().length}}/{{outputs.length}}</span>
+            </div>
+
+            <div id="terminal-console" class="term-console" ng-scroll="onConsoleScroll()" onscroll="angular.element(this).scope().onConsoleScroll()">
+                <div ng-repeat="o in filteredOutputs() track by o.id" class="term-line">
+                    <span class="term-ts">{{o.ts | date:'HH:mm:ss'}}</span>
+                    <span class="term-prefix">[{{o.deviceNumber || '?'}}]</span>
+                    <span ng-if="entryLatency(o)" style="color:#7d8590; font-size:10px; margin-right:4px;">+{{entryLatency(o)}}</span>
+                    <span ng-class="statusClass(o)">{{o._displayMessage || o.message}}</span>
+                </div>
+                <div ng-if="filteredOutputs().length === 0" style="color:#6e7681; font-style:italic; padding:8px;">
+                    <span ng-if="outputs.length === 0">{{"plugin.terminal.console.empty" | localize}}</span>
+                    <span ng-if="outputs.length > 0">{{"plugin.terminal.console.filtered.empty" | localize}}</span>
+                </div>
+            </div>
+
+            <div ng-if="currentIsDestructive()" style="background:#3d0e0e; color:#ff7b72; border:1px solid #f85149; border-radius:4px; padding:4px 10px; margin-top:4px; font-size:11px;">
+                {{"plugin.terminal.destructive.warning" | localize}}
+            </div>
+
+            <div class="term-input-row">
+                <textarea
+                    class="term-input"
+                    ng-model="currentCommand"
+                    ng-keydown="$event.keyCode === 13 && !$event.shiftKey && (send(), $event.preventDefault());
+                                $event.keyCode === 38 && navigateHistory(1);
+                                $event.keyCode === 40 && navigateHistory(-1);
+                                $event.ctrlKey && $event.keyCode === 76 && (clearConsole(), $event.preventDefault())"
+                    placeholder="$ appops get com.webkul.androidtracking ↵       (Shift+Enter = nova linha · ↑↓ histórico · Ctrl+L limpar)"
+                ></textarea>
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                    <button class="term-btn"
+                            ng-class="{'term-btn-warn': currentIsDestructive()}"
+                            ng-click="send()" ng-disabled="sending">
+                        {{sending ? '⏳' : (dryRun ? ('plugin.terminal.dryrun.action' | localize) : ('▶ ' + ('plugin.terminal.send' | localize)))}}
+                    </button>
+                    <label style="display:flex; align-items:center; gap:4px; color:#8b949e; font-size:11px; cursor:pointer;">
+                        <input type="checkbox" ng-model="dryRun"/> {{"plugin.terminal.dryrun" | localize}}
+                    </label>
+                    <button class="term-btn term-btn-ghost" ng-click="currentCommand=''">{{"plugin.terminal.clear" | localize}}</button>
+                </div>
+            </div>
+
+            <div class="term-statusbar">
+                <span>📤 <b>{{stats.sent}}</b> {{"plugin.terminal.stats.sent" | localize}}</span>
+                <span>✅ <b>{{stats.ok}}</b> {{"plugin.terminal.stats.ok" | localize}}</span>
+                <span>⏳ <b>{{stats.pending}}</b> {{"plugin.terminal.stats.pending" | localize}}</span>
+                <span>❌ <b>{{stats.error}}</b> {{"plugin.terminal.stats.error" | localize}}</span>
+                <span style="margin-left:auto;">
+                    {{selectedDeviceIds().length}} {{"plugin.terminal.targets" | localize}} ·
+                    {{"plugin.terminal.polling" | localize}} {{pollingIntervalMs()/1000}}s ·
+                    {{"plugin.terminal.session" | localize}} #{{session.id || '?'}}
+                </span>
+            </div>
+        </div>
+
+        <!-- ─── SNIPPETS ─────────────────────────────────────────── -->
+        <div class="term-col term-col-snippets">
+            <h4 style="display:flex; align-items:center; gap:6px;">
+                {{"plugin.terminal.snippets" | localize}}
+                <button class="term-btn term-btn-ghost" style="margin-left:auto; padding:2px 8px;"
+                        ng-click="openSnippetEditor(null)" title="{{'plugin.terminal.snippets.new' | localize}}">+</button>
+            </h4>
+            <input
+                type="text"
+                ng-model="snippetFilter"
+                placeholder="{{'plugin.terminal.snippets.search' | localize}}"
+                style="width:100%; background:#0d1117; color:#c9d1d9; border:1px solid #30363d; border-radius:4px; padding:4px 8px; margin-bottom:6px; font-size:12px;"
+            />
+
+            <!-- FAVORITES -->
+            <div ng-if="favoriteSnippets().length > 0">
+                <div class="term-snip-cat">{{"plugin.terminal.snippets.favorites" | localize}}</div>
+                <div class="term-snip-item"
+                     ng-class="{'destructive': s.destructive}"
+                     ng-repeat="s in favoriteSnippets() track by s.id"
+                     ng-click="applySnippetWithGuard(s)"
+                     title="{{s.commands}}">
+                    <span style="color:#d29922; cursor:pointer;" ng-click="toggleFavorite(s, $event)">★</span>
+                    <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-left:4px;">{{s.label}}</span>
+                    <span class="term-snip-go">▶</span>
+                </div>
+            </div>
+
+            <!-- BY CATEGORY -->
+            <div ng-repeat="cat in snippetCategories">
+                <div class="term-snip-cat">{{cat.name}}</div>
+                <div class="term-snip-item"
+                     ng-class="{'destructive': s.destructive}"
+                     ng-repeat="s in filteredSnippets(cat.items) track by s.id"
+                     ng-click="applySnippetWithGuard(s)"
+                     title="{{s.commands}}">
+                    <span style="cursor:pointer; color: {{favoriteIds[s.id] ? '#d29922' : '#6e7681'}};"
+                          ng-click="toggleFavorite(s, $event)">
+                        {{favoriteIds[s.id] ? '★' : '☆'}}
+                    </span>
+                    <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-left:4px;">{{s.label}}</span>
+                    <span ng-if="s.customerId" style="cursor:pointer; color:#8b949e;"
+                          ng-click="openSnippetEditor(s, $event)" title="{{'plugin.terminal.snippets.edit' | localize}}">✎</span>
+                    <span ng-if="s.customerId" style="cursor:pointer; color:#f85149; margin-left:4px;"
+                          ng-click="deleteSnippet(s, $event)" title="{{'plugin.terminal.snippets.delete' | localize}}">×</span>
+                    <span class="term-snip-go">▶</span>
+                </div>
+            </div>
+            <div ng-if="snippetCategories.length === 0" style="color:#6e7681; font-style:italic; padding:8px;">
+                {{"plugin.terminal.snippets.none" | localize}}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ─── MODAL: snippet editor ────────────────────────────────── -->
+    <div ng-if="editorSnippet"
+         style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:9999; display:flex; align-items:center; justify-content:center;"
+         ng-click="closeSnippetEditor()">
+        <div style="background:#161b22; border:1px solid #30363d; border-radius:8px; padding:20px; width:520px; color:#c9d1d9;"
+             ng-click="$event.stopPropagation()">
+            <h3 style="margin-top:0;">{{editorMode === 'edit' ? ('plugin.terminal.snippets.edit' | localize) : ('plugin.terminal.snippets.new' | localize)}}</h3>
+            <label>{{"plugin.terminal.snippets.label.category" | localize}}
+                <input ng-model="editorSnippet.category"
+                       style="width:100%; background:#0d1117; color:#c9d1d9; border:1px solid #30363d; border-radius:4px; padding:6px;">
+            </label>
+            <label style="display:block; margin-top:8px;">{{"plugin.terminal.snippets.label.title" | localize}}
+                <input ng-model="editorSnippet.label"
+                       style="width:100%; background:#0d1117; color:#c9d1d9; border:1px solid #30363d; border-radius:4px; padding:6px;">
+            </label>
+            <label style="display:block; margin-top:8px;">{{"plugin.terminal.snippets.label.commands" | localize}}
+                <textarea ng-model="editorSnippet.commands" rows="6"
+                          style="width:100%; background:#0d1117; color:#c9d1d9; border:1px solid #30363d; border-radius:4px; padding:6px; font-family:monospace; font-size:12px;"></textarea>
+            </label>
+            <label style="display:block; margin-top:8px;">{{"plugin.terminal.snippets.label.type" | localize}}
+                <select ng-model="editorSnippet.messageType"
+                        style="width:100%; background:#0d1117; color:#c9d1d9; border:1px solid #30363d; border-radius:4px; padding:6px;">
+                    <option value="runCommand">runCommand</option>
+                    <option value="grantPermissions">grantPermissions</option>
+                </select>
+            </label>
+            <label style="display:flex; align-items:center; gap:6px; margin-top:8px;">
+                <input type="checkbox" ng-model="editorSnippet.destructive"/> {{"plugin.terminal.snippets.label.destructive" | localize}}
+            </label>
+            <label style="display:block; margin-top:8px;">{{"plugin.terminal.snippets.label.order" | localize}}
+                <input type="number" ng-model="editorSnippet.sortOrder"
+                       style="width:80px; background:#0d1117; color:#c9d1d9; border:1px solid #30363d; border-radius:4px; padding:6px;">
+            </label>
+            <div style="display:flex; gap:8px; margin-top:14px; justify-content:flex-end;">
+                <button class="term-btn term-btn-ghost" ng-click="closeSnippetEditor()">{{"plugin.terminal.snippets.cancel" | localize}}</button>
+                <button class="term-btn" ng-click="saveSnippet()">{{"plugin.terminal.snippets.save" | localize}}</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── MODAL: history ─────────────────────────────────────── -->
+    <div ng-if="historyVisible"
+         style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:9998; display:flex; align-items:center; justify-content:center;"
+         ng-click="closeHistory()">
+        <div style="background:#161b22; border:1px solid #30363d; border-radius:8px; padding:18px; width:880px; max-height:80vh; color:#c9d1d9; display:flex; flex-direction:column;"
+             ng-click="$event.stopPropagation()">
+            <h3 style="margin-top:0; display:flex; align-items:center; gap:8px;">
+                {{"plugin.terminal.history.title" | localize}}
+                <button class="term-btn term-btn-ghost" ng-click="closeHistory()" style="margin-left:auto; padding:2px 10px;">×</button>
+            </h3>
+
+            <!-- FILTROS -->
+            <div style="display:flex; gap:8px; align-items:center; margin-bottom:10px; flex-wrap:wrap;">
+                <input ng-model="historyFilter.search" placeholder="{{'plugin.terminal.history.search' | localize}}"
+                       style="flex:1; min-width:200px; background:#0d1117; color:#c9d1d9; border:1px solid #30363d; border-radius:4px; padding:6px 10px;"/>
+                <select ng-model="historyFilter.deviceId"
+                        style="background:#0d1117; color:#c9d1d9; border:1px solid #30363d; border-radius:4px; padding:6px;">
+                    <option value="">{{"plugin.terminal.history.all.devices" | localize}}</option>
+                    <option ng-repeat="d in devices" value="{{d.id}}">{{d.number}}</option>
+                </select>
+                <select ng-model="historyFilter.scope"
+                        style="background:#0d1117; color:#c9d1d9; border:1px solid #30363d; border-radius:4px; padding:6px;">
+                    <option value="self">{{"plugin.terminal.history.scope.self" | localize}}</option>
+                    <option value="all">{{"plugin.terminal.history.scope.all" | localize}}</option>
+                </select>
+                <select ng-model="historyFilter.days"
+                        style="background:#0d1117; color:#c9d1d9; border:1px solid #30363d; border-radius:4px; padding:6px;">
+                    <option value="1">{{"plugin.terminal.history.range.24h" | localize}}</option>
+                    <option value="7">{{"plugin.terminal.history.range.7d" | localize}}</option>
+                    <option value="30">{{"plugin.terminal.history.range.30d" | localize}}</option>
+                    <option value="365">{{"plugin.terminal.history.range.1y" | localize}}</option>
+                </select>
+                <button class="term-btn" ng-click="refreshHistory()">{{"plugin.terminal.history.search.button" | localize}}</button>
+                <button class="term-btn term-btn-warn" ng-click="purgeHistory()" title="{{'plugin.terminal.history.purge' | localize}}">{{"plugin.terminal.history.purge" | localize}}</button>
+            </div>
+
+            <!-- LIST -->
+            <div style="flex:1; overflow-y:auto; background:#0d1117; border:1px solid #30363d; border-radius:4px;">
+                <table style="width:100%; font-size:12px; color:#c9d1d9; border-collapse:collapse;">
+                    <thead style="position:sticky; top:0; background:#161b22;">
+                        <tr style="text-align:left;">
+                            <th style="padding:6px 8px; border-bottom:1px solid #30363d;">{{"plugin.terminal.history.col.when" | localize}}</th>
+                            <th style="padding:6px 8px; border-bottom:1px solid #30363d;">{{"plugin.terminal.history.col.device" | localize}}</th>
+                            <th style="padding:6px 8px; border-bottom:1px solid #30363d;">{{"plugin.terminal.history.col.type" | localize}}</th>
+                            <th style="padding:6px 8px; border-bottom:1px solid #30363d;">{{"plugin.terminal.history.col.command" | localize}}</th>
+                            <th style="padding:6px 8px; border-bottom:1px solid #30363d;">{{"plugin.terminal.history.col.status" | localize}}</th>
+                            <th style="padding:6px 8px; border-bottom:1px solid #30363d;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="h in historyItems track by h.id" style="border-bottom:1px dotted #21262d;">
+                            <td style="padding:6px 8px; white-space:nowrap; color:#8b949e;">{{h.sentAt | date:'dd/MM HH:mm:ss'}}</td>
+                            <td style="padding:6px 8px;">{{h.deviceNumber || ('#' + h.deviceId)}}</td>
+                            <td style="padding:6px 8px; color:#58a6ff;">{{h.messageType}}</td>
+                            <td style="padding:6px 8px; font-family:monospace; max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="{{h.command}}">{{h.command}}</td>
+                            <td style="padding:6px 8px;">
+                                <span ng-if="h.status === 'SENT'" style="color:#d29922;">⏳ {{h.status}}</span>
+                                <span ng-if="h.status === 'OK' || h.status === 'EXECUTED'" style="color:#3fb950;">✅ {{h.status}}</span>
+                                <span ng-if="h.status === 'FAILED' || h.status === 'ERROR'" style="color:#f85149;">❌ {{h.status}}</span>
+                                <span ng-if="h.status && h.status !== 'SENT' && h.status !== 'OK' && h.status !== 'EXECUTED' && h.status !== 'FAILED' && h.status !== 'ERROR'">{{h.status}}</span>
+                            </td>
+                            <td style="padding:6px 8px;">
+                                <button class="term-btn term-btn-ghost" ng-click="replay(h)" style="padding:2px 8px;" title="Replay">↻</button>
+                            </td>
+                        </tr>
+                        <tr ng-if="historyItems.length === 0">
+                            <td colspan="6" style="padding:24px; text-align:center; color:#6e7681; font-style:italic;">
+                                {{"plugin.terminal.history.empty" | localize}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="padding:8px 0 0; color:#8b949e; font-size:11px;">
+                {{historyItems.length}} {{"plugin.terminal.history.col.command" | localize | lowercase}}(s) · click ↻
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── MODAL: destructive confirmation ─────────────────────── -->
+    <div ng-if="confirmDialog"
+         style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:10000; display:flex; align-items:center; justify-content:center;"
+         ng-click="cancelConfirm()">
+        <div style="background:#161b22; border:2px solid #f85149; border-radius:8px; padding:20px; width:520px; color:#c9d1d9;"
+             ng-click="$event.stopPropagation()">
+            <h3 style="margin-top:0; color:#f85149;">{{"plugin.terminal.destructive.modal.title" | localize}}</h3>
+            <p>{{"plugin.terminal.destructive.modal.snippet" | localize}}: <b>{{confirmDialog.snippet.label}}</b></p>
+            <pre style="background:#0d1117; padding:8px; border-radius:4px; color:#f85149; font-size:11px;">{{confirmDialog.snippet.commands}}</pre>
+            <p>{{"plugin.terminal.destructive.modal.devices" | localize}} <b>{{confirmDialog.devicesCount}}</b> device(s).</p>
+            <p style="font-size:12px;">{{"plugin.terminal.destructive.modal.confirm" | localize}} <b>"{{confirmDialog.expected}}"</b>:</p>
+            <input ng-model="confirmDialog.typed"
+                   style="width:100%; background:#0d1117; color:#c9d1d9; border:1px solid #30363d; border-radius:4px; padding:6px;"
+                   placeholder="{{confirmDialog.expected}}"/>
+            <div style="display:flex; gap:8px; margin-top:14px; justify-content:flex-end;">
+                <button class="term-btn term-btn-ghost" ng-click="cancelConfirm()">{{"plugin.terminal.destructive.modal.cancel" | localize}}</button>
+                <button class="term-btn term-btn-warn"
+                        ng-disabled="confirmDialog.typed !== confirmDialog.expected"
+                        ng-click="confirmDialog.onConfirm()">{{"plugin.terminal.destructive.modal.apply" | localize}}</button>
+            </div>
+        </div>
+
+    </div>
+</div>

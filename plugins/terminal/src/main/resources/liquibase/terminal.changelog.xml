@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd"
+        logicalFilePath="terminal.changelog.xml">
+
+    <!--
+    HMDM plugin convention:
+      - changeSet id MUST start with "plugin-terminal-"
+      - DB object names MUST start with "plugin_terminal_"
+    -->
+
+    <!-- ──────────────────────────────────────────────────────────────
+         01 — Plugin registration in `plugins` + permissions seed
+         ────────────────────────────────────────────────────────────── -->
+    <changeSet id="plugin-terminal-01-register" author="mikitos" context="common">
+        <comment>Plugin,new: terminal — register plugin row + permissions</comment>
+        <sql>
+            INSERT INTO plugins (
+                identifier,
+                name,
+                description,
+                javascriptmodulefile,
+                functionsviewtemplate,
+                namelocalizationkey,
+                functionspermission,
+                enabledfordevice
+            ) VALUES (
+                'terminal',
+                'Terminal',
+                'CMD-style remote shell for HMDM-managed devices',
+                'app/components/plugins/terminal/terminal.module.js',
+                'app/components/plugins/terminal/views/terminal.html',
+                'plugin.terminal.localization.key.name',
+                'plugin_terminal_use',
+                false
+            );
+
+            INSERT INTO permissions (name, description, superadmin) VALUES
+                ('plugin_terminal_use',         'Can use the Terminal plugin (send commands, see output)', false),
+                ('plugin_terminal_destructive', 'Can run destructive commands (uninstall, reboot, factory reset)', false),
+                ('plugin_terminal_snippets',    'Can create/edit/delete custom snippets', false);
+        </sql>
+        <rollback>
+            DELETE FROM plugins WHERE identifier = 'terminal';
+            DELETE FROM permissions WHERE name IN
+                ('plugin_terminal_use','plugin_terminal_destructive','plugin_terminal_snippets');
+        </rollback>
+    </changeSet>
+
+    <!-- ──────────────────────────────────────────────────────────────
+         02 — Table: plugin_terminal_sessions
+         ────────────────────────────────────────────────────────────── -->
+    <changeSet id="plugin-terminal-02-sessions" author="mikitos" context="common">
+        <comment>Plugin terminal: sessions table</comment>
+        <createTable tableName="plugin_terminal_sessions">
+            <column name="id" type="serial">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="customerid" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="userid" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="startedat" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="endedat" type="bigint"/>
+            <column name="label" type="varchar(120)"/>
+        </createTable>
+        <createIndex tableName="plugin_terminal_sessions" indexName="ix_plugin_terminal_sessions_user">
+            <column name="userid"/>
+            <column name="startedat"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- ──────────────────────────────────────────────────────────────
+         03 — Table: plugin_terminal_commands
+         ────────────────────────────────────────────────────────────── -->
+    <changeSet id="plugin-terminal-03-commands" author="mikitos" context="common">
+        <comment>Plugin terminal: commands history table</comment>
+        <createTable tableName="plugin_terminal_commands">
+            <column name="id" type="bigserial">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="sessionid" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deviceid" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="command" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="messagetype" type="varchar(32)" defaultValue="runCommand">
+                <constraints nullable="false"/>
+            </column>
+            <column name="messageid" type="int"/>
+            <column name="sentat" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="completedat" type="bigint"/>
+            <column name="status" type="varchar(24)" defaultValue="SENT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="plugin_terminal_commands" indexName="ix_plugin_terminal_commands_session">
+            <column name="sessionid"/>
+            <column name="sentat"/>
+        </createIndex>
+        <createIndex tableName="plugin_terminal_commands" indexName="ix_plugin_terminal_commands_msgid">
+            <column name="messageid"/>
+        </createIndex>
+        <createIndex tableName="plugin_terminal_commands" indexName="ix_plugin_terminal_commands_device">
+            <column name="deviceid"/>
+            <column name="sentat"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- ──────────────────────────────────────────────────────────────
+         04 — Table: plugin_terminal_snippets
+         ────────────────────────────────────────────────────────────── -->
+    <changeSet id="plugin-terminal-04-snippets" author="mikitos" context="common">
+        <comment>Plugin terminal: snippets table</comment>
+        <createTable tableName="plugin_terminal_snippets">
+            <column name="id" type="serial">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="customerid" type="int"/>
+            <column name="category" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="label" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="commands" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="messagetype" type="varchar(32)" defaultValue="runCommand">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payloadtemplate" type="text"/>
+            <column name="destructive" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sortorder" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="createdat" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="createdby" type="int"/>
+        </createTable>
+        <createIndex tableName="plugin_terminal_snippets" indexName="ix_plugin_terminal_snippets_category">
+            <column name="category"/>
+            <column name="sortorder"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- ──────────────────────────────────────────────────────────────
+         05 — Table: plugin_terminal_snippet_favorites
+         ────────────────────────────────────────────────────────────── -->
+    <changeSet id="plugin-terminal-05-favorites" author="mikitos" context="common">
+        <comment>Plugin terminal: snippet favorites per user</comment>
+        <createTable tableName="plugin_terminal_snippet_favorites">
+            <column name="userid" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="snippetid" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="plugin_terminal_snippet_favorites"
+                       columnNames="userid,snippetid"
+                       constraintName="pk_plugin_terminal_snippet_favorites"/>
+        <addForeignKeyConstraint baseTableName="plugin_terminal_snippet_favorites"
+                                  baseColumnNames="snippetid"
+                                  referencedTableName="plugin_terminal_snippets"
+                                  referencedColumnNames="id"
+                                  constraintName="fk_plugin_terminal_snippet_favorites_snippet"
+                                  onDelete="CASCADE"/>
+    </changeSet>
+
+    <!-- ──────────────────────────────────────────────────────────────
+         06 — Seed default snippets (customerid NULL = visível para todos)
+         ────────────────────────────────────────────────────────────── -->
+    <changeSet id="plugin-terminal-06-seed-snippets" author="mikitos" context="common">
+        <comment>Plugin terminal: seed default snippets (Mikitos + HMDM + Home)</comment>
+        <sql>
+        -- MIKITOS SYSTEM (com.webkul.androidtracking)
+        INSERT INTO plugin_terminal_snippets (customerid, category, label, commands, messagetype, destructive, sortorder, createdat)
+        VALUES (NULL, 'mikitos', '[Mikitos] Background full allow (4 ops)',
+                'appops set com.webkul.androidtracking RUN_IN_BACKGROUND allow' || chr(10) ||
+                'appops set com.webkul.androidtracking RUN_ANY_IN_BACKGROUND allow' || chr(10) ||
+                'appops set com.webkul.androidtracking WAKE_LOCK allow' || chr(10) ||
+                'appops set com.webkul.androidtracking START_FOREGROUND allow',
+                'runCommand', false, 10, EXTRACT(EPOCH FROM NOW())*1000);
+
+        INSERT INTO plugin_terminal_snippets (customerid, category, label, commands, messagetype, destructive, sortorder, createdat)
+        VALUES (NULL, 'mikitos', '[Mikitos] Standby + Doze whitelist',
+                'am set-inactive com.webkul.androidtracking false' || chr(10) ||
+                'dumpsys deviceidle whitelist +com.webkul.androidtracking',
+                'runCommand', false, 20, EXTRACT(EPOCH FROM NOW())*1000);
+
+        INSERT INTO plugin_terminal_snippets (customerid, category, label, commands, messagetype, payloadtemplate, destructive, sortorder, createdat)
+        VALUES (NULL, 'mikitos', '[Mikitos] Grant runtime permissions',
+                'com.webkul.androidtracking',
+                'grantPermissions', '{"pkg":"com.webkul.androidtracking"}', false, 30, EXTRACT(EPOCH FROM NOW())*1000);
+
+        INSERT INTO plugin_terminal_snippets (customerid, category, label, commands, messagetype, destructive, sortorder, createdat)
+        VALUES (NULL, 'mikitos', '[Mikitos] Status check (read-only)',
+                'appops get com.webkul.androidtracking' || chr(10) ||
+                'am get-inactive com.webkul.androidtracking' || chr(10) ||
+                'dumpsys deviceidle whitelist | grep webkul',
+                'runCommand', false, 5, EXTRACT(EPOCH FROM NOW())*1000);
+
+        -- HMDM LAUNCHER (com.hmdm.launcher)
+        INSERT INTO plugin_terminal_snippets (customerid, category, label, commands, messagetype, destructive, sortorder, createdat)
+        VALUES (NULL, 'hmdm', '[HMDM] Set Device Owner ⚠ apenas device novo/factory reset',
+                'dpm set-device-owner com.hmdm.launcher/.AdminReceiver',
+                'runCommand', true, 10, EXTRACT(EPOCH FROM NOW())*1000);
+
+        INSERT INTO plugin_terminal_snippets (customerid, category, label, commands, messagetype, destructive, sortorder, createdat)
+        VALUES (NULL, 'hmdm', '[HMDM] Verificar Device Admin ativo',
+                'dumpsys device_policy | grep admin=',
+                'runCommand', false, 20, EXTRACT(EPOCH FROM NOW())*1000);
+
+        INSERT INTO plugin_terminal_snippets (customerid, category, label, commands, messagetype, destructive, sortorder, createdat)
+        VALUES (NULL, 'hmdm', '[HMDM] Overlay (SYSTEM_ALERT_WINDOW) allow',
+                'appops set com.hmdm.launcher SYSTEM_ALERT_WINDOW allow' || chr(10) ||
+                'cmd appops set com.hmdm.launcher SYSTEM_ALERT_WINDOW allow',
+                'runCommand', false, 30, EXTRACT(EPOCH FROM NOW())*1000);
+
+        INSERT INTO plugin_terminal_snippets (customerid, category, label, commands, messagetype, destructive, sortorder, createdat)
+        VALUES (NULL, 'hmdm', '[HMDM] Usage Stats allow',
+                'appops set com.hmdm.launcher GET_USAGE_STATS allow' || chr(10) ||
+                'cmd appops set com.hmdm.launcher GET_USAGE_STATS allow',
+                'runCommand', false, 40, EXTRACT(EPOCH FROM NOW())*1000);
+
+        INSERT INTO plugin_terminal_snippets (customerid, category, label, commands, messagetype, destructive, sortorder, createdat)
+        VALUES (NULL, 'hmdm', '[HMDM] Verificar overlay + usage stats',
+                'appops get com.hmdm.launcher SYSTEM_ALERT_WINDOW' || chr(10) ||
+                'appops get com.hmdm.launcher GET_USAGE_STATS',
+                'runCommand', false, 50, EXTRACT(EPOCH FROM NOW())*1000);
+
+        INSERT INTO plugin_terminal_snippets (customerid, category, label, commands, messagetype, destructive, sortorder, createdat)
+        VALUES (NULL, 'hmdm', '[HMDM] Definir como launcher home',
+                'cmd package set-home-activity com.hmdm.launcher/com.hmdm.launcher.ui.MainActivity',
+                'runCommand', false, 60, EXTRACT(EPOCH FROM NOW())*1000);
+
+        -- HOME / LAUNCHER (sistema)
+        INSERT INTO plugin_terminal_snippets (customerid, category, label, commands, messagetype, destructive, sortorder, createdat)
+        VALUES (NULL, 'home', '[Home] Activity resolvida no MAIN',
+                'cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME',
+                'runCommand', false, 10, EXTRACT(EPOCH FROM NOW())*1000);
+
+        -- DEVICE STATUS GERAL
+        INSERT INTO plugin_terminal_snippets (customerid, category, label, commands, messagetype, destructive, sortorder, createdat)
+        VALUES (NULL, 'status', '[Status] Bateria + device model + uptime',
+                'getprop ro.product.model' || chr(10) ||
+                'getprop ro.build.version.release' || chr(10) ||
+                'dumpsys battery | grep -E "level|status|temperature"' || chr(10) ||
+                'uptime',
+                'runCommand', false, 10, EXTRACT(EPOCH FROM NOW())*1000);
+
+        -- NETWORK
+        INSERT INTO plugin_terminal_snippets (customerid, category, label, commands, messagetype, destructive, sortorder, createdat)
+        VALUES (NULL, 'network', '[Network] Status WiFi + IP + DNS',
+                'dumpsys connectivity | grep -E "NetworkAgentInfo|state|extra"' || chr(10) ||
+                'ip addr show wlan0' || chr(10) ||
+                'getprop net.dns1',
+                'runCommand', false, 10, EXTRACT(EPOCH FROM NOW())*1000);
+
+        -- DESTRUTIVOS
+        INSERT INTO plugin_terminal_snippets (customerid, category, label, commands, messagetype, destructive, sortorder, createdat)
+        VALUES (NULL, 'destructive', '[⚠ Destrutivo] Force-stop Mikitos',
+                'am force-stop com.webkul.androidtracking',
+                'runCommand', true, 10, EXTRACT(EPOCH FROM NOW())*1000);
+
+        INSERT INTO plugin_terminal_snippets (customerid, category, label, commands, messagetype, destructive, sortorder, createdat)
+        VALUES (NULL, 'destructive', '[⚠ Destrutivo] Clear app data Mikitos',
+                'pm clear com.webkul.androidtracking',
+                'runCommand', true, 20, EXTRACT(EPOCH FROM NOW())*1000);
+
+        INSERT INTO plugin_terminal_snippets (customerid, category, label, commands, messagetype, destructive, sortorder, createdat)
+        VALUES (NULL, 'destructive', '[⚠ Destrutivo] Reboot device',
+                'reboot',
+                'runCommand', true, 30, EXTRACT(EPOCH FROM NOW())*1000);
+        </sql>
+        <rollback>
+            DELETE FROM plugin_terminal_snippets WHERE customerid IS NULL;
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
