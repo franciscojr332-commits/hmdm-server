@@ -367,8 +367,9 @@ angular.module('plugin-terminal', ['ngResource', 'ui.bootstrap', 'ui.router', 'n
                             cats[s.category].push(s);
                         });
                         $scope.snippetCategories = Object.keys(cats).sort().map(function (k) {
-                            return { name: k, items: cats[k] };
+                            return { name: k, items: cats[k], filteredItems: cats[k] };
                         });
+                        if (typeof recomputeSnippetCategories === 'function') recomputeSnippetCategories();
                     }
                 });
             };

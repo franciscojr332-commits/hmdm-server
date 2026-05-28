@@ -166,7 +166,7 @@ public interface TerminalMapper {
             "SELECT d.id, d.number, d.description, " +
             "       d.configurationid AS configurationId, " +
             "       c.name AS configurationName, " +
-            "       (SELECT MAX(l.createtime) FROM plugin_devicelog_log l WHERE l.deviceid = d.id) AS lastPollMs, " +
+            "       d.lastupdate AS lastPollMs, " +
             "       (SELECT COUNT(*) FROM pendingpushes pp " +
             "          JOIN pushmessages pm ON pm.id = pp.messageid " +
             "          WHERE pm.deviceid = d.id AND pp.status = 0) AS pendingCount " +
