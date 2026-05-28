@@ -140,10 +140,7 @@
                 <textarea
                     class="term-input"
                     ng-model="currentCommand"
-                    ng-keydown="$event.keyCode === 13 && !$event.shiftKey && (send(), $event.preventDefault());
-                                $event.keyCode === 38 && navigateHistory(1);
-                                $event.keyCode === 40 && navigateHistory(-1);
-                                $event.ctrlKey && $event.keyCode === 76 && (clearConsole(), $event.preventDefault())"
+                    ng-keydown="onTerminalKeyDown($event)"
                     placeholder="$ appops get com.webkul.androidtracking ↵       (Shift+Enter = nova linha · ↑↓ histórico · Ctrl+L limpar)"
                 ></textarea>
                 <div style="display:flex; flex-direction:column; gap:4px;">

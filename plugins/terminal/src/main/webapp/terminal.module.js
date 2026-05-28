@@ -583,6 +583,20 @@ angular.module('plugin-terminal', ['ngResource', 'ui.bootstrap', 'ui.router', 'n
 
             $scope.clearConsole = function () { $scope.outputs = []; };
 
+            $scope.onTerminalKeyDown = function ($event) {
+                if ($event.keyCode === 13 && !$event.shiftKey) {
+                    $scope.send();
+                    $event.preventDefault();
+                } else if ($event.keyCode === 38) {
+                    $scope.navigateHistory(1);
+                } else if ($event.keyCode === 40) {
+                    $scope.navigateHistory(-1);
+                } else if ($event.ctrlKey && $event.keyCode === 76) {
+                    $scope.clearConsole();
+                    $event.preventDefault();
+                }
+            };
+
             $scope.exportConsole = function () {
                 var lines = $scope.outputs.map(function (o) {
                     return new Date(o.ts).toISOString() + ' [' + (o.deviceNumber || '?') + '] [' +
