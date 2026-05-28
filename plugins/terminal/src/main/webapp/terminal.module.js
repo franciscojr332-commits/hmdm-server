@@ -176,6 +176,25 @@ angular.module('plugin-terminal', ['ngResource', 'ui.bootstrap', 'ui.router', 'n
                 $scope.history = JSON.parse(localStorage.getItem('plugin.terminal.history') || '[]');
                 $scope.lastFetchMs = Date.now();
                 $scope.startPolling();
+                $scope.startDeviceStatusPolling();
+            };
+
+            // Re-poll /private/devices to refresh statusCode + pendingCount.
+            // Faster cadence (10s) when there is any push pending — user is
+            // waiting to see the queue drain; slower (60s) otherwise.
+            $scope.startDeviceStatusPolling = function () {
+                if ($scope._devicePollHandle) return;
+                var schedule = function () {
+                    var hasPending = ($scope.devices || []).some(function (d) {
+                        return (d.pendingCount || 0) > 0;
+                    });
+                    var delay = hasPending ? 10000 : 60000;
+                    $scope._devicePollHandle = $timeout(function () {
+                        $scope.refreshDevices();
+                        schedule();
+                    }, delay);
+                };
+                schedule();
             };
 
             // ─── Favorites ────────────────────────────────────────────
@@ -739,6 +758,10 @@ angular.module('plugin-terminal', ['ngResource', 'ui.bootstrap', 'ui.router', 'n
             // Cleanup
             $scope.$on('$destroy', function () {
                 $scope.stopPolling();
+                if ($scope._devicePollHandle) {
+                    $timeout.cancel($scope._devicePollHandle);
+                    $scope._devicePollHandle = null;
+                }
                 if ($scope.session && $scope.session.id) {
                     terminalPluginService.closeSession({ id: $scope.session.id }, {});
                 }
