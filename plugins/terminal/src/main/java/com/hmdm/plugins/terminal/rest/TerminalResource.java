@@ -31,9 +31,18 @@ public class TerminalResource {
     private static final String PERM_USE = "plugin_terminal_use";
     private static final String PERM_DESTRUCTIVE = "plugin_terminal_destructive";
 
-    private final DeviceDAO deviceDAO;
-    private final PushService pushService;
-    private final TerminalDAO terminalDAO;
+    private DeviceDAO deviceDAO;
+    private PushService pushService;
+    private TerminalDAO terminalDAO;
+
+    /**
+     * No-arg constructor required by Jersey/HK2 reification (matches the
+     * pattern used by AuditResource, PushResource, MessagingResource).
+     * Without it, HK2 fails with NoSuchMethodException and the endpoint
+     * does not respond, so the devices picker stays empty in the UI.
+     */
+    public TerminalResource() {
+    }
 
     @Inject
     public TerminalResource(DeviceDAO deviceDAO, PushService pushService, TerminalDAO terminalDAO) {

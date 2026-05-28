@@ -671,4 +671,7 @@ angular.module('plugin-terminal', ['ngResource', 'ui.bootstrap', 'ui.router', 'n
                 }
             });
         }
-    ]);
+    ])
+    .run(function (localization) {
+        localization.loadPluginResourceBundles("terminal");
+    });

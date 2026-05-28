@@ -296,4 +296,30 @@
         </rollback>
     </changeSet>
 
+    <!-- ──────────────────────────────────────────────────────────────
+         07 — Grant plugin_terminal_* to existing non-superadmin roles
+         (idempotent: ON CONFLICT DO NOTHING). Without this, plugin
+         registration only CREATES permissions; menu Funções hides
+         Terminal for every existing role until manually granted.
+         ────────────────────────────────────────────────────────────── -->
+    <changeSet id="plugin-terminal-07-grant-perms" author="mikitos" context="common">
+        <comment>Plugin terminal: grant plugin_terminal_* to all existing non-superadmin roles</comment>
+        <sql>
+            INSERT INTO userrolepermissions (roleid, permissionid)
+            SELECT ur.id, p.id
+            FROM userroles ur
+            CROSS JOIN permissions p
+            WHERE p.name IN ('plugin_terminal_use','plugin_terminal_destructive','plugin_terminal_snippets')
+              AND COALESCE(ur.superadmin, false) = false
+            ON CONFLICT DO NOTHING;
+        </sql>
+        <rollback>
+            DELETE FROM userrolepermissions
+            WHERE permissionid IN (
+                SELECT id FROM permissions
+                WHERE name IN ('plugin_terminal_use','plugin_terminal_destructive','plugin_terminal_snippets')
+            );
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>
