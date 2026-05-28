@@ -11,6 +11,7 @@ public class TerminalDeviceStatus {
     private String configurationName;
     private Long lastPollMs;
     private boolean online;
+    private String statusCode; // green | yellow | red (HMDM standard)
     private Integer pendingCount;
 
     public TerminalDeviceStatus() {}
@@ -29,6 +30,8 @@ public class TerminalDeviceStatus {
     public void setLastPollMs(Long lastPollMs) { this.lastPollMs = lastPollMs; }
     public boolean isOnline() { return online; }
     public void setOnline(boolean online) { this.online = online; }
+    public String getStatusCode() { return statusCode; }
+    public void setStatusCode(String statusCode) { this.statusCode = statusCode; }
     public Integer getPendingCount() { return pendingCount; }
     public void setPendingCount(Integer pendingCount) { this.pendingCount = pendingCount; }
 }

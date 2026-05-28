@@ -11,7 +11,11 @@
         .term-device-row { display:flex; align-items:center; gap:6px; padding:4px 2px; border-bottom:1px dotted #21262d; color:#c9d1d9; font-size:12px; cursor:pointer; }
         .term-device-row:hover { background:#21262d; }
         .term-device-row input[type=checkbox] { margin:0; }
-        .term-dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+        .term-dot { width:10px; height:10px; border-radius:50%; display:inline-block; box-shadow: 0 0 0 1px #21262d inset; }
+        .term-dot.green  { background:#3fb950; }
+        .term-dot.yellow { background:#d29922; }
+        .term-dot.red    { background:#f85149; }
+        /* legacy fallbacks */
         .term-dot.on  { background:#3fb950; }
         .term-dot.off { background:#8b949e; }
         .term-device-meta { color:#8b949e; font-size:10px; }
@@ -78,10 +82,10 @@
             <div class="term-device-row" ng-repeat="d in devices track by d.id"
                  ng-click="selectedDevices[d.id] = !selectedDevices[d.id]">
                 <input type="checkbox" ng-model="selectedDevices[d.id]" ng-click="$event.stopPropagation()" />
-                <span class="term-dot" ng-class="d.online ? 'on' : 'off'"></span>
+                <span class="term-dot" ng-class="d.statusCode || (d.online ? 'green' : 'red')" title="{{deviceStatusText(d)}}"></span>
                 <div style="flex:1; min-width:0;">
                     <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{d.number}}</div>
-                    <div class="term-device-meta">cfg #{{d.configurationId}} · pend {{d.pendingCount || 0}}</div>
+                    <div class="term-device-meta">cfg #{{d.configurationId}} · pend {{d.pendingCount || 0}} · {{deviceStatusText(d)}}</div>
                 </div>
             </div>
         </div>

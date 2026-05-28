@@ -708,6 +708,16 @@ angular.module('plugin-terminal', ['ngResource', 'ui.bootstrap', 'ui.router', 'n
                 $scope.favoriteSnippetsList = ($scope.snippets || [])
                     .filter(function (s) { return $scope.favoriteIds[s.id]; });
             }
+            $scope.deviceStatusText = function (d) {
+                if (!d || !d.lastPollMs) return 'sem heartbeat';
+                var ageMin = Math.round((Date.now() - d.lastPollMs) / 60000);
+                if (ageMin < 1) return 'agora';
+                if (ageMin < 60) return ageMin + ' min atrás';
+                var ageH = Math.round(ageMin / 60);
+                if (ageH < 48) return ageH + 'h atrás';
+                return Math.round(ageH / 24) + 'd atrás';
+            };
+
             $scope.matchSnippet = function (s) {
                 var q = ($scope.snippetFilter || '').toLowerCase();
                 if (!q) return true;

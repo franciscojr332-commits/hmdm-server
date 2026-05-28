@@ -69,8 +69,14 @@ public class TerminalResource {
             int customerId = SecurityContext.get().getCurrentCustomerId().orElseThrow(IllegalStateException::new);
             List<TerminalDeviceStatus> rows = terminalDAO.listDevices(customerId, configurationId);
             long now = System.currentTimeMillis();
+            long h2 = 2 * 3600 * 1000L;
+            long h4 = 4 * 3600 * 1000L;
             for (TerminalDeviceStatus s : rows) {
-                s.setOnline(s.getLastPollMs() != null && (now - s.getLastPollMs()) < 600_000L);
+                Long last = s.getLastPollMs();
+                long age = (last == null) ? Long.MAX_VALUE : (now - last);
+                String code = age < h2 ? "green" : age < h4 ? "yellow" : "red";
+                s.setStatusCode(code);
+                s.setOnline("green".equals(code));
             }
             return Response.OK(rows);
         } catch (Exception e) {
