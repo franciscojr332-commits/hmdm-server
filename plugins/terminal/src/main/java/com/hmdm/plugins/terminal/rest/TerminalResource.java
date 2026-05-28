@@ -70,7 +70,7 @@ public class TerminalResource {
             List<TerminalDeviceStatus> rows = terminalDAO.listDevices(customerId, configurationId);
             long now = System.currentTimeMillis();
             for (TerminalDeviceStatus s : rows) {
-                s.setOnline(s.getLastPollMs() != null && (now - s.getLastPollMs()) < 300_000L);
+                s.setOnline(s.getLastPollMs() != null && (now - s.getLastPollMs()) < 600_000L);
             }
             return Response.OK(rows);
         } catch (Exception e) {
