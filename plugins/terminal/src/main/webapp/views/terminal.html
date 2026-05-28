@@ -202,7 +202,7 @@
                 <div class="term-snip-cat">{{cat.name}}</div>
                 <div class="term-snip-item"
                      ng-class="{'destructive': s.destructive}"
-                     ng-repeat="s in cat.filteredItems track by s.id"
+                     ng-repeat="s in cat.items | filter:matchSnippet track by s.id"
                      ng-click="applySnippetWithGuard(s)"
                      title="{{s.commands}}">
                     <span style="cursor:pointer; color: {{favoriteIds[s.id] ? '#d29922' : '#6e7681'}};"

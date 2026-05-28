@@ -367,9 +367,8 @@ angular.module('plugin-terminal', ['ngResource', 'ui.bootstrap', 'ui.router', 'n
                             cats[s.category].push(s);
                         });
                         $scope.snippetCategories = Object.keys(cats).sort().map(function (k) {
-                            return { name: k, items: cats[k], filteredItems: cats[k] };
+                            return { name: k, items: cats[k] };
                         });
-                        if (typeof recomputeSnippetCategories === 'function') recomputeSnippetCategories();
                     }
                 });
             };
@@ -709,15 +708,12 @@ angular.module('plugin-terminal', ['ngResource', 'ui.bootstrap', 'ui.router', 'n
                 $scope.favoriteSnippetsList = ($scope.snippets || [])
                     .filter(function (s) { return $scope.favoriteIds[s.id]; });
             }
-            function recomputeSnippetCategories() {
-                var f = ($scope.snippetFilter || '').toLowerCase();
-                ($scope.snippetCategories || []).forEach(function (cat) {
-                    cat.filteredItems = !f ? cat.items : (cat.items || []).filter(function (s) {
-                        return s.label.toLowerCase().indexOf(f) >= 0 ||
-                               (s.commands || '').toLowerCase().indexOf(f) >= 0;
-                    });
-                });
-            }
+            $scope.matchSnippet = function (s) {
+                var q = ($scope.snippetFilter || '').toLowerCase();
+                if (!q) return true;
+                return s.label.toLowerCase().indexOf(q) >= 0 ||
+                       (s.commands || '').toLowerCase().indexOf(q) >= 0;
+            };
             $scope.$watchCollection('selectedDevices', recomputeSelected);
             $scope.$watchCollection('devices', recomputeSelected);
             $scope.$watchCollection('tabBadges', recomputeSelected);
@@ -726,8 +722,6 @@ angular.module('plugin-terminal', ['ngResource', 'ui.bootstrap', 'ui.router', 'n
             $scope.$watch('activeTabDeviceId', recomputeFilteredOutputs);
             $scope.$watchCollection('favoriteIds', recomputeFavorites);
             $scope.$watchCollection('snippets', recomputeFavorites);
-            $scope.$watchCollection('snippetCategories', recomputeSnippetCategories);
-            $scope.$watch('snippetFilter', recomputeSnippetCategories);
 
             // Auto-init
             $scope.init();
