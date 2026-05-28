@@ -102,7 +102,7 @@
                     ALL <span ng-if="outputs.length" style="color:#6e7681;">({{outputs.length}})</span>
                 </div>
                 <div class="term-tab"
-                     ng-repeat="t in openTabs() track by t.id"
+                     ng-repeat="t in openTabsList track by t.id"
                      ng-class="{active: activeTabDeviceId === t.id}"
                      ng-click="selectTab(t.id)">
                     {{t.label}}
@@ -120,7 +120,7 @@
             </div>
 
             <div id="terminal-console" class="term-console" ng-scroll="onConsoleScroll()" onscroll="angular.element(this).scope().onConsoleScroll()">
-                <div ng-repeat="o in filteredOutputs() track by o.id" class="term-line">
+                <div ng-repeat="o in filteredOutputsList track by o.id" class="term-line">
                     <span class="term-ts">{{o.ts | date:'HH:mm:ss'}}</span>
                     <span class="term-prefix">[{{o.deviceNumber || '?'}}]</span>
                     <span ng-if="entryLatency(o)" style="color:#7d8590; font-size:10px; margin-right:4px;">+{{entryLatency(o)}}</span>
@@ -162,7 +162,7 @@
                 <span>⏳ <b>{{stats.pending}}</b> {{"plugin.terminal.stats.pending" | localize}}</span>
                 <span>❌ <b>{{stats.error}}</b> {{"plugin.terminal.stats.error" | localize}}</span>
                 <span style="margin-left:auto;">
-                    {{selectedDeviceIds().length}} {{"plugin.terminal.targets" | localize}} ·
+                    {{selectedIdsCount}} {{"plugin.terminal.targets" | localize}} ·
                     {{"plugin.terminal.polling" | localize}} {{pollingIntervalMs()/1000}}s ·
                     {{"plugin.terminal.session" | localize}} #{{session.id || '?'}}
                 </span>
@@ -184,11 +184,11 @@
             />
 
             <!-- FAVORITES -->
-            <div ng-if="favoriteSnippets().length > 0">
+            <div ng-if="favoriteSnippetsList.length > 0">
                 <div class="term-snip-cat">{{"plugin.terminal.snippets.favorites" | localize}}</div>
                 <div class="term-snip-item"
                      ng-class="{'destructive': s.destructive}"
-                     ng-repeat="s in favoriteSnippets() track by s.id"
+                     ng-repeat="s in favoriteSnippetsList track by s.id"
                      ng-click="applySnippetWithGuard(s)"
                      title="{{s.commands}}">
                     <span style="color:#d29922; cursor:pointer;" ng-click="toggleFavorite(s, $event)">★</span>
@@ -202,7 +202,7 @@
                 <div class="term-snip-cat">{{cat.name}}</div>
                 <div class="term-snip-item"
                      ng-class="{'destructive': s.destructive}"
-                     ng-repeat="s in filteredSnippets(cat.items) track by s.id"
+                     ng-repeat="s in cat.filteredItems track by s.id"
                      ng-click="applySnippetWithGuard(s)"
                      title="{{s.commands}}">
                     <span style="cursor:pointer; color: {{favoriteIds[s.id] ? '#d29922' : '#6e7681'}};"

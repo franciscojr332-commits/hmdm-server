@@ -137,6 +137,14 @@ angular.module('plugin-terminal', ['ngResource', 'ui.bootstrap', 'ui.router', 'n
             $scope.editorMode = 'create';
             // Destructive confirm
             $scope.confirmDialog = null;                // { snippet, devices, typed, expected, onConfirm }
+            // Derived caches — populated via watchers to avoid AngularJS infdig
+            // when template iterates the result of a function call (each call
+            // returns a new array reference, triggering re-digest forever).
+            $scope.selectedIds = [];
+            $scope.selectedIdsCount = 0;
+            $scope.openTabsList = [];
+            $scope.filteredOutputsList = [];
+            $scope.favoriteSnippetsList = [];
             // History
             $scope.historyVisible = false;
             $scope.historyItems = [];
@@ -673,6 +681,52 @@ angular.module('plugin-terminal', ['ngResource', 'ui.bootstrap', 'ui.router', 'n
                 if (entry.severity === 'ERROR') return '❌ ' + msg;
                 return msg;
             };
+
+            // ─── Derived state recompute (avoid AngularJS infdig) ─────
+            function recomputeSelected() {
+                var ids = Object.keys($scope.selectedDevices)
+                    .filter(function (k) { return $scope.selectedDevices[k]; })
+                    .map(function (k) { return parseInt(k, 10); });
+                $scope.selectedIds = ids;
+                $scope.selectedIdsCount = ids.length;
+                $scope.openTabsList = ids.map(function (id) {
+                    var d = $scope.devices.filter(function (x) { return x.id === id; })[0];
+                    return { id: id, label: d ? d.number : ('#' + id), badge: $scope.tabBadges[id] || 0 };
+                });
+            }
+            function recomputeFilteredOutputs() {
+                var f = ($scope.grepFilter || '').toLowerCase();
+                var active = $scope.activeTabDeviceId;
+                $scope.filteredOutputsList = $scope.outputs.filter(function (o) {
+                    if (active !== null && o.deviceId !== active && o.deviceId !== null) return false;
+                    if (!f) return true;
+                    var hay = ((o._displayMessage || o.message || '') + ' ' + (o.deviceNumber || '')).toLowerCase();
+                    try { return new RegExp(f).test(hay); } catch (e) { return hay.indexOf(f) >= 0; }
+                });
+            }
+            function recomputeFavorites() {
+                $scope.favoriteSnippetsList = ($scope.snippets || [])
+                    .filter(function (s) { return $scope.favoriteIds[s.id]; });
+            }
+            function recomputeSnippetCategories() {
+                var f = ($scope.snippetFilter || '').toLowerCase();
+                ($scope.snippetCategories || []).forEach(function (cat) {
+                    cat.filteredItems = !f ? cat.items : (cat.items || []).filter(function (s) {
+                        return s.label.toLowerCase().indexOf(f) >= 0 ||
+                               (s.commands || '').toLowerCase().indexOf(f) >= 0;
+                    });
+                });
+            }
+            $scope.$watchCollection('selectedDevices', recomputeSelected);
+            $scope.$watchCollection('devices', recomputeSelected);
+            $scope.$watchCollection('tabBadges', recomputeSelected);
+            $scope.$watchCollection('outputs', recomputeFilteredOutputs);
+            $scope.$watch('grepFilter', recomputeFilteredOutputs);
+            $scope.$watch('activeTabDeviceId', recomputeFilteredOutputs);
+            $scope.$watchCollection('favoriteIds', recomputeFavorites);
+            $scope.$watchCollection('snippets', recomputeFavorites);
+            $scope.$watchCollection('snippetCategories', recomputeSnippetCategories);
+            $scope.$watch('snippetFilter', recomputeSnippetCategories);
 
             // Auto-init
             $scope.init();
