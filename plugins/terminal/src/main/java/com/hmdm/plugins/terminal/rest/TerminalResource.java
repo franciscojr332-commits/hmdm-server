@@ -2,7 +2,9 @@ package com.hmdm.plugins.terminal.rest;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import com.hmdm.notification.PushService;
+import com.hmdm.notification.PushSenderMqtt;
+import com.hmdm.notification.PushSenderPolling;
+import com.hmdm.notification.persistence.NotificationDAO;
 import com.hmdm.notification.persistence.domain.PushMessage;
 import com.hmdm.persistence.DeviceDAO;
 import com.hmdm.persistence.domain.Device;
@@ -32,7 +34,9 @@ public class TerminalResource {
     private static final String PERM_DESTRUCTIVE = "plugin_terminal_destructive";
 
     private DeviceDAO deviceDAO;
-    private PushService pushService;
+    private NotificationDAO notificationDAO;
+    private PushSenderMqtt pushSenderMqtt;
+    private PushSenderPolling pushSenderPolling;
     private TerminalDAO terminalDAO;
 
     /**
@@ -45,9 +49,15 @@ public class TerminalResource {
     }
 
     @Inject
-    public TerminalResource(DeviceDAO deviceDAO, PushService pushService, TerminalDAO terminalDAO) {
+    public TerminalResource(DeviceDAO deviceDAO,
+                             NotificationDAO notificationDAO,
+                             PushSenderMqtt pushSenderMqtt,
+                             PushSenderPolling pushSenderPolling,
+                             TerminalDAO terminalDAO) {
         this.deviceDAO = deviceDAO;
-        this.pushService = pushService;
+        this.notificationDAO = notificationDAO;
+        this.pushSenderMqtt = pushSenderMqtt;
+        this.pushSenderPolling = pushSenderPolling;
         this.terminalDAO = terminalDAO;
     }
 
@@ -155,8 +165,15 @@ public class TerminalResource {
                     pm.setDeviceId(d.getId());
                     pm.setMessageType(msgType);
                     if (payload != null) pm.setPayload(payload);
-                    pushService.send(pm);
+                    // Persistir SEMPRE primeiro: notificationDAO.send insere em
+                    // pushmessages + pendingpushes e popula pm.getId(). O caminho
+                    // padrão (PushService.send -> PushSenderPolling.send) tem um
+                    // fast-path in-memory para device online que não chama o DAO
+                    // e deixa pm.getId() nulo, quebrando o tracking aqui.
+                    notificationDAO.send(pm);
                     Integer pmId = pm.getId();
+                    pushSenderMqtt.send(pm);
+                    pushSenderPolling.sendPending(d.getId(), java.util.Collections.singletonList(pm));
                     if (pmId != null) {
                         ids.add(pmId);
                         if (req.getSessionId() != null) {
