@@ -116,7 +116,7 @@
                 <span class="term-scroll-pill" ng-if="!autoScroll" ng-click="autoScroll = true; $timeout(function(){var el=document.getElementById('terminal-console'); if(el)el.scrollTop=el.scrollHeight;}, 50)" style="cursor:pointer;">
                     {{"plugin.terminal.scroll.paused" | localize}}
                 </span>
-                <span style="color:#6e7681; font-size:10px;">{{filteredOutputs().length}}/{{outputs.length}}</span>
+                <span style="color:#6e7681; font-size:10px;">{{filteredOutputsList.length}}/{{outputs.length}}</span>
             </div>
 
             <div id="terminal-console" class="term-console" ng-scroll="onConsoleScroll()" onscroll="angular.element(this).scope().onConsoleScroll()">
@@ -126,7 +126,7 @@
                     <span ng-if="entryLatency(o)" style="color:#7d8590; font-size:10px; margin-right:4px;">+{{entryLatency(o)}}</span>
                     <span ng-class="statusClass(o)">{{o._displayMessage || o.message}}</span>
                 </div>
-                <div ng-if="filteredOutputs().length === 0" style="color:#6e7681; font-style:italic; padding:8px;">
+                <div ng-if="filteredOutputsList.length === 0" style="color:#6e7681; font-style:italic; padding:8px;">
                     <span ng-if="outputs.length === 0">{{"plugin.terminal.console.empty" | localize}}</span>
                     <span ng-if="outputs.length > 0">{{"plugin.terminal.console.filtered.empty" | localize}}</span>
                 </div>
