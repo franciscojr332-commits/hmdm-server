@@ -677,6 +677,12 @@ angular.module('headwind-kiosk')
             return (info && info.batteryLevel != null) ? info.batteryLevel : null;
         };
 
+        // Array de permissões [p0,p1,p2] (0/1) p/ os dots; null se desconhecido
+        $scope.getPermissions = function (device) {
+            var info = $scope.getDeviceInfo(device);
+            return (info && info.permissions) ? info.permissions : null;
+        };
+
         $scope.getIsDefaultLauncher = function (device) {
             var info = $scope.getDeviceInfo(device);
             if (info) {

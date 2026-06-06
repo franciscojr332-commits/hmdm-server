@@ -563,3 +563,8 @@ html:has(.login-page){ background:color-mix(in oklab, var(--brand-strong) 40%, b
 .battery-cell.low .bbar i{background:var(--warn)}
 .battery-cell.crit .bbar i{background:var(--danger)}
 .battery-cell .bpct{font-variant-numeric:tabular-nums;color:var(--ink-2);font-size:12.5px}
+
+/* ===== Aparelhos: permissões em dots ===== */
+.perm-dots{display:inline-flex;gap:3px;align-items:center}
+.perm-dots i{width:7px;height:7px;border-radius:2px;background:var(--border-strong)}
+.perm-dots i.on{background:var(--ok)}

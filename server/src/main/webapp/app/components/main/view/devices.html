@@ -378,9 +378,10 @@
             </td>
             <td ng-if="settings.columnDisplayedDeviceModel"><span>{{getDeviceModel(device)}}</span></td>
             <td ng-if="settings.columnDisplayedDevicePermissionsStatus">
-                <img class='device-indicator'
-                     ng-src='{{getDevicePermissionIndicatorImage(device)}}'
-                     title='{{getDevicePermissionTitle(device)}}'>
+                <span class="perm-dots" ng-if="getPermissions(device)" title="{{getDevicePermissionTitle(device)}}">
+                    <i ng-repeat="p in getPermissions(device) track by $index" ng-class="{'on': p}"></i>
+                </span>
+                <span ng-if="!getPermissions(device)" class="text-muted">—</span>
             </td>
             <td ng-if="settings.columnDisplayedDeviceAppInstallStatus">
                 <img class='device-indicator'
