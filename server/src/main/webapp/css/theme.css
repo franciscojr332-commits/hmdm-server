@@ -613,3 +613,76 @@ html:has(.login-page){ background:color-mix(in oklab, var(--brand-strong) 40%, b
 .login-page .login-msg h3{color:var(--t-ink);font-size:18px;font-weight:700;margin:0 0 10px}
 .login-page .login-msg p{font-size:14px;line-height:1.6;margin:0}
 .login-page .login-msg .action-link{color:color-mix(in oklab,var(--brand-soft) 55%,white) !important}
+
+/* ============================================================
+   ADMIN DARK COMMAND-CENTER — escopado em .content-wrapper + .header.
+   Faz Aparelhos (e chrome do admin) bater com devices_complete.html.
+   Cor 100% derivada dos tokens (color-mix + alpha). Login (.login-page) intacto.
+   ============================================================ */
+body:has(.content-wrapper):not(:has(.login-page)){
+  background:radial-gradient(125% 100% at 50% -10%,
+    color-mix(in oklab,var(--brand) 28%,black 32%) 0%,
+    color-mix(in oklab,var(--brand) 20%,black 56%) 44%,
+    color-mix(in oklab,var(--brand-strong) 38%,black 80%) 100%) fixed !important;
+}
+.content-wrapper{
+  --surface:rgb(255 255 255/.055); --surface-2:rgb(255 255 255/.035); --surface-3:rgb(255 255 255/.09);
+  --border:rgb(255 255 255/.11); --border-strong:rgb(255 255 255/.20);
+  --ink:rgb(255 255 255/.95); --ink-2:rgb(255 255 255/.66); --ink-3:rgb(255 255 255/.46);
+  --brand-tint:color-mix(in oklab,var(--brand) 22%,transparent);
+  --brand-tint-2:color-mix(in oklab,var(--brand) 34%,transparent);
+  color:rgb(255 255 255/.95);
+}
+/* header dark glass */
+.header.navbar, .navbar.header{ background:rgb(20 24 52/.55) !important; backdrop-filter:blur(16px) saturate(1.1);
+  border-bottom:1px solid rgb(255 255 255/.10) !important; box-shadow:0 1px 0 rgb(255 255 255/.04) }
+.header a, .header a:active{ color:rgb(255 255 255/.66) !important } .header a:hover{ color:#fff !important }
+.header .username-label{ color:rgb(255 255 255/.85) !important }
+.nav-tabs{ border-bottom:1px solid rgb(255 255 255/.10) }
+.content-wrapper .nav-tabs > li > a{ color:rgb(255 255 255/.66) }
+.content-wrapper .nav-tabs > li > a:hover{ background:rgb(255 255 255/.08); color:#fff }
+.content-wrapper .nav-tabs > li.active > a{ color:#fff }
+.content-wrapper .tab-ico > a::before, .content-wrapper .menu-settings > a.dropdown-toggle::before, .content-wrapper .menu-functions > a.dropdown-toggle::before{ opacity:.85 }
+.content-wrapper .nav-tabs > li.active > a::after{ background:var(--brand-soft) }
+
+/* painel / tabela glass */
+.content-wrapper .panel{ background:rgb(255 255 255/.05) !important; backdrop-filter:blur(16px) saturate(1.1);
+  border:1px solid rgb(255 255 255/.10) !important; box-shadow:0 24px 64px color-mix(in oklab,black 55%,transparent) !important }
+.content-wrapper .panel-default > .panel-heading{ background:rgb(255 255 255/.04) !important; color:#fff !important; border-color:rgb(255 255 255/.10) !important }
+.content-wrapper .table{ color:rgb(255 255 255/.92) }
+.content-wrapper .table > thead > tr > th{ background:rgb(255 255 255/.04) !important; color:rgb(255 255 255/.6) !important; border-bottom:1px solid rgb(255 255 255/.12) !important }
+.content-wrapper .table > tbody > tr > td{ border-top:1px solid rgb(255 255 255/.07) !important; color:rgb(255 255 255/.9) }
+.content-wrapper .table-hover > tbody > tr:hover{ background:color-mix(in oklab,var(--brand) 16%,transparent) }
+.content-wrapper .table > tbody > tr.active > td, .content-wrapper .table > tbody > tr.selected > td{ background:color-mix(in oklab,var(--brand) 18%,transparent) !important }
+.content-wrapper .table strong{ color:#fff }
+.content-wrapper .battery-cell .bbar{ background:rgb(255 255 255/.14) }
+.content-wrapper .perm-dots i{ background:rgb(255 255 255/.22) } .content-wrapper .perm-dots i.on{ background:color-mix(in oklab,var(--ok) 70%,white) }
+
+/* inputs / selects / botões dark */
+.content-wrapper .form-control{ background:rgb(255 255 255/.07) !important; color:#fff !important; border-color:rgb(255 255 255/.18) !important }
+.content-wrapper .form-control::placeholder{ color:rgb(255 255 255/.45) !important }
+.content-wrapper .btn{ background:rgb(255 255 255/.06); color:rgb(255 255 255/.95); border-color:rgb(255 255 255/.18) }
+.content-wrapper .btn:hover{ background:rgb(255 255 255/.13); color:#fff }
+.content-wrapper .btn-default{ background:rgb(255 255 255/.06); color:rgb(255 255 255/.95) }
+.content-wrapper .open > .dropdown-toggle.btn-default{ background:rgb(255 255 255/.12); color:#fff }
+.content-wrapper .dropdown-menu{ background:color-mix(in oklab,var(--brand-strong) 55%,black 35%); border-color:rgb(255 255 255/.14); backdrop-filter:blur(14px) }
+.content-wrapper .dropdown-menu > li > a{ color:rgb(255 255 255/.9) } .content-wrapper .dropdown-menu > li > a:hover{ background:rgb(255 255 255/.10); color:#fff }
+
+/* status labels translúcidos + neon (admin dark) */
+.content-wrapper .label-default{ background:rgb(255 255 255/.10); color:rgb(255 255 255/.66) }
+.content-wrapper .label-primary, .content-wrapper .label-info{ background:color-mix(in oklab,var(--brand) 28%,transparent); color:color-mix(in oklab,var(--brand-soft) 55%,white) }
+.content-wrapper .label-success{ background:color-mix(in oklab,var(--ok) 20%,transparent); color:color-mix(in oklab,var(--ok) 60%,white) }
+.content-wrapper .label-warning{ background:color-mix(in oklab,var(--warn) 22%,transparent); color:color-mix(in oklab,var(--warn) 70%,white) }
+.content-wrapper .label-danger{ background:color-mix(in oklab,var(--danger) 24%,transparent); color:color-mix(in oklab,var(--danger) 65%,white) }
+.content-wrapper .label-success::before, .content-wrapper .label-warning::before, .content-wrapper .label-danger::before{ box-shadow:0 0 7px currentColor }
+
+/* page-head + seg + pagination dark */
+.content-wrapper .dev-count{ color:rgb(255 255 255/.66) } .content-wrapper .dev-count strong{ color:#fff }
+.content-wrapper .seg-filter{ background:rgb(255 255 255/.06) } .content-wrapper .seg-filter button{ color:rgb(255 255 255/.66) }
+.content-wrapper .seg-filter button.on{ background:rgb(255 255 255/.14); color:#fff; box-shadow:none }
+.content-wrapper .pagination > li > a{ background:transparent; color:rgb(255 255 255/.66); border-color:rgb(255 255 255/.14) }
+.content-wrapper .pagination > li > a:hover{ background:rgb(255 255 255/.10); color:#fff }
+.content-wrapper .pagination > .active > a{ background:var(--brand); border-color:var(--brand); color:#fff }
+.content-wrapper .text-muted{ color:rgb(255 255 255/.5) !important }
+.content-wrapper .action-link{ color:color-mix(in oklab,var(--brand-soft) 55%,white) !important }
+.content-wrapper .pagination-label{ color:rgb(255 255 255/.6) }
