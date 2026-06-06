@@ -528,3 +528,25 @@ html:has(.login-page){ background:color-mix(in oklab, var(--brand-strong) 40%, b
   box-shadow:0 8px 24px color-mix(in oklab,black 50%,transparent)}
 .login-page .tfa-hint{font-size:12.5px;color:var(--t-ink-2);text-align:center;max-width:30ch;line-height:1.5;margin:0}
 .login-page #authCode{padding-left:14px !important;text-align:center;letter-spacing:.3em;font-weight:600}
+
+/* ===== LOGIN: imagem de fundo (rede global) + overlay p/ contraste ===== */
+.login-page{
+  background:
+    radial-gradient(58% 48% at 50% 44%, color-mix(in oklab,black 58%,transparent) 0%, transparent 72%),
+    linear-gradient(0deg, color-mix(in oklab,var(--brand-strong) 35%,black 72%) 0%, transparent 34%),
+    linear-gradient(180deg, color-mix(in oklab,black 28%,transparent) 0%, transparent 22%),
+    url('../images/login-bg.webp') center/cover no-repeat,
+    color-mix(in oklab,var(--brand-strong) 40%,black 78%) !important;
+}
+.login-page::before{ /* só glow suave; a rede vem da imagem */
+  background:radial-gradient(40% 30% at 50% 40%, color-mix(in oklab,var(--brand-soft) 28%,transparent), transparent 72%) !important;
+  -webkit-mask:none !important; mask:none !important; }
+.login-page::after{ opacity:.035 !important } /* grão bem leve */
+.login-page .lnet{ display:none !important } /* imagem já tem linhas/órbitas */
+@media (max-width:880px){
+  .login-page{ background:
+    radial-gradient(70% 40% at 50% 42%, color-mix(in oklab,black 55%,transparent) 0%, transparent 74%),
+    linear-gradient(0deg, color-mix(in oklab,var(--brand-strong) 35%,black 72%) 0%, transparent 30%),
+    url('../images/login-bg-mobile.webp') center/cover no-repeat,
+    color-mix(in oklab,var(--brand-strong) 40%,black 78%) !important; }
+}
