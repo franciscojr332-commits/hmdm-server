@@ -372,18 +372,18 @@
                        class='pointer'>
             </td>
             <td ng-if="settings.columnDisplayedDeviceStatus">
-                <img class='device-indicator'
-                     ng-src='{{getDeviceIndicatorImage(device)}}'
-                     title='{{calculateStatusText(device)}}'>
+                <span class="dev-status dev-status--{{getStatusKind(device)}}" title="{{calculateStatusText(device)}}">
+                    <i class="dev-status-dot"></i>{{getStatusLabel(device)}}
+                </span>
             </td>
             <td ng-if='(device.lastUpdateDate > 0) && settings.columnDisplayedDeviceDate'>{{device.lastUpdateDate|date:dateFormat}}</td>
             <td ng-if='(device.lastUpdateDate <= 0 || !device.lastUpdateDate) && settings.columnDisplayedDeviceDate' localized>devices.date.unknown</td>
-            <td ng-if="settings.columnDisplayedDeviceNumber"><span>{{device.number}}</span></td>
+            <td ng-if="settings.columnDisplayedDeviceNumber"><span class="cell-mono">{{device.number}}</span></td>
             <td ng-if="settings.columnDisplayedDeviceImei">
-                <span title="{{device.imeiTooltip}}" class="{{device.imeiTooltipClass}}">{{device.displayedIMEI}}</span>
+                <span title="{{device.imeiTooltip}}" class="cell-mono {{device.imeiTooltipClass}}">{{device.displayedIMEI}}</span>
             </td>
             <td ng-if="settings.columnDisplayedDevicePhone">
-                <span title="{{device.phoneTooltip}}" class="{{device.phoneTooltipClass}}">{{device.displayedPhone}}</span>
+                <span title="{{device.phoneTooltip}}" class="cell-mono muted-cell {{device.phoneTooltipClass}}">{{device.displayedPhone}}</span>
             </td>
             <td ng-if="settings.columnDisplayedDeviceModel"><span>{{getDeviceModel(device)}}</span></td>
             <td ng-if="settings.columnDisplayedDevicePermissionsStatus">
@@ -428,7 +428,7 @@
                 <span>{{isBackgroundMode(device)}}</span>
             </td>
             <td ng-if="settings.columnDisplayedMdmMode">
-                <span ng-class="{'device-data-mismatch': device.info.mdmMode === false}">{{getIsMdmMode(device)}}</span>
+                <span class="dev-badge" ng-class="{'device-data-mismatch': device.info.mdmMode === false}">{{getIsMdmMode(device)}}</span>
             </td>
             <td ng-if="settings.columnDisplayedKioskMode">
                 <span>{{isKioskMode(device)}}</span>

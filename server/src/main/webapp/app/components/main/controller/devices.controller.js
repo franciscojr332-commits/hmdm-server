@@ -683,6 +683,22 @@ angular.module('headwind-kiosk')
             return (info && info.permissions) ? info.permissions : null;
         };
 
+        // ---- Status p/ pill (kind = green/yellow/red/grey + label curto) ----
+        $scope.getStatusKind = function (device) {
+            if (device.statusCode) return device.statusCode;
+            var d = new Date().getTime() - device.lastUpdate;
+            if (d < 2 * 60 * 60 * 1000) return 'green';
+            if (d < 4 * 60 * 60 * 1000) return 'yellow';
+            return 'red';
+        };
+        $scope.getStatusLabel = function (device) {
+            var k = $scope.getStatusKind(device);
+            if (k === 'green') return 'Online';
+            if (k === 'yellow') return 'Inativo';
+            if (k === 'red') return 'Offline';
+            return $scope.calculateStatusText ? $scope.calculateStatusText(device) : k;
+        };
+
         // ---- Seleção em massa (bulk bar flutuante) ----
         $scope.selectedCount = function () {
             var n = 0;

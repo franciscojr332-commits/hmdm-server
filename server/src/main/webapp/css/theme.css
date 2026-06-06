@@ -810,3 +810,14 @@ form[name="qrForm"] textarea.form-control{ background:rgb(255 255 255/.07) !impo
 .content-wrapper .table td a.action-link:hover{ background:color-mix(in oklab,var(--brand) 38%,transparent) }
 /* indicador de status (img círculo): tamanho consistente */
 .content-wrapper .device-indicator{ width:12px; height:12px; vertical-align:middle }
+
+/* ===== Aparelhos: células estilo mockup (status pill / mono / mdm badge) ===== */
+.dev-status{display:inline-flex;align-items:center;gap:5px;height:21px;padding:0 9px;border-radius:999px;font:650 11px var(--font);white-space:nowrap}
+.dev-status .dev-status-dot{width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 7px currentColor;flex:none}
+.content-wrapper .dev-status--green{background:color-mix(in oklab,var(--ok) 20%,transparent);color:color-mix(in oklab,var(--ok) 62%,white)}
+.content-wrapper .dev-status--yellow{background:color-mix(in oklab,var(--warn) 22%,transparent);color:color-mix(in oklab,var(--warn) 74%,white)}
+.content-wrapper .dev-status--red{background:color-mix(in oklab,var(--danger) 24%,transparent);color:color-mix(in oklab,var(--danger) 66%,white)}
+.content-wrapper .dev-status--grey,.content-wrapper .dev-status--brown{background:rgb(255 255 255/.10);color:rgb(255 255 255/.6)}
+.content-wrapper .table .cell-mono{font-family:var(--mono);font-size:12px;letter-spacing:-.01em}
+.content-wrapper .table .muted-cell{color:rgb(255 255 255/.55)}
+.content-wrapper .table .dev-badge{display:inline-block;padding:2px 8px;border-radius:6px;background:rgb(255 255 255/.08);font-size:11px;font-weight:600;color:rgb(255 255 255/.75)}
