@@ -319,3 +319,101 @@ label { font-weight: 600; color: var(--ink-2); }
 .tabset .nav-tabs > li.tab-files > a::before { --ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%205h5l2%202.5h9V18a2%202%200%200%201-2%202H4a2%202%200%200%201-2-2V7a2%202%200%200%201%202-2z%22%2F%3E%3C%2Fsvg%3E"); }
 .tabset .nav-tabs > li.menu-settings > a.dropdown-toggle::before { --ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%223.2%22%2F%3E%3Cpath%20d%3D%22M12%202v3M12%2019v3M2%2012h3M19%2012h3M4.8%204.8l2.1%202.1M17.1%2017.1l2.1%202.1M19.2%204.8l-2.1%202.1M6.9%2017.1l-2.1%202.1%22%2F%3E%3C%2Fsvg%3E"); }
 .tabset .nav-tabs > li.menu-functions > a.dropdown-toggle::before { --ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M13%202L4%2014h7l-1%208%209-12h-7z%22%2F%3E%3C%2Fsvg%3E"); }
+
+/* ============================================================
+   LOGIN — Central de Comando (dark glass). Escopado em .login-page,
+   não afeta o resto do app. Cor 100% derivada dos tokens (color-mix+alpha).
+   ============================================================ */
+.login-page{
+  --t-ink:rgb(255 255 255/.95); --t-ink-2:rgb(255 255 255/.66); --t-ink-3:rgb(255 255 255/.46);
+  --glass:rgb(255 255 255/.07); --glass-bd:rgb(255 255 255/.16);
+  position:fixed; inset:0; min-height:100vh; display:grid; place-items:center; overflow:hidden;
+  padding:24px; color:var(--t-ink); z-index:1;
+  background:radial-gradient(125% 100% at 50% -10%,
+    color-mix(in oklab,var(--brand) 30%,black 28%) 0%,
+    color-mix(in oklab,var(--brand) 22%,black 54%) 44%,
+    color-mix(in oklab,var(--brand-strong) 40%,black 78%) 100%);
+}
+/* camadas decorativas (pseudo, pointer-events none) */
+.login-page::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(42% 32% at 50% 40%, color-mix(in oklab,var(--brand-soft) 45%,transparent), transparent 70%),
+    radial-gradient(color-mix(in oklab,var(--brand-soft) 70%,white) 1px, transparent 1.3px);
+  background-size:auto, 20px 20px;
+  -webkit-mask:radial-gradient(80% 70% at 50% 42%,#000,transparent 82%);
+          mask:radial-gradient(80% 70% at 50% 42%,#000,transparent 82%);}
+.login-page::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+.login-page .login-wrapper{position:relative;z-index:2;width:min(440px,100%)}
+
+/* card glass */
+.login-page .login-card{
+  background:linear-gradient(180deg, rgb(255 255 255/.10), rgb(255 255 255/.06)) !important;
+  border:1px solid var(--glass-bd) !important; border-radius:26px !important;
+  backdrop-filter:blur(26px) saturate(1.1);
+  box-shadow:0 30px 80px color-mix(in oklab,black 60%,transparent),
+             0 2px 0 rgb(255 255 255/.10) inset,
+             0 0 0 1px color-mix(in oklab,var(--brand-soft) 26%,transparent) inset !important;
+  overflow:hidden; position:relative;}
+.login-page .login-card::before{content:"";position:absolute;top:0;left:-30%;width:60%;height:2px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,color-mix(in oklab,var(--brand-soft) 60%,white),transparent);
+  animation:lg-shimmer 5.5s linear infinite;opacity:.8}
+@keyframes lg-shimmer{0%{left:-40%}100%{left:100%}}
+.login-page .login-card-body{background:transparent !important;padding:34px clamp(26px,4vw,48px) 28px !important;text-align:center;min-height:auto !important}
+
+/* logo topo do card */
+.login-page .login-card-brand{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:16px}
+.login-page .login-seal{width:60px;height:60px;border-radius:18px;display:grid;place-items:center;color:var(--t-ink);
+  background:color-mix(in oklab,var(--brand) 28%,transparent);
+  border:1px solid color-mix(in oklab,var(--brand-soft) 50%,white 20%);
+  box-shadow:0 8px 24px color-mix(in oklab,var(--brand-strong) 55%,transparent),0 0 0 6px color-mix(in oklab,var(--brand-soft) 14%,transparent)}
+.login-page .login-seal svg{width:32px;height:32px}
+.login-page .login-word{font-weight:800;font-size:18px;letter-spacing:.02em;color:var(--t-ink);line-height:1.15}
+.login-page .login-word small{display:block;font-weight:600;font-size:11px;letter-spacing:.18em;color:var(--t-ink-2);margin-top:2px}
+
+.login-page .login-card-title{color:var(--t-ink) !important;font-size:30px;font-weight:800;letter-spacing:-.02em}
+.login-page .login-card-subtitle{color:var(--t-ink-2) !important;font-size:14px;margin:6px 0 0 !important}
+.login-page .login-deco-line{display:block;width:48px;height:3px;border-radius:3px;margin:14px auto 22px;
+  background:linear-gradient(90deg,color-mix(in oklab,var(--brand-soft) 70%,white),color-mix(in oklab,var(--brand) 60%,transparent))}
+
+/* form dark */
+.login-page .login-form{text-align:left}
+.login-page .login-form label{color:var(--t-ink) !important;font-weight:700;font-size:13px;margin-bottom:7px}
+.login-page .login-form .form-control{
+  height:50px !important;background:rgb(255 255 255/.08) !important;color:var(--t-ink) !important;
+  border:1px solid var(--glass-bd) !important;border-radius:13px !important;padding:0 14px 0 44px !important;
+  background-repeat:no-repeat !important;background-position:14px center !important;background-size:18px !important;
+  transition:border-color .18s,box-shadow .18s,background-color .18s}
+.login-page .login-form .form-control::placeholder{color:var(--t-ink-3) !important}
+.login-page .login-form .form-control:focus{
+  border-color:color-mix(in oklab,var(--brand-soft) 60%,white) !important;
+  box-shadow:0 0 0 4px color-mix(in oklab,var(--brand) 30%,transparent) !important;
+  background-color:rgb(255 255 255/.12) !important;outline:none}
+.login-page .login-form #username{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-opacity='.6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 21a8 8 0 0 1 16 0'/%3E%3C/svg%3E") !important}
+.login-page .login-form #password{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-opacity='.6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='11' width='16' height='10' rx='2'/%3E%3Cpath d='M8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E") !important}
+
+.login-page .login-links{margin:2px 0 20px}
+.login-page .login-links .action-link{color:color-mix(in oklab,var(--brand-soft) 55%,white) !important}
+.login-page .login-links .action-link:hover{color:var(--t-ink) !important}
+
+.login-page .login-submit{
+  height:52px !important;border:none !important;border-radius:14px !important;color:var(--on-brand) !important;
+  font-weight:700 !important;letter-spacing:.01em;position:relative;overflow:hidden;
+  background:linear-gradient(180deg,color-mix(in oklab,var(--brand-soft) 75%,white 5%),var(--brand) 55%,var(--brand-strong)) !important;
+  box-shadow:0 14px 30px color-mix(in oklab,var(--brand-strong) 55%,transparent),0 1px 0 rgb(255 255 255/.25) inset !important;
+  transition:transform .14s,filter .15s,box-shadow .18s}
+.login-page .login-submit:hover{transform:translateY(-1px);filter:brightness(1.06)}
+.login-page .login-submit:active{transform:translateY(0) scale(.99)}
+.login-page .login-submit::after{content:"";position:absolute;top:0;left:-45%;width:35%;height:100%;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgb(255 255 255/.28),transparent);transform:skewX(-18deg);animation:lg-shine 4.5s ease-in-out infinite}
+@keyframes lg-shine{0%,60%{left:-45%}80%,100%{left:120%}}
+
+/* logo externo antigo + footer */
+.login-page .login-page-logo{display:none}
+.login-footer{position:fixed;bottom:16px;left:0;right:0;text-align:center;z-index:3;
+  color:rgb(255 255 255/.5) !important;font-size:12.5px}
+.login-footer a{color:rgb(255 255 255/.7) !important}
+
+@media (prefers-reduced-motion: reduce){
+  .login-page .login-card::before,.login-page .login-submit::after{animation:none}
+}

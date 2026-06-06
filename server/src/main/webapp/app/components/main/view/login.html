@@ -10,8 +10,15 @@
             <div class="panel-heading login-card-heading" ng-if='errorMessage'>{{errorMessage}}</div>
             <div class="panel-heading login-card-heading" ng-if='successMessage'>{{successMessage}}</div>
             <div class="panel-body login-card-body">
+                <div class="login-card-brand">
+                    <span class="login-seal">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l6.5 2.3v4.8c0 4.3-2.8 7.5-6.5 8.6-3.7-1.1-6.5-4.3-6.5-8.6V4.8z"/><rect x="9" y="7.6" width="6" height="8" rx="1.4"/><path d="M11 14.2h2"/></svg>
+                    </span>
+                    <span class="login-word">Mikitos MDM<small>MOBILE DEVICE MANAGEMENT</small></span>
+                </div>
                 <h1 class="login-card-title">Entrar</h1>
-                <p class="login-card-subtitle">Acesse sua conta</p>
+                <p class="login-card-subtitle">Acesse o painel de gestão da sua frota.</p>
+                <span class="login-deco-line"></span>
                 <form name='loginForm' ng-submit='onLogin()' class="login-form">
                     <div class='form-group'>
                         <label for='username' localized>login.username</label>
