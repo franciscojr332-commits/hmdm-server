@@ -594,3 +594,22 @@ html:has(.login-page){ background:color-mix(in oklab, var(--brand-strong) 40%, b
 .bulk-float .bf-del:hover{background:color-mix(in oklab,var(--danger) 50%,transparent) !important;color:#fff !important}
 .bulk-float .bf-clear{width:30px;height:30px;border:none;border-radius:50%;background:transparent;color:rgb(255 255 255/.7);cursor:pointer;font-size:13px;display:grid;place-items:center}
 .bulk-float .bf-clear:hover{background:rgb(255 255 255/.12);color:#fff}
+
+/* ===== Auth screens (recovery/reset/signup): ajustes ===== */
+/* inputs sem ícone usam padding normal; só user/senha do login têm ícone */
+.login-page .login-form .form-control{padding:0 16px !important}
+.login-page .login-form #username,.login-page .login-form #password{padding-left:44px !important}
+.login-page .login-form textarea.form-control{height:auto !important;min-height:84px;padding:12px 16px !important;resize:vertical;line-height:1.5}
+.login-page--wide .login-wrapper{width:min(640px,100%) !important}
+.login-page--wide .login-card-body{padding:30px clamp(24px,3vw,40px) 26px !important}
+.login-page--wide .row{display:flex;flex-wrap:wrap;margin:0 -8px}
+.login-page--wide .row > [class*="col-"]{padding:0 8px}
+.login-page .login-terms{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--t-ink-2);margin-bottom:18px}
+.login-page .login-terms label{font-weight:500 !important;color:var(--t-ink-2) !important;margin:0;line-height:1.4}
+.login-page .login-terms a{color:color-mix(in oklab,var(--brand-soft) 55%,white) !important}
+.login-page .field-hint{font-size:12px;margin-top:6px;color:var(--t-ink-2)}
+.login-page .field-warning{font-size:12px;margin-top:6px;color:color-mix(in oklab,var(--danger) 55%,white)}
+.login-page .login-msg{text-align:center;color:var(--t-ink-2)}
+.login-page .login-msg h3{color:var(--t-ink);font-size:18px;font-weight:700;margin:0 0 10px}
+.login-page .login-msg p{font-size:14px;line-height:1.6;margin:0}
+.login-page .login-msg .action-link{color:color-mix(in oklab,var(--brand-soft) 55%,white) !important}
