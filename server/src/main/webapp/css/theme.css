@@ -555,3 +555,11 @@ html:has(.login-page){ background:color-mix(in oklab, var(--brand-strong) 40%, b
 .login-footer{ background:transparent !important; border-top:none !important;
   color:rgb(255 255 255/.55) !important; bottom:14px !important; }
 .login-footer a{ color:rgb(255 255 255/.75) !important; }
+
+/* ===== Aparelhos: bateria em mini-barra (admin claro) ===== */
+.battery-cell{display:inline-flex;align-items:center;gap:8px}
+.battery-cell .bbar{width:38px;height:7px;border-radius:999px;background:var(--surface-3);overflow:hidden;flex:none}
+.battery-cell .bbar i{display:block;height:100%;border-radius:999px;background:var(--ok);transition:width .3s var(--ease-out)}
+.battery-cell.low .bbar i{background:var(--warn)}
+.battery-cell.crit .bbar i{background:var(--danger)}
+.battery-cell .bpct{font-variant-numeric:tabular-nums;color:var(--ink-2);font-size:12.5px}

@@ -407,7 +407,12 @@
                 <span ng-style="{color: getDeviceLauncherVersionColor(device)}">{{getDeviceLauncherVersion(device)}}</span>
             </td>
             <td ng-if="settings.columnDisplayedBatteryLevel">
-                <span>{{getDeviceBatteryLevel(device)}}</span>
+                <span class="battery-cell" ng-if="getBatteryNum(device) !== null"
+                      ng-class="{'low': getBatteryNum(device) <= 30, 'crit': getBatteryNum(device) <= 12}">
+                    <span class="bbar"><i ng-style="{width: getBatteryNum(device) + '%'}"></i></span>
+                    <span class="bpct">{{getBatteryNum(device)}}%</span>
+                </span>
+                <span ng-if="getBatteryNum(device) === null" class="text-muted">—</span>
             </td>
             <td ng-if="settings.columnDisplayedDefaultLauncher">
                 <span>{{isBackgroundMode(device)}}</span>

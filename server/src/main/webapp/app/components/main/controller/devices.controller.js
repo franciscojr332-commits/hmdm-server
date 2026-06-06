@@ -671,6 +671,12 @@ angular.module('headwind-kiosk')
             return null;
         };
 
+        // Nível de bateria numérico (0-100) p/ a barra visual; null se desconhecido
+        $scope.getBatteryNum = function (device) {
+            var info = $scope.getDeviceInfo(device);
+            return (info && info.batteryLevel != null) ? info.batteryLevel : null;
+        };
+
         $scope.getIsDefaultLauncher = function (device) {
             var info = $scope.getDeviceInfo(device);
             if (info) {
