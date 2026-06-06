@@ -550,3 +550,8 @@ html:has(.login-page){ background:color-mix(in oklab, var(--brand-strong) 40%, b
     url('../images/login-bg-mobile.webp') center/cover no-repeat,
     color-mix(in oklab,var(--brand-strong) 40%,black 78%) !important; }
 }
+
+/* ===== LOGIN: rodapé institucional sem faixa branca ===== */
+.login-footer{ background:transparent !important; border-top:none !important;
+  color:rgb(255 255 255/.55) !important; bottom:14px !important; }
+.login-footer a{ color:rgb(255 255 255/.75) !important; }
