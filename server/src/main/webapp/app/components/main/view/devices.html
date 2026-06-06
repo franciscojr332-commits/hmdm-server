@@ -180,21 +180,6 @@
             style="float: left; margin: 10px 10px 10px 30px">
             <span style="float: left; margin: 7px 0 0 0" localized>form.devices.fast.search</span>
 
-            <button type='button' class='btn btn-primary' style='margin-right:4px' ng-click='openBulkConfigUpdatedModal()'>Atualizar Config</button>
-            <button type='button' class='btn btn-success' style='margin-right:4px' ng-click='openBulkGrantPermissionsModal()'>Conceder Permiss&#245;es</button>
-            <button type='button' class='btn btn-warning' style='margin-right:4px' ng-click='openBulkNotificationModal()'>Notifica&#231;&#227;o</button>
-
-            <div class="btn-group dropdown" uib-dropdown ng-if="hasPermission('edit_devices')">
-                    <button id="group-actions-button" type="button"
-                            class="btn btn-default dropdown-toggle" uib-dropdown-toggle ng-disabled='isNotSelected()' localized>button.group.action</button>
-                    <ul class="dropdown-menu dropdown-menu-devices" uib-dropdown-menu role="menu">
-                        <li role="menuitem">
-                            <a ng-click="openBulkUpdateModal()" localized>button.set.configuration</a>
-                            <a ng-click="openBulkGroupModal()" localized>button.set.group</a>
-                            <a ng-click="confirmBulkDelete()" localized>button.delete</a>
-                        </li>
-                    </ul>
-                    </div>
             <button type='button' ng-if="hasPermission('edit_devices')"
                     ng-disabled='commonSettings.deviceLimit > 0 && commonSettings.deviceCount >= commonSettings.deviceLimit'
                     class='btn btn-default' ng-click='editDevice( {} )' localized>button.add</button>
@@ -202,6 +187,15 @@
     </div>
 
     </form>
+
+    <div class="dev-pagehead">
+        <div class="dev-count"><strong>{{paging.totalItems}}</strong> aparelhos</div>
+        <div class="seg-filter">
+            <button type="button" ng-class="{on: statusFilter==='all'}" ng-click="setStatusFilter('all')">Todos</button>
+            <button type="button" ng-class="{on: statusFilter==='online'}" ng-click="setStatusFilter('online')">Online</button>
+            <button type="button" ng-class="{on: statusFilter==='offline'}" ng-click="setStatusFilter('offline')">Offline</button>
+        </div>
+    </div>
 
     <div class="custom-pagination-wrapper">
         <div class="custom-pagination" ng-if="paging.totalItems > 0">
@@ -539,6 +533,18 @@
   </div>
 </div>
 
+    <div class="bulk-float" ng-show="!isNotSelected()">
+        <span class="bf-count">{{selectedCount()}} selecionado(s)</span>
+        <span class="bf-sep"></span>
+        <button type="button" class="btn btn-primary" ng-click="openBulkConfigUpdatedModal()">Atualizar Config</button>
+        <button type="button" class="btn" ng-click="openBulkGrantPermissionsModal()">Permissões</button>
+        <button type="button" class="btn" ng-click="openBulkNotificationModal()">Notificar</button>
+        <button type="button" class="btn" ng-if="hasPermission('edit_devices')" ng-click="openBulkUpdateModal()">Config</button>
+        <button type="button" class="btn" ng-if="hasPermission('edit_devices')" ng-click="openBulkGroupModal()">Grupo</button>
+        <button type="button" class="btn bf-del" ng-if="hasPermission('edit_devices')" ng-click="confirmBulkDelete()">Excluir</button>
+        <span class="bf-sep"></span>
+        <button type="button" class="bf-clear" ng-click="clearSelection()" title="Limpar seleção">&#10005;</button>
+    </div>
 </div>
 <style>
 @-webkit-keyframes spin { 0%{-webkit-transform:rotate(0deg)} 100%{-webkit-transform:rotate(360deg)} }

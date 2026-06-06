@@ -683,6 +683,41 @@ angular.module('headwind-kiosk')
             return (info && info.permissions) ? info.permissions : null;
         };
 
+        // ---- Seleção em massa (bulk bar flutuante) ----
+        $scope.selectedCount = function () {
+            var n = 0;
+            if ($scope.devices) {
+                for (var i = 0; i < $scope.devices.length; i++) {
+                    if ($scope.devices[i].selected) n++;
+                }
+            }
+            return n;
+        };
+        $scope.clearSelection = function () {
+            if ($scope.devices) {
+                for (var i = 0; i < $scope.devices.length; i++) {
+                    $scope.devices[i].selected = false;
+                }
+            }
+            if ($scope.selection) $scope.selection.all = false;
+        };
+
+        // ---- Filtro rápido de status (usa o param server existente) ----
+        $scope.statusFilter = 'all';
+        $scope.setStatusFilter = function (f) {
+            $scope.statusFilter = f;
+            if (f === 'online') {
+                $scope.additionalParams.onlineOrOffline = '1';
+                $scope.additionalParams.onlineTimeSelect = '10';
+            } else if (f === 'offline') {
+                $scope.additionalParams.onlineOrOffline = '2';
+                $scope.additionalParams.onlineTimeSelect = '10';
+            } else {
+                $scope.additionalParams.onlineOrOffline = null;
+            }
+            $scope.initSearch();
+        };
+
         $scope.getIsDefaultLauncher = function (device) {
             var info = $scope.getDeviceInfo(device);
             if (info) {
