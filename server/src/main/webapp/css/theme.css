@@ -773,3 +773,30 @@ form[name="qrForm"] .dropdown-multiselect .dropdown-menu a,
 .content-wrapper .dropdown-multiselect .dropdown-menu a{ color:rgb(255 255 255/.9) }
 form[name="qrForm"] input.common-checkbox{ width:18px !important; height:18px !important; padding:0 !important; box-shadow:none !important }
 form[name="qrForm"] textarea.form-control{ background:rgb(255 255 255/.07) !important; color:#fff !important }
+
+/* ===== Aparelhos: toolbar flex limpo (mata float chaos do Bootstrap) ===== */
+.content-wrapper form > .form-group:has(.dev-act){
+  display:flex !important; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px;
+}
+.content-wrapper form > .form-group:has(.dev-act)::before,
+.content-wrapper form > .form-group:has(.dev-act)::after{ content:none !important; display:none !important }
+.content-wrapper form > .form-group:has(.dev-act) > .col-sm-5{
+  float:none !important; width:auto !important; flex:0 0 auto; padding:0 !important; margin:0 !important;
+}
+.content-wrapper form > .form-group:has(.dev-act) > .col-sm-5 .form-control{ width:300px; max-width:42vw }
+.content-wrapper form > .form-group:has(.dev-act) > .col-sm-7{
+  float:none !important; width:auto !important; flex:1 1 auto; padding:0 !important; margin:0 !important;
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+}
+.content-wrapper form > .form-group:has(.dev-act) > .col-sm-7 > [style*="float: left"]{ float:none !important; margin:0 !important }
+.content-wrapper form > .form-group:has(.dev-act) > .col-sm-7 input[type=checkbox]{ margin:0 4px 0 10px !important; float:none !important }
+.content-wrapper form > .form-group:has(.dev-act) .dev-act:first-of-type{ margin-left:auto !important }
+.content-wrapper .dev-act{ margin-bottom:0 !important; float:none !important }
+
+/* ===== Aparelhos: restaurar cores dos botões de ação no dark (especificidade) ===== */
+.content-wrapper .btn-primary{ background:var(--brand) !important; border-color:var(--brand) !important; color:#fff !important }
+.content-wrapper .btn-primary:hover{ background:var(--brand-soft) !important }
+.content-wrapper .btn-success{ background:color-mix(in oklab,var(--ok) 22%,transparent) !important; border-color:color-mix(in oklab,var(--ok) 45%,transparent) !important; color:color-mix(in oklab,var(--ok) 62%,white) !important }
+.content-wrapper .btn-success:hover{ background:color-mix(in oklab,var(--ok) 30%,transparent) !important; color:#fff !important }
+.content-wrapper .btn-warning{ background:color-mix(in oklab,var(--warn) 24%,transparent) !important; border-color:color-mix(in oklab,var(--warn) 45%,transparent) !important; color:color-mix(in oklab,var(--warn) 74%,white) !important }
+.content-wrapper .btn-warning:hover{ background:color-mix(in oklab,var(--warn) 32%,transparent) !important; color:#fff !important }

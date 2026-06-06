@@ -1,6 +1,19 @@
 <!-- Localization completed -->
 <div ng-controller="DevicesTabController" style="position:relative">
 
+    <div class="dev-pagehead">
+        <div class="dev-titlewrap">
+            <h1 class="dev-title">Aparelhos</h1>
+            <div class="dev-count"><strong>{{paging.totalItems}}</strong> dispositivos gerenciados</div>
+        </div>
+        <div class="seg-filter">
+            <button type="button" ng-class="{on: statusFilter==='all'}" ng-click="setStatusFilter('all')">Todos</button>
+            <button type="button" ng-class="{on: statusFilter==='online'}" ng-click="setStatusFilter('online')">Online</button>
+            <button type="button" ng-class="{on: statusFilter==='offline'}" ng-click="setStatusFilter('offline')">Offline</button>
+        </div>
+    </div>
+
+
     <sarsha-spinner name="spinner2">
         <div class="spinner">
             <div class="rect1"></div>
@@ -198,18 +211,6 @@
     </div>
 
     </form>
-
-    <div class="dev-pagehead">
-        <div class="dev-titlewrap">
-            <h1 class="dev-title">Aparelhos</h1>
-            <div class="dev-count"><strong>{{paging.totalItems}}</strong> dispositivos gerenciados</div>
-        </div>
-        <div class="seg-filter">
-            <button type="button" ng-class="{on: statusFilter==='all'}" ng-click="setStatusFilter('all')">Todos</button>
-            <button type="button" ng-class="{on: statusFilter==='online'}" ng-click="setStatusFilter('online')">Online</button>
-            <button type="button" ng-class="{on: statusFilter==='offline'}" ng-click="setStatusFilter('offline')">Offline</button>
-        </div>
-    </div>
 
     <div class="custom-pagination-wrapper">
         <div class="custom-pagination" ng-if="paging.totalItems > 0">
