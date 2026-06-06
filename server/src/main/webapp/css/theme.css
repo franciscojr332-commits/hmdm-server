@@ -486,3 +486,11 @@ label { font-weight: 600; color: var(--ink-2); }
 @media (max-width:1180px){ .login-page .lf-gear,.login-page .lf-dash,.login-page .lf-laptop{display:none} }
 @media (max-width:880px){ .login-page .lfloat,.login-page .lmetrics,.login-page .lbrandtop{display:none} .login-page .lnet{opacity:.3} }
 @media (prefers-reduced-motion: reduce){ .login-page .lfloat,.login-page .lparticles span,.login-page .lf-on .d,.login-page .lm-pulse{animation:none} }
+
+/* ===== LOGIN: matar faixa branca atrás do .login-page (body/scroll) ===== */
+body:has(> .login-page), body:has(.login-page){
+  margin:0; overflow:hidden;
+  background:color-mix(in oklab, var(--brand-strong) 40%, black 78%) !important;
+}
+html:has(.login-page){ background:color-mix(in oklab, var(--brand-strong) 40%, black 78%) !important; }
+.login-footer:has(~ .login-page), .login-page ~ .login-footer{ } /* footer já fixed/transparente */
