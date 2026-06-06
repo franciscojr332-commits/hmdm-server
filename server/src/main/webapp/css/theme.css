@@ -800,3 +800,13 @@ form[name="qrForm"] textarea.form-control{ background:rgb(255 255 255/.07) !impo
 .content-wrapper .btn-success:hover{ background:color-mix(in oklab,var(--ok) 30%,transparent) !important; color:#fff !important }
 .content-wrapper .btn-warning{ background:color-mix(in oklab,var(--warn) 24%,transparent) !important; border-color:color-mix(in oklab,var(--warn) 45%,transparent) !important; color:color-mix(in oklab,var(--warn) 74%,white) !important }
 .content-wrapper .btn-warning:hover{ background:color-mix(in oklab,var(--warn) 32%,transparent) !important; color:#fff !important }
+
+/* ===== Aparelhos: polish de célula (CSS-only, sem markup) ===== */
+/* Config (action-link) vira badge índigo, como o mockup */
+.content-wrapper .table td a.action-link{
+  display:inline-block; padding:2px 9px; border-radius:999px; font-weight:650; font-size:11.5px;
+  background:color-mix(in oklab,var(--brand) 26%,transparent);
+  color:color-mix(in oklab,var(--brand-soft) 58%,white) !important; text-decoration:none !important }
+.content-wrapper .table td a.action-link:hover{ background:color-mix(in oklab,var(--brand) 38%,transparent) }
+/* indicador de status (img círculo): tamanho consistente */
+.content-wrapper .device-indicator{ width:12px; height:12px; vertical-align:middle }
