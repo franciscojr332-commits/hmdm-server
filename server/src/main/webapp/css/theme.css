@@ -300,3 +300,58 @@ label { font-weight: 600; color: var(--ink-2); }
   .open > .dropdown-menu, .modal.in .modal-content, .alert, .skeleton { animation: none; }
   .nav-tabs > li > a::after { transition: none; }
 }
+
+/* ============================================================
+   DENSE CONSOLE — vibe ferramenta de frota séria (não SaaS).
+   Canvas frio estruturado, data-grid com linhas, mono nos dados,
+   densidade alta, status neon. Sobrescreve os defaults mais macios.
+   ============================================================ */
+:root {
+  --bg: oklch(0.935 0.009 256);          /* canvas mais escuro/frio: cards flutuam */
+  --surface-2: oklch(0.972 0.005 256);
+  --surface-3: oklch(0.948 0.008 256);
+  --border: oklch(0.892 0.010 256);      /* bordas mais nítidas = estrutura visível */
+  --border-strong: oklch(0.828 0.013 256);
+}
+
+/* painel = moldura de console, cantos menos arredondados, sombra definida */
+.panel { border-radius: 10px; border-color: var(--border-strong); box-shadow: var(--shadow-2); }
+
+/* --- DATA GRID: denso, linhas verticais+horizontais, mono, tabular --- */
+.table { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.table > thead > tr > th {
+  padding: 7px 10px; font-family: var(--font); font-size: 10.5px;
+  border-right: 1px solid var(--border); background: var(--surface-3);
+}
+.table > tbody > tr > td {
+  padding: 6px 10px; font-size: 12px; line-height: 1.45;
+  border-right: 1px solid var(--border);
+}
+.table > thead > tr > th:last-child, .table > tbody > tr > td:last-child { border-right: none; }
+.table > tbody > tr:nth-child(even) > td { background: oklch(0.985 0.004 256 / 0.6); } /* zebra sutil p/ varredura */
+.table-hover > tbody > tr:hover > td { background: var(--brand-tint) !important; }
+.table > tbody > tr.selected > td { background: var(--brand-tint) !important; box-shadow: inset 2px 0 0 var(--brand); }
+/* código do device protagonista, ainda mono mas forte */
+.table strong { font-family: var(--mono); font-weight: 700; letter-spacing: -0.01em; color: var(--ink); }
+.table small.text-muted { font-family: var(--font); font-size: 10.5px; }
+
+/* --- STATUS NEON: dot com glow, texto mais brilhante --- */
+.label-success, .label-warning, .label-danger { font-weight: 700; border-radius: 5px; padding: .22em .55em; }
+.label-success { background: oklch(0.95 0.05 152); color: oklch(0.46 0.16 152); }
+.label-danger  { background: oklch(0.95 0.045 25); color: oklch(0.52 0.21 25); }
+.label-warning { background: oklch(0.955 0.06 86); color: oklch(0.50 0.13 70); }
+.label-success::before { box-shadow: 0 0 0 1px oklch(0.64 0.15 152 / .25), 0 0 7px oklch(0.64 0.15 152 / .7); }
+.label-danger::before  { box-shadow: 0 0 7px oklch(0.58 0.21 25 / .6); }
+.label-warning::before { box-shadow: 0 0 7px oklch(0.76 0.14 78 / .6); }
+.label-primary, .label-info { background: oklch(0.93 0.05 268); color: var(--brand-strong); border-radius: 5px; }
+
+/* --- HEADER: moldura de console com acento de marca --- */
+.header.navbar, .navbar.header { border-bottom: 1px solid var(--border-strong); box-shadow: 0 1px 0 var(--surface), var(--shadow-1); }
+.header .logo-text, .header .logo-text a { letter-spacing: -0.02em; }
+
+/* --- NAV TABS: barra de modo, fundo estruturado --- */
+.nav-tabs { background: var(--surface); border-radius: 8px 8px 0 0; padding: 0 4px; }
+
+/* botões um tico mais compactos p/ densidade */
+.btn { height: auto; }
+.btn-default, .btn-primary, .btn-success, .btn-warning { padding: 6px 12px; font-size: 12.5px; }
