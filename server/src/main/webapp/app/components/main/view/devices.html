@@ -180,16 +180,30 @@
             style="float: left; margin: 10px 10px 10px 30px">
             <span style="float: left; margin: 7px 0 0 0" localized>form.devices.fast.search</span>
 
+            <button type='button' class='btn btn-primary dev-act' style='margin-right:4px' ng-click='openBulkConfigUpdatedModal()'>Atualizar Config</button>
+            <button type='button' class='btn btn-success dev-act' style='margin-right:4px' ng-click='openBulkGrantPermissionsModal()'>Conceder Permiss&#245;es</button>
+            <button type='button' class='btn btn-warning dev-act' style='margin-right:4px' ng-click='openBulkNotificationModal()'>Notifica&#231;&#227;o</button>
+            <div class="btn-group dropdown dev-act" uib-dropdown ng-if="hasPermission('edit_devices')" style='margin-right:4px'>
+                <button type="button" class="btn btn-default dropdown-toggle" uib-dropdown-toggle ng-disabled='isNotSelected()' localized>button.group.action</button>
+                <ul class="dropdown-menu dropdown-menu-devices dropdown-menu-right" uib-dropdown-menu role="menu">
+                    <li role="menuitem"><a ng-click="openBulkUpdateModal()" localized>button.set.configuration</a></li>
+                    <li role="menuitem"><a ng-click="openBulkGroupModal()" localized>button.set.group</a></li>
+                    <li role="menuitem"><a ng-click="confirmBulkDelete()" localized>button.delete</a></li>
+                </ul>
+            </div>
             <button type='button' ng-if="hasPermission('edit_devices')"
                     ng-disabled='commonSettings.deviceLimit > 0 && commonSettings.deviceCount >= commonSettings.deviceLimit'
-                    class='btn btn-default' ng-click='editDevice( {} )' localized>button.add</button>
+                    class='btn btn-primary' ng-click='editDevice( {} )' localized>button.add</button>
         </div>
     </div>
 
     </form>
 
     <div class="dev-pagehead">
-        <div class="dev-count"><strong>{{paging.totalItems}}</strong> aparelhos</div>
+        <div class="dev-titlewrap">
+            <h1 class="dev-title">Aparelhos</h1>
+            <div class="dev-count"><strong>{{paging.totalItems}}</strong> dispositivos gerenciados</div>
+        </div>
         <div class="seg-filter">
             <button type="button" ng-class="{on: statusFilter==='all'}" ng-click="setStatusFilter('all')">Todos</button>
             <button type="button" ng-class="{on: statusFilter==='online'}" ng-click="setStatusFilter('online')">Online</button>

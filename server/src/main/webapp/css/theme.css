@@ -705,3 +705,12 @@ body:has(.content-wrapper):not(:has(.login-page)){
   .content-wrapper .tabset > .tab-content{ margin-top:0 }
   /* conteúdo já começa após a navbar (content-wrapper padding-top do main.css) */
 }
+
+/* ===== Aparelhos: título grande no page-head + ações inline ===== */
+.dev-titlewrap{display:flex;flex-direction:column}
+.dev-title{font-size:24px;font-weight:800;letter-spacing:-.02em;margin:0 0 3px;line-height:1.1;color:var(--ink)}
+.content-wrapper .dev-title{color:#fff}
+.dev-pagehead{align-items:flex-end}
+.dev-act{vertical-align:top;margin-bottom:4px}
+/* toolbar: deixa a linha de ações respirar (flex-wrap) */
+.content-wrapper form .form-group:last-of-type .col-sm-7{white-space:normal}
