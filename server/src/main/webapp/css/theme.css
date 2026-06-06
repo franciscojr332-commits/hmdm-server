@@ -417,3 +417,72 @@ label { font-weight: 600; color: var(--ink-2); }
 @media (prefers-reduced-motion: reduce){
   .login-page .login-card::before,.login-page .login-submit::after{animation:none}
 }
+
+/* ===== LOGIN — cena decorativa (badges, métricas, rede, partículas) ===== */
+.login-page .lnet{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.55}
+.login-page .lnet-line{fill:none;stroke:rgb(255 255 255/.5);stroke-width:1;filter:blur(.3px)}
+.login-page .lnet-node{fill:rgb(255 255 255/.7)}
+.login-page .lparticles{position:absolute;inset:0;z-index:0;pointer-events:none}
+.login-page .lparticles span{position:absolute;width:4px;height:4px;border-radius:50%;
+  background:color-mix(in oklab,var(--brand-soft) 60%,white);opacity:.5;
+  box-shadow:0 0 8px color-mix(in oklab,var(--brand-soft) 70%,white);animation:lg-float 7s ease-in-out infinite}
+.login-page .lparticles span:nth-child(1){left:22%;top:30%;animation-delay:0s}
+.login-page .lparticles span:nth-child(2){left:74%;top:26%;animation-delay:1.4s}
+.login-page .lparticles span:nth-child(3){left:34%;top:70%;animation-delay:.7s}
+.login-page .lparticles span:nth-child(4){left:66%;top:66%;animation-delay:2.1s}
+.login-page .lparticles span:nth-child(5){left:48%;top:18%;animation-delay:1s}
+@keyframes lg-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.login-page .lhorizon{position:absolute;left:0;right:0;bottom:0;height:40%;z-index:0;pointer-events:none;
+  background:radial-gradient(120% 100% at 50% 100%, color-mix(in oklab,var(--brand-soft) 42%,transparent) 0%, transparent 62%)}
+
+.login-page .lbrandtop{position:absolute;top:30px;left:36px;z-index:4;display:flex;align-items:center;gap:12px;pointer-events:none;color:var(--t-ink)}
+.login-page .lbt-mk{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;
+  background:rgb(255 255 255/.10);border:1px solid var(--glass-bd);backdrop-filter:blur(8px)}
+.login-page .lbt-mk svg{width:24px;height:24px}
+.login-page .lbt-nm{font-weight:800;font-size:22px;letter-spacing:-.02em}
+.login-page .lbt-tg{font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--t-ink-2);
+  background:rgb(255 255 255/.10);border:1px solid var(--glass-bd);padding:3px 8px;border-radius:6px}
+
+.login-page .lfloat{position:absolute;z-index:1;pointer-events:none;color:color-mix(in oklab,var(--brand-soft) 50%,white);
+  background:var(--glass);border:1px solid var(--glass-bd);backdrop-filter:blur(10px);border-radius:16px;
+  box-shadow:0 14px 40px color-mix(in oklab,var(--brand-strong) 55%,black 25%);animation:lg-float 8s ease-in-out infinite}
+.login-page .lf-phone{left:7%;top:42%;width:108px;height:188px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;animation-delay:.3s}
+.login-page .lf-and{width:50px;height:50px}
+.login-page .lf-on{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t-ink-2)}
+.login-page .lf-on .d{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok);animation:lg-pulse 2.2s ease-out infinite}
+.login-page .lf-gear{left:15%;top:25%;width:72px;height:72px;display:grid;place-items:center;animation-delay:1.2s}
+.login-page .lf-gear svg{width:32px;height:32px}
+.login-page .lf-shield{right:9%;top:15%;width:108px;height:128px;display:grid;place-items:center;background:transparent;border:none;box-shadow:none;animation-delay:.8s}
+.login-page .lf-shield svg{width:84px;height:100px}
+.login-page .lf-laptop{right:8%;bottom:14%;width:170px;height:120px;display:grid;place-items:center;background:transparent;border:none;box-shadow:none;animation-delay:1.6s}
+.login-page .lf-laptop svg{width:140px;height:100px}
+.login-page .lf-dash{right:5%;top:37%;width:212px;padding:16px;animation-delay:.5s}
+.login-page .lf-dash .lf-top{display:flex;justify-content:space-between;align-items:flex-start}
+.login-page .lf-lbl{font-size:11px;color:var(--t-ink-2)}
+.login-page .lf-v{font-size:26px;font-weight:800;letter-spacing:-.02em;margin-top:2px;color:var(--t-ink)}
+.login-page .lf-donut{width:48px;height:48px}
+.login-page .lf-donut .trk{stroke:rgb(255 255 255/.2)} .login-page .lf-donut .val{stroke:color-mix(in oklab,var(--brand-soft) 55%,white)}
+.login-page .lf-sp{margin-top:12px;width:100%;height:28px}
+.login-page .lf-sp polyline{stroke:color-mix(in oklab,var(--brand-soft) 55%,white)}
+
+.login-page .lmetrics{position:absolute;bottom:54px;left:50%;transform:translateX(-50%);display:flex;gap:16px;z-index:2;pointer-events:none}
+.login-page .lmetric{width:212px;padding:15px 18px;position:relative;overflow:hidden;
+  background:var(--glass);border:1px solid var(--glass-bd);backdrop-filter:blur(10px);border-radius:15px;
+  box-shadow:0 12px 34px color-mix(in oklab,var(--brand-strong) 50%,black 25%)}
+.login-page .lm-row{display:flex;align-items:center;gap:11px}
+.login-page .lm-ic{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;flex:none;
+  background:color-mix(in oklab,var(--brand) 20%,transparent);border:1px solid var(--glass-bd);color:color-mix(in oklab,var(--brand-soft) 50%,white)}
+.login-page .lm-ic.on{color:var(--ok);background:color-mix(in oklab,var(--ok) 16%,transparent);border-color:color-mix(in oklab,var(--ok) 40%,transparent)}
+.login-page .lm-ic svg{width:20px;height:20px}
+.login-page .lm-v{font-size:24px;font-weight:800;letter-spacing:-.02em;line-height:1;color:var(--t-ink)}
+.login-page .lm-l{font-size:12.5px;color:var(--t-ink-2);margin-top:3px}
+.login-page .lm-sp{position:absolute;left:0;right:0;bottom:0;height:28px;opacity:.75}
+.login-page .lm-sp polyline{stroke:color-mix(in oklab,var(--brand-soft) 55%,white)}
+.login-page .lm-sp.on polyline{stroke:var(--ok)}
+.login-page .lm-pulse{width:11px;height:11px;border-radius:50%;background:var(--ok);box-shadow:0 0 10px var(--ok);animation:lg-pulse 2.2s ease-out infinite}
+@keyframes lg-pulse{0%{box-shadow:0 0 0 0 color-mix(in oklab,var(--ok) 60%,transparent)}70%{box-shadow:0 0 0 7px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+/* responsivo: esconde decoração em telas menores */
+@media (max-width:1180px){ .login-page .lf-gear,.login-page .lf-dash,.login-page .lf-laptop{display:none} }
+@media (max-width:880px){ .login-page .lfloat,.login-page .lmetrics,.login-page .lbrandtop{display:none} .login-page .lnet{opacity:.3} }
+@media (prefers-reduced-motion: reduce){ .login-page .lfloat,.login-page .lparticles span,.login-page .lf-on .d,.login-page .lm-pulse{animation:none} }
