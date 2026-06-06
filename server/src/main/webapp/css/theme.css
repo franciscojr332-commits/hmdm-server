@@ -686,3 +686,22 @@ body:has(.content-wrapper):not(:has(.login-page)){
 .content-wrapper .text-muted{ color:rgb(255 255 255/.5) !important }
 .content-wrapper .action-link{ color:color-mix(in oklab,var(--brand-soft) 55%,white) !important }
 .content-wrapper .pagination-label{ color:rgb(255 255 255/.6) }
+
+/* ===== ADMIN: header em barra única (CSS-only, sem mexer no uib-tabset/router) =====
+   Sobe a <ul.nav-tabs> pra linha da navbar. Logo=esquerda, usuário=direita, tabs=centro.
+   Reverte p/ 2 linhas <1180px. */
+@media (min-width:1180px){
+  .header.navbar, .navbar.header{ height:60px }
+  .header .logo-text{ line-height:60px }
+  .header .navbar-right{ line-height:60px }
+  .content-wrapper .tabset > .nav-tabs{
+    position:fixed; top:0; left:212px; right:300px; height:60px; z-index:1102;
+    display:flex; align-items:center; gap:2px; margin:0; padding:0;
+    border-bottom:none; background:transparent;
+  }
+  .content-wrapper .tabset > .nav-tabs > li{ float:none; height:100%; display:flex; align-items:center }
+  .content-wrapper .tabset > .nav-tabs > li > a{ margin:0; height:38px; display:flex; align-items:center }
+  .content-wrapper .tabset > .nav-tabs > li.active > a::after{ bottom:-11px } /* underline na base da barra */
+  .content-wrapper .tabset > .tab-content{ margin-top:0 }
+  /* conteúdo já começa após a navbar (content-wrapper padding-top do main.css) */
+}
