@@ -721,3 +721,55 @@ body:has(.content-wrapper):not(:has(.login-page)){
 .content-wrapper .error{color:color-mix(in oklab,var(--danger) 55%,white)}
 .content-wrapper .checkbox label, .content-wrapper .radio label{color:rgb(255 255 255/.85)}
 .content-wrapper .panel-heading{color:#fff}
+
+/* ============================================================
+   PROFILE / UPDATES / QR — telas utilitárias autenticadas standalone.
+   Não usam .content-wrapper → dark próprio. Login (.login-page) intacto.
+   ============================================================ */
+body:has(.profile):not(:has(.login-page)):not(:has(.content-wrapper)),
+body:has(form[name="qrForm"]):not(:has(.login-page)):not(:has(.content-wrapper)){
+  background:radial-gradient(125% 100% at 50% -10%,
+    color-mix(in oklab,var(--brand) 26%,black 34%) 0%,
+    color-mix(in oklab,var(--brand) 18%,black 58%) 46%,
+    color-mix(in oklab,var(--brand-strong) 38%,black 80%) 100%) fixed !important;
+  color:rgb(255 255 255/.92);
+}
+/* card glass centralizado p/ profile/updates/qr */
+.profile, form[name="qrForm"] > .width-1000{
+  max-width:780px; margin:56px auto 40px; padding:30px clamp(20px,3vw,38px);
+  background:rgb(255 255 255/.05); border:1px solid rgb(255 255 255/.10);
+  border-radius:18px; backdrop-filter:blur(18px) saturate(1.1);
+  box-shadow:0 24px 64px color-mix(in oklab,black 55%,transparent);
+}
+.profile h3, form[name="qrForm"] h3{ color:#fff; font-weight:800; letter-spacing:-.02em }
+.profile .control-label, .profile label, form[name="qrForm"] .control-label, form[name="qrForm"] label{ color:rgb(255 255 255/.82) !important }
+.profile .bold, form[name="qrForm"] .bold{ color:#fff }
+.profile .form-control, form[name="qrForm"] .form-control{ background:rgb(255 255 255/.07) !important; color:#fff !important; border-color:rgb(255 255 255/.18) !important }
+.profile .form-control::placeholder, form[name="qrForm"] .form-control::placeholder{ color:rgb(255 255 255/.45) !important }
+.profile .form-control[disabled]{ opacity:.7 }
+.profile .btn, form[name="qrForm"] .btn{ background:rgb(255 255 255/.06); color:#fff; border-color:rgb(255 255 255/.18) }
+.profile .btn:hover, form[name="qrForm"] .btn:hover{ background:rgb(255 255 255/.13) }
+.profile .btn-primary, form[name="qrForm"] .btn-primary{ background:var(--brand); border-color:var(--brand) }
+.profile .error, form[name="qrForm"] .error{ color:color-mix(in oklab,var(--danger) 55%,white) }
+.profile .success, form[name="qrForm"] .success{ color:color-mix(in oklab,var(--ok) 60%,white) }
+.profile .warning-font{ color:color-mix(in oklab,var(--warn) 70%,white) }
+/* QR: imagem em caixa branca (escaneável) + help dark */
+.profile + br + div, body:has(form[name="qrForm"]) > div[ng-if="showQR"]{ }
+form[name="qrForm"] ~ * img, body > div[style*="text-align: center"] img{ background:#fff; padding:14px; border-radius:14px; box-shadow:0 8px 24px color-mix(in oklab,black 50%,transparent) }
+.qr-help-wrapper{ max-width:780px; margin:0 auto }
+.qr-help{ background:rgb(255 255 255/.05); border:1px solid rgb(255 255 255/.10); border-radius:14px; padding:18px 22px; color:rgb(255 255 255/.85); backdrop-filter:blur(14px) }
+.qr-help-line a{ color:color-mix(in oklab,var(--brand-soft) 55%,white) }
+
+/* QR: multiselect de grupos + checkbox dark */
+form[name="qrForm"] .dropdown-multiselect button,
+form[name="qrForm"] .custom-multi-select button,
+.content-wrapper .dropdown-multiselect button,
+.content-wrapper .custom-multi-select button{
+  background:rgb(255 255 255/.07) !important; color:#fff !important; border-color:rgb(255 255 255/.18) !important }
+form[name="qrForm"] .dropdown-multiselect .dropdown-menu,
+.content-wrapper .dropdown-multiselect .dropdown-menu{
+  background:color-mix(in oklab,var(--brand-strong) 55%,black 35%) !important; border-color:rgb(255 255 255/.14) }
+form[name="qrForm"] .dropdown-multiselect .dropdown-menu a,
+.content-wrapper .dropdown-multiselect .dropdown-menu a{ color:rgb(255 255 255/.9) }
+form[name="qrForm"] input.common-checkbox{ width:18px !important; height:18px !important; padding:0 !important; box-shadow:none !important }
+form[name="qrForm"] textarea.form-control{ background:rgb(255 255 255/.07) !important; color:#fff !important }
