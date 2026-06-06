@@ -494,3 +494,37 @@ body:has(> .login-page), body:has(.login-page){
 }
 html:has(.login-page){ background:color-mix(in oklab, var(--brand-strong) 40%, black 78%) !important; }
 .login-footer:has(~ .login-page), .login-page ~ .login-footer{ } /* footer já fixed/transparente */
+
+/* ===== LOGIN/2FA: avisos modernos (erro/sucesso) ===== */
+/* card continua glass mesmo em erro/sucesso (não fica todo vermelho) */
+.login-page .login-card.panel-danger, .login-page .login-card.panel-success{
+  border-color:var(--glass-bd) !important; }
+/* heading vira alert translúcido no topo do card */
+.login-page .login-card-heading{
+  margin:0 0 18px !important; padding:11px 14px 11px 40px !important; border:1px solid !important;
+  border-radius:12px !important; font-weight:600 !important; font-size:13.5px !important;
+  line-height:1.4 !important; text-align:left !important; position:relative; box-shadow:none !important;
+  animation:lg-alert .26s var(--ease-out) both; }
+@keyframes lg-alert{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.login-page .login-card-heading::before{content:"";position:absolute;left:13px;top:13px;width:17px;height:17px;
+  background:currentColor;-webkit-mask:var(--ai) center/contain no-repeat;mask:var(--ai) center/contain no-repeat}
+/* erro */
+.login-page .login-card.panel-danger .login-card-heading, .login-page .login-card-heading--error{
+  background:color-mix(in oklab,var(--danger) 22%,transparent) !important;
+  color:color-mix(in oklab,var(--danger) 55%,white) !important;
+  border-color:color-mix(in oklab,var(--danger) 45%,transparent) !important;
+  --ai:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 9v4'/%3E%3Cpath d='M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'/%3E%3Cpath d='M12 17h.01'/%3E%3C/svg%3E")}
+/* sucesso */
+.login-page .login-card.panel-success .login-card-heading, .login-page .login-card-heading--ok{
+  background:color-mix(in oklab,var(--ok) 20%,transparent) !important;
+  color:color-mix(in oklab,var(--ok) 60%,white) !important;
+  border-color:color-mix(in oklab,var(--ok) 42%,transparent) !important;
+  --ai:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21.8 10A10 10 0 1 1 12 2'/%3E%3Cpath d='m9 11 3 3L22 4'/%3E%3C/svg%3E")}
+
+/* ===== 2FA específico ===== */
+.login-page--compact .login-card-title{font-size:22px !important}
+.login-page .tfa-qr{display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:18px}
+.login-page .tfa-qr img{width:170px;height:170px;background:#fff;padding:10px;border-radius:14px;
+  box-shadow:0 8px 24px color-mix(in oklab,black 50%,transparent)}
+.login-page .tfa-hint{font-size:12.5px;color:var(--t-ink-2);text-align:center;max-width:30ch;line-height:1.5;margin:0}
+.login-page #authCode{padding-left:14px !important;text-align:center;letter-spacing:.3em;font-weight:600}

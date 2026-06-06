@@ -1,29 +1,34 @@
-<div>
-    <div class='panel panel-default login' style="margin-top: 180px" ng-class='{"panel-danger": errorMessage, "panel-success": successMessage}'>
-        <div class='panel-heading' ng-if='errorMessage'>{{errorMessage}}</div>
-        <div class='panel-heading' ng-if='successMessage'>{{successMessage}}</div>
-        <div class='panel-body' style="padding: 30px; background: #f6f8fc">
-            <form name='twoFactorAuthForm'>
-                <div class='form-group'>
-                    <h3 class="center" localized>form.two.factor.auth.title</h3>
+<div class="login-page login-page--compact" ng-if="!isIE">
+    <div class="login-wrapper">
+        <div class="login-card panel panel-default" ng-class='{"panel-danger": errorMessage, "panel-success": successMessage}'>
+            <div class="panel-heading login-card-heading login-card-heading--error" ng-if='errorMessage'>{{errorMessage}}</div>
+            <div class="panel-heading login-card-heading login-card-heading--ok" ng-if='successMessage'>{{successMessage}}</div>
+            <div class="panel-body login-card-body">
+                <div class="login-card-brand">
+                    <span class="login-seal">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l6.5 2.3v4.8c0 4.3-2.8 7.5-6.5 8.6-3.7-1.1-6.5-4.3-6.5-8.6V4.8z"/><rect x="9" y="7.6" width="6" height="8" rx="1.4"/><path d="M11 14.2h2"/></svg>
+                    </span>
+                    <span class="login-word">Mikitos MDM<small>VERIFICAÇÃO EM DUAS ETAPAS</small></span>
                 </div>
-                <div class='form-group' ng-if="!user.twoFactorAccepted">
-                    <div class="center">
-                        <img ng-src="{{auth.qrCodeUrl}}" alt="" />
-                    </div>
-                    <div localized>form.two.factor.auth.hint</div>
-                </div>
+                <h2 class="login-card-title" localized>form.two.factor.auth.title</h2>
+                <span class="login-deco-line"></span>
 
-                <div class='form-group'>
-                    <label for='authCode' localized>form.two.factor.auth.code</label>
-                    <input type='text' class='form-control' id='authCode'
-                           ng-model='auth.code' localized-placeholder='form.two.factor.auth.code.hint'
-                           required/>
-                </div>
-                <button type='submit' class='btn btn-default right' style="opacity: 1" ng-click='verify()'
-                        localized>form.two.factor.auth.verify</button>
-            </form>
+                <form name='twoFactorAuthForm' class="login-form">
+                    <div class="tfa-qr" ng-if="!user.twoFactorAccepted">
+                        <img ng-src="{{auth.qrCodeUrl}}" alt="" />
+                        <p class="tfa-hint" localized>form.two.factor.auth.hint</p>
+                    </div>
+
+                    <div class='form-group'>
+                        <label for='authCode' localized>form.two.factor.auth.code</label>
+                        <input type='text' class='form-control' id='authCode' autocomplete="one-time-code"
+                               ng-model='auth.code' localized-placeholder='form.two.factor.auth.code.hint'
+                               required/>
+                    </div>
+                    <button type='submit' class='btn btn-primary btn-block login-submit' ng-click='verify()'
+                            localized>form.two.factor.auth.verify</button>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 </div>
