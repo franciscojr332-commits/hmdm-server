@@ -35,6 +35,22 @@
     <script src='lib/angular-sanitize/angular-sanitize.js'></script>
     <script src="lib/chart.js/Chart.js"></script>
     <script src="lib/angular-chart.js/angular-chart.js"></script>
+    <!-- Redesign Mikitos: Chart.js defaults p/ tema dark (texto/grid claros) — só afeta charts (Resumo) -->
+    <script>
+        (function () {
+            if (window.Chart && Chart.defaults) {
+                Chart.defaults.global.defaultFontColor = 'rgba(255,255,255,0.72)';
+                Chart.defaults.global.defaultFontFamily = "Archivo, -apple-system, 'Segoe UI', sans-serif";
+                if (Chart.defaults.global.legend && Chart.defaults.global.legend.labels) {
+                    Chart.defaults.global.legend.labels.fontColor = 'rgba(255,255,255,0.78)';
+                }
+                if (Chart.defaults.scale && Chart.defaults.scale.gridLines) {
+                    Chart.defaults.scale.gridLines.color = 'rgba(255,255,255,0.10)';
+                    Chart.defaults.scale.gridLines.zeroLineColor = 'rgba(255,255,255,0.18)';
+                }
+            }
+        })();
+    </script>
 
     <script src='lib/blueimp-md5/md5.js'></script>
     <script src='lib/ng-tags-input/ng-tags-input.js'></script>
@@ -102,7 +118,7 @@
     <link rel='stylesheet' type='text/css' href='lib/bootstrap-css-only/css/bootstrap.css'>
     <link rel='stylesheet' type='text/css' href='css/main.css'>
     <!-- Redesign Mikitos: camada de tema (remapeia BS3/HMDM -> tokens indigo). Reverter = remover esta linha. -->
-    <link rel='stylesheet' type='text/css' href='css/theme.css?timestamp=14'>
+    <link rel='stylesheet' type='text/css' href='css/theme.css?timestamp=15'>
 </head>
 <body>
     <div ng-include='"app/components/main/view/main.html"'></div>

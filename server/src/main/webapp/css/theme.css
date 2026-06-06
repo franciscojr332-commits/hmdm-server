@@ -714,3 +714,10 @@ body:has(.content-wrapper):not(:has(.login-page)){
 .dev-act{vertical-align:top;margin-bottom:4px}
 /* toolbar: deixa a linha de ações respirar (flex-wrap) */
 .content-wrapper form .form-group:last-of-type .col-sm-7{white-space:normal}
+
+/* ===== Resumo (dashboard): divisores/títulos dark ===== */
+.content-wrapper .delimiter{border-top:1px solid rgb(255 255 255/.10)}
+.content-wrapper h3{color:rgb(255 255 255/.92)}
+.content-wrapper .error{color:color-mix(in oklab,var(--danger) 55%,white)}
+.content-wrapper .checkbox label, .content-wrapper .radio label{color:rgb(255 255 255/.85)}
+.content-wrapper .panel-heading{color:#fff}
