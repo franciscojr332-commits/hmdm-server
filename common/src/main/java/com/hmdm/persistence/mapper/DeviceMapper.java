@@ -114,6 +114,13 @@ public interface DeviceMapper {
                           @Param("imeiUpdateTs") Long imeiUpdateTs,
                           @Param("publicIp") String publicIp);
 
+    // HMDM-EVOLUTION: presence heartbeat. Long-poll reconnect (~polling.timeout) touches lastUpdate
+    // without rewriting the heavy info json. Gives ~60s online accuracy in polling mode at near-zero cost.
+    @Update({"UPDATE devices SET " +
+            "  lastUpdate = CAST(EXTRACT(EPOCH FROM NOW()) * 1000 AS BIGINT) " +
+            "WHERE id = #{deviceId}"})
+    void touchDeviceLastUpdate(@Param("deviceId") Integer deviceId);
+
     @Update({"UPDATE devices SET " +
             "  custom1 = #{custom1}, " +
             "  custom2 = #{custom2}, " +

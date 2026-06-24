@@ -142,6 +142,19 @@ public class LongPollingServlet extends HttpServlet {
             return;
         }
 
+        // HMDM-EVOLUTION: presence heartbeat. Each long-poll reconnect (~polling.timeout) proves the
+        // device is alive, so refresh lastUpdate here instead of waiting for the periodic info sync.
+        // Throttled to >=60s to bound writes to 1/min/device even on rapid reconnects after delivery.
+        Long lastUpdate = device.getLastUpdate();
+        long nowMillis = System.currentTimeMillis();
+        if (lastUpdate == null || nowMillis - lastUpdate > 60000L) {
+            try {
+                unsecureDAO.touchDeviceLastUpdate(device.getId());
+            } catch (Exception e) {
+                log.warn("Failed to touch lastUpdate for device '{}': {}", deviceNumber, e.getMessage());
+            }
+        }
+
         // Unfortunately the output buffer can't be disabled or reduced (the minimal buffer size is 8192)
         // Even setting in server.xml: <Connector ... socket.appWriteBufSize="1" /> doesn't change anything!
         // Therefore, when the client is disconnected, the response is still "sent" to him without an exception.
@@ -172,6 +185,19 @@ public class LongPollingServlet extends HttpServlet {
                     sb.append(m.toJsonString());
                 }
                 sb.append("]}");
+                // HMDM-EVOLUTION: mitigate silent push loss on flaky mobile networks.
+                // Tomcat's response output buffer (min 8192 bytes, not reducible — see authors' note above)
+                // accepts a write to an already-disconnected client WITHOUT throwing, so the catch-block
+                // re-enqueue below never fires and the command is silently lost. Pad the body past the buffer
+                // with trailing JSON whitespace so flush() actually reaches the socket: a dead connection then
+                // raises IOException -> the existing re-enqueue recovers the message on the next poll.
+                // Only pad when there is something to lose. Trailing whitespace keeps the JSON valid.
+                if (!messages.isEmpty()) {
+                    final int paddingTarget = 8500;
+                    while (sb.length() < paddingTarget) {
+                        sb.append(' ');
+                    }
+                }
                 try {
                     log.debug("Buffer size: " + resp.getBufferSize());
                     resp.setStatus(200);

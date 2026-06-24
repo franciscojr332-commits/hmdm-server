@@ -184,6 +184,11 @@ public class UnsecureDAO {
         this.deviceMapper.updateDeviceInfo(id, info, imeiUpdateTs, publicIp);
     }
 
+    // HMDM-EVOLUTION: lightweight presence touch (long-poll heartbeat), no info json rewrite.
+    public void touchDeviceLastUpdate(Integer id) {
+        this.deviceMapper.touchDeviceLastUpdate(id);
+    }
+
     public void updateDeviceCustomProperties(Integer id, Device device) {
         this.deviceMapper.updateDeviceCustomProperties(id, device.getCustom1(), device.getCustom2(), device.getCustom3());
     }
