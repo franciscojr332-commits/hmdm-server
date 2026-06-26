@@ -22,9 +22,11 @@ angular.module('headwind-kiosk')
                                                   spinnerService, localization, utils) {
 
         var saveDeviceSearchParams = function() {
+            // Cookie persistente (30 dias). Bug anterior: +600ms + setDate() no-op,
+            // e o expires nem era passado ao $cookies.put -> virava cookie de sessao
+            // (filtros sumiam ao fechar o browser).
             var expireDate = new Date();
-            expireDate.setTime(expireDate.getTime() + 600);
-            expireDate.setDate(expireDate.getDate());
+            expireDate.setDate(expireDate.getDate() + 30);
 
             var searchData = {
                 searchParams: $scope.searchParams,
@@ -33,18 +35,31 @@ angular.module('headwind-kiosk')
                 selection: $scope.selection
             };
 
-            $cookies.put('deviceSearch', JSON.stringify(searchData));
+            $cookies.put('deviceSearch', JSON.stringify(searchData), {expires: expireDate});
         };
 
         var restoreDeviceSearchParams = function() {
-            if ($cookies.get('deviceSearch')) {
-                var deviceSearch = JSON.parse($cookies.get('deviceSearch'));
+            var raw = $cookies.get('deviceSearch');
+            if (!raw) {
+                return false;
+            }
+            // Cookie corrompido (ou shape antigo) nao pode brickar a aba: parse
+            // protegido + valida as 4 secoes; em qualquer falha limpa o cookie e
+            // cai nos defaults.
+            try {
+                var deviceSearch = JSON.parse(raw);
+                if (!deviceSearch || !deviceSearch.searchParams || !deviceSearch.paging
+                    || !deviceSearch.additionalParams || !deviceSearch.selection) {
+                    $cookies.remove('deviceSearch');
+                    return false;
+                }
                 $scope.searchParams = deviceSearch.searchParams;
                 $scope.paging = deviceSearch.paging;
                 $scope.additionalParams = deviceSearch.additionalParams;
                 $scope.selection = deviceSearch.selection;
                 return true;
-            } else {
+            } catch (e) {
+                $cookies.remove('deviceSearch');
                 return false;
             }
         };
@@ -332,18 +347,6 @@ angular.module('headwind-kiosk')
                 if ($scope.additionalParams.kioskMode !== null && $scope.additionalParams.kioskMode !== '') {
                     request["kioskMode"] = $scope.additionalParams.kioskMode === '1' ? true : false;
                 }
-                if ($scope.additionalParams.onlineOrOffline) {
-                    var time = $scope.additionalParams.onlineTimeSelect;
-                    if (time == 1) {
-                        time = $scope.additionalParams.onlineTimeEnter;
-                    }
-                    time *= 60000;
-                    if ($scope.additionalParams.onlineOrOffline == 1) {
-                        request["onlineLaterMillis"] = time;
-                    } else {
-                        request["onlineEarlierMillis"] = time;
-                    }
-                }
                 if ($scope.additionalParams.installationStatus !== 'ALL'
                     && $scope.additionalParams.installationStatus
                     && $scope.additionalParams.installationStatus.length > 0) {
@@ -351,6 +354,22 @@ angular.module('headwind-kiosk')
                 }
                 if ($scope.additionalParams.imeiChanged) {
                     request["imeiChanged"] = true;
+                }
+            }
+
+            // Filtro online/offline aplicado SEMPRE que setado. Bug anterior: ficava
+            // dentro do if(enabled), entao o seg-filter do topo (Online/Offline) nao
+            // surtia efeito a menos que "mais parametros" estivesse aberto.
+            if ($scope.additionalParams.onlineOrOffline) {
+                var time = $scope.additionalParams.onlineTimeSelect;
+                if (time == 1) {
+                    time = $scope.additionalParams.onlineTimeEnter;
+                }
+                time *= 60000;
+                if ($scope.additionalParams.onlineOrOffline == 1) {
+                    request["onlineLaterMillis"] = time;
+                } else {
+                    request["onlineEarlierMillis"] = time;
                 }
             }
 
@@ -383,6 +402,15 @@ angular.module('headwind-kiosk')
                         device.displayedPhone = resolvedPhone[0];
                         device.phoneTooltip = resolvedPhone[1];
                         device.phoneTooltipClass = resolvedPhone[2];
+
+                        // Precompute status apps/arquivos 1x por carga. Antes
+                        // getDevice{Applications,Files}{IndicatorImage,Title} eram
+                        // chamados em ng-src/title dentro do ng-repeat -> recalculo
+                        // (e mutacao da config compartilhada) a CADA digest, por device.
+                        device.appIndicatorImg = $scope.getDeviceApplicationsIndicatorImage(device);
+                        device.appTitle = $scope.getDeviceApplicationsTitle(device);
+                        device.filesIndicatorImg = $scope.getDeviceFilesIndicatorImage(device);
+                        device.filesTitle = $scope.getDeviceFilesTitle(device);
 
                         if ($scope.accountExpired) {
                             if (counter == 3) {
@@ -455,7 +483,9 @@ angular.module('headwind-kiosk')
             return true;
         };
 
-        const updateTime = 2 * 60 * 60 * 1000;
+        // HMDM-EVOLUTION: long-poll heartbeat refreshes lastUpdate every ~60s (polling.timeout).
+        // Online window tightened 2h -> 5min so presence reflects reality: online <5min, away 5-10min, offline >10min.
+        const updateTime = 5 * 60 * 1000;
         $scope.getDeviceIndicatorImage = function (device) {
             if (device.statusCode) {
                 return "images/circle-" + device.statusCode + ".png";
@@ -724,10 +754,10 @@ angular.module('headwind-kiosk')
             $scope.statusFilter = f;
             if (f === 'online') {
                 $scope.additionalParams.onlineOrOffline = '1';
-                $scope.additionalParams.onlineTimeSelect = '10';
+                $scope.additionalParams.onlineTimeSelect = '15';
             } else if (f === 'offline') {
                 $scope.additionalParams.onlineOrOffline = '2';
-                $scope.additionalParams.onlineTimeSelect = '10';
+                $scope.additionalParams.onlineTimeSelect = '15';
             } else {
                 $scope.additionalParams.onlineOrOffline = null;
             }
@@ -752,7 +782,7 @@ angular.module('headwind-kiosk')
             if (info) {
                 if (info.mdmMode === true) {
                     return localization.localize('yes');
-                } else if (info.defaultLauncher === false) {
+                } else if (info.mdmMode === false) {
                     return localization.localize('no');
                 }
             }
@@ -765,7 +795,7 @@ angular.module('headwind-kiosk')
             if (info) {
                 if (info.kioskMode === true) {
                     return localization.localize('yes');
-                } else if (info.defaultLauncher === false) {
+                } else if (info.kioskMode === false) {
                     return localization.localize('no');
                 }
             }
@@ -975,7 +1005,24 @@ angular.module('headwind-kiosk')
             if (!sel.length) { m.error = 'Selecione ao menos um grupo.'; return; }
             if (m.type === 'notification' && (!m.msg || !m.msg.trim())) { m.error = 'Digite o texto.'; return; }
             m.sending = true; m.error = undefined; m.success = undefined;
-            var reqs = sel.map(function(c) {
+            // Settle-all (nao fail-fast): conta ok/falha por grupo e reporta
+            // parcial. Checa r.data.status pois o backend pode devolver 200 com
+            // corpo de erro. Antes o $q.all abortava no 1o erro e escondia que
+            // alguns grupos ja tinham recebido.
+            var total = sel.length, done = 0, okCount = 0, failCount = 0;
+            var settle = function() {
+                if (++done < total) { return; }
+                m.sending = false;
+                if (failCount === 0) {
+                    m.success = 'Enviado para ' + okCount + ' grupo(s).';
+                } else if (okCount === 0) {
+                    m.error = 'Falha em todos os ' + total + ' grupo(s). Verifique se o plugin esta ativo.';
+                } else {
+                    m.success = 'Enviado para ' + okCount + ' grupo(s).';
+                    m.error = 'Falha em ' + failCount + ' grupo(s).';
+                }
+            };
+            sel.forEach(function(c) {
                 var messageType = m.messageType;
                 var payload = m.payload;
                 if (m.type === 'notification') {
@@ -984,12 +1031,11 @@ angular.module('headwind-kiosk')
                 }
                 var body = {scope:'configuration', configurationId:c.id, messageType:messageType};
                 if (payload) { body.payload = payload; }
-                return $http.post('rest/plugins/push/private/send', body);
+                $http.post('rest/plugins/push/private/send', body).then(function(r) {
+                    if (r.data && r.data.status && r.data.status !== 'OK') { failCount++; } else { okCount++; }
+                    settle();
+                }, function() { failCount++; settle(); });
             });
-            $q.all(reqs).then(
-                function() { m.sending = false; m.success = 'Enviado para ' + sel.length + ' grupo(s).'; },
-                function() { m.sending = false; m.error = 'Erro ao enviar. Verifique se o plugin está ativo.'; }
-            );
         };
 
         var openBulkModal = function(type, title, messageType, payload) {
@@ -1004,6 +1050,7 @@ angular.module('headwind-kiosk')
         $scope.openBulkConfigUpdatedModal = function() { openBulkModal('push', 'Atualizar Configuração', 'configUpdated', null); };
         $scope.openBulkGrantPermissionsModal = function() { openBulkModal('push', 'Conceder Permissões APK', 'grantPermissions', '{"pkg":"com.webkul.androidtracking"}'); };
         $scope.openBulkNotificationModal = function() { openBulkModal('notification', 'Enviar Notificação', '', ''); };
+        $scope.openBulkRebootModal = function() { openBulkModal('push', 'Reiniciar Aparelhos', 'reboot', null); };
 
         $scope.openBulkUpdateModal = function () {
             var modalInstance = $uibModal.open({
@@ -1294,16 +1341,21 @@ angular.module('headwind-kiosk')
         }
     })
     .controller('DeviceResetModalController', [
-        '$scope', '$uibModalInstance', '$uibModalInstance', '$http', '$timeout', '$interval', 'deviceService', 'alertService', 'localization', 'devices', 'preselectedDevice',
-        function ($scope, $uibModalInstance, $uibModalInstance, $http, $timeout, $interval, deviceService, alertService, localization, devices, preselectedDevice) {
-        var modalInstance = $uibModalInstance || $uibModalInstance;
+        '$scope', '$uibModalInstance', '$http', '$timeout', '$interval', 'deviceService', 'alertService', 'localization', 'devices', 'preselectedDevice',
+        function ($scope, $uibModalInstance, $http, $timeout, $interval, deviceService, alertService, localization, devices, preselectedDevice) {
+        var modalInstance = $uibModalInstance;
         var PUSH_DELAY_SEC = 3;
+        var resetTick = null;
         $scope.devices = devices || [];
         $scope.selectedDevice = preselectedDevice || null;
         $scope.errorMessage = null;
         $scope.resetScheduled = false;
         $scope.sendingCountdown = PUSH_DELAY_SEC;
         $scope.sendingProgress = 0;
+        // Cancela o countdown se o modal for dismissado (ESC/backdrop) durante a
+        // contagem; senao o $interval ficava orfao e disparava push + close em
+        // modal ja fechado.
+        $scope.$on('$destroy', function () { if (resetTick) { $interval.cancel(resetTick); resetTick = null; } });
 
         function getDeviceId(device) {
             if (device == null) return null;
@@ -1350,13 +1402,15 @@ angular.module('headwind-kiosk')
             var elapsedMs = 0;
             var tickMs = 100;
             var totalMs = PUSH_DELAY_SEC * 1000;
-            var tick = $interval(function () {
+            if (resetTick) { $interval.cancel(resetTick); }
+            resetTick = $interval(function () {
                 elapsedMs += tickMs;
                 var secLeft = Math.ceil((totalMs - elapsedMs) / 1000);
                 $scope.sendingCountdown = Math.max(0, secLeft);
                 $scope.sendingProgress = Math.min(100, (elapsedMs / totalMs) * 100);
                 if (elapsedMs >= totalMs) {
-                    $interval.cancel(tick);
+                    $interval.cancel(resetTick);
+                    resetTick = null;
                     sendConfigUpdatedPush(deviceNumber);
                     $timeout(function () {
                         onFlagSetSuccess(deviceNumber);
@@ -1380,6 +1434,7 @@ angular.module('headwind-kiosk')
         }
 
         $scope.confirm = function () {
+            if ($scope.submitting || $scope.resetScheduled) { return; }
             var device = $scope.selectedDevice;
             if (!device) {
                 showAlert(localization.localize('form.device.reset.select.device'));
@@ -1401,6 +1456,7 @@ angular.module('headwind-kiosk')
                 }
             }
             $scope.errorMessage = null;
+            $scope.submitting = true;
             var urlPath = 'rest/plugins/devicereset/private/reset/' + deviceId;
             var body = { deviceId: deviceId };
             $http.put(urlPath, body, { headers: { 'Content-Type': 'application/json' } }).then(function () {
@@ -1414,12 +1470,15 @@ angular.module('headwind-kiosk')
                         deviceService.updateDevice(deviceForUpdate, function () {
                             startSendAnimationAndPush(deviceNumber);
                         }, function () {
+                            $scope.submitting = false;
                             $scope.errorMessage = localization.localize('error.device.reset');
                         });
                     } else {
+                        $scope.submitting = false;
                         $scope.errorMessage = localization.localize('error.device.reset');
                     }
                 } else {
+                    $scope.submitting = false;
                     $scope.errorMessage = localization.localize('error.device.reset');
                 }
             });
@@ -1573,7 +1632,7 @@ angular.module('headwind-kiosk')
                 $scope.groups = response.data;
             });
         })
-    .controller('DeviceApplicationSettingsModalController', function ($scope, $uibModalInstance,
+    .controller('DeviceApplicationSettingsModalController', function ($scope, $uibModalInstance, $uibModal,
                                                                       localization, deviceService,
                                                                       applicationService, alertService,
                                                                       device) {
@@ -1679,7 +1738,7 @@ angular.module('headwind-kiosk')
             });
 
             modalInstance.result.then(function (applicationSetting) {
-                var index = $scope.applicationSettings.findIndex(function (item) {
+                var index = allApplicationSettings.findIndex(function (item) {
                     if (item.id) {
                         return item.id === applicationSetting.id;
                     } else if (item.tempId) {
@@ -1768,7 +1827,7 @@ angular.module('headwind-kiosk')
                     if ($scope.settingsPaging.appSettingsFilterApp && $scope.settingsPaging.appSettingsFilterApp.id) {
                         valid = item.applicationId === $scope.settingsPaging.appSettingsFilterApp.id;
                     } else if (typeof $scope.settingsPaging.appSettingsFilterApp === "string") {
-                        valid = item.applicationPkg.toLowerCase().indexOf($scope.settingsPaging.appSettingsFilterApp.toLowerCase(0)) > -1;
+                        valid = !!item.applicationPkg && item.applicationPkg.toLowerCase().indexOf($scope.settingsPaging.appSettingsFilterApp.toLowerCase()) > -1;
                     }
                 }
 
@@ -1797,120 +1856,4 @@ angular.module('headwind-kiosk')
 
         loadData();
 
-    })
-    .controller('BulkPushModalController', function ($scope, $uibModalInstance, $http, $q, pushConfig, configurations) {
-
-        $scope.modalTitle = pushConfig.title;
-        $scope.sending = false;
-        $scope.errorMessage = undefined;
-        $scope.successMessage = undefined;
-        $scope.selectAll = false;
-
-        $scope.configurations = (configurations || []).map(function (c) {
-            return { id: c.id, name: c.name, selected: false };
-        });
-
-        $scope.toggleAll = function () {
-            $scope.configurations.forEach(function (c) { c.selected = $scope.selectAll; });
-        };
-
-        $scope.onItemChange = function () {
-            $scope.selectAll = $scope.configurations.every(function (c) { return c.selected; });
-        };
-
-        $scope.noneSelected = function () {
-            return !$scope.configurations.some(function (c) { return c.selected; });
-        };
-
-        $scope.send = function () {
-            $scope.errorMessage = undefined;
-            $scope.successMessage = undefined;
-            $scope.sending = true;
-
-            var selected = $scope.configurations.filter(function (c) { return c.selected; });
-            var promises = selected.map(function (cfg) {
-                return $http.post('rest/plugins/push/private/send', {
-                    scope: 'configuration',
-                    configurationId: cfg.id,
-                    messageType: pushConfig.messageType,
-                    payload: pushConfig.payload
-                });
-            });
-
-            $q.all(promises).then(function (results) {
-                $scope.sending = false;
-                var errors = results.filter(function (r) { return r.data && r.data.status !== 'OK'; });
-                if (errors.length === 0) {
-                    $scope.successMessage = 'Enviado para ' + selected.length + ' grupo(s) com sucesso.';
-                } else {
-                    $scope.errorMessage = 'Erro em ' + errors.length + ' grupo(s). Verifique o plugin Push está ativo.';
-                }
-            }, function () {
-                $scope.sending = false;
-                $scope.errorMessage = 'Erro de comunicação com o servidor.';
-            });
-        };
-
-        $scope.closeModal = function () { $uibModalInstance.dismiss(); };
-    })
-    .controller('BulkNotificationModalController', function ($scope, $uibModalInstance, $http, $q, configurations) {
-
-        $scope.sending = false;
-        $scope.errorMessage = undefined;
-        $scope.successMessage = undefined;
-        $scope.selectAll = false;
-        $scope.messageText = '';
-
-        $scope.configurations = (configurations || []).map(function (c) {
-            return { id: c.id, name: c.name, selected: false };
-        });
-
-        $scope.toggleAll = function () {
-            $scope.configurations.forEach(function (c) { c.selected = $scope.selectAll; });
-        };
-
-        $scope.onItemChange = function () {
-            $scope.selectAll = $scope.configurations.every(function (c) { return c.selected; });
-        };
-
-        $scope.noneSelected = function () {
-            return !$scope.configurations.some(function (c) { return c.selected; });
-        };
-
-        $scope.send = function () {
-            $scope.errorMessage = undefined;
-            $scope.successMessage = undefined;
-
-            if (!$scope.messageText || $scope.messageText.trim() === '') {
-                $scope.errorMessage = 'Digite o texto da notificação.';
-                return;
-            }
-
-            $scope.sending = true;
-
-            var selected = $scope.configurations.filter(function (c) { return c.selected; });
-            var promises = selected.map(function (cfg) {
-                return $http.post('rest/plugins/messaging/private/send', {
-                    scope: 'configuration',
-                    configurationId: cfg.id,
-                    message: $scope.messageText.trim()
-                });
-            });
-
-            $q.all(promises).then(function (results) {
-                $scope.sending = false;
-                var errors = results.filter(function (r) { return r.data && r.data.status !== 'OK'; });
-                if (errors.length === 0) {
-                    $scope.successMessage = 'Notificação enviada para ' + selected.length + ' grupo(s).';
-                    $scope.messageText = '';
-                } else {
-                    $scope.errorMessage = 'Erro em ' + errors.length + ' grupo(s). Verifique o plugin Messaging está ativo.';
-                }
-            }, function () {
-                $scope.sending = false;
-                $scope.errorMessage = 'Erro de comunicação com o servidor.';
-            });
-        };
-
-        $scope.closeModal = function () { $uibModalInstance.dismiss(); };
     });

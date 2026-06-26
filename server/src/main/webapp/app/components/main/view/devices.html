@@ -196,6 +196,7 @@
             <button type='button' class='btn btn-primary dev-act' style='margin-right:4px' ng-click='openBulkConfigUpdatedModal()'>Atualizar Config</button>
             <button type='button' class='btn btn-success dev-act' style='margin-right:4px' ng-click='openBulkGrantPermissionsModal()'>Conceder Permiss&#245;es</button>
             <button type='button' class='btn btn-warning dev-act' style='margin-right:4px' ng-click='openBulkNotificationModal()'>Notifica&#231;&#227;o</button>
+            <button type='button' class='btn btn-danger dev-act' style='margin-right:4px' ng-click='openBulkRebootModal()'>Reiniciar</button>
             <div class="btn-group dropdown dev-act" uib-dropdown ng-if="hasPermission('edit_devices')" style='margin-right:4px'>
                 <button type="button" class="btn btn-default dropdown-toggle" uib-dropdown-toggle ng-disabled='isNotSelected()' localized>button.group.action</button>
                 <ul class="dropdown-menu dropdown-menu-devices dropdown-menu-right" uib-dropdown-menu role="menu">
@@ -230,7 +231,8 @@
         </div>
     </div>
 
-    <table ng-if='devices && devices.length > 0' class='table'>
+    <div class="devices-scroll">
+    <table ng-if='devices && devices.length > 0' class='table table-hover'>
         <thead>
         <tr>
             <th ng-if="hasPermission('edit_devices')">
@@ -365,7 +367,7 @@
         </thead>
         <tbody>
         <!--<tr ng-repeat='device in devices | limitTo:paging.pageSize:paging.pageSize * (paging.currentPage - 1)'>-->
-        <tr ng-repeat='device in devices' class="{{device.class}}">
+        <tr ng-repeat='device in devices' class="{{device.class}}" ng-class="{'selected': device.selected}">
             <td ng-if="hasPermission('edit_devices')">
                 <input ng-model='device.selected'
                        type='checkbox'
@@ -394,13 +396,13 @@
             </td>
             <td ng-if="settings.columnDisplayedDeviceAppInstallStatus">
                 <img class='device-indicator'
-                     ng-src='{{getDeviceApplicationsIndicatorImage(device)}}'
-                     title='{{getDeviceApplicationsTitle(device)}}'>
+                     ng-src='{{device.appIndicatorImg}}'
+                     title='{{device.appTitle}}'>
             </td>
             <td ng-if="settings.columnDisplayedDeviceFilesStatus">
                 <img class='device-indicator'
-                     ng-src='{{getDeviceFilesIndicatorImage(device)}}'
-                     title='{{getDeviceFilesTitle(device)}}'>
+                     ng-src='{{device.filesIndicatorImg}}'
+                     title='{{device.filesTitle}}'>
             </td>
             <td ng-if="settings.columnDisplayedDeviceConfiguration && hasPermission('configurations') && configAvailable(device.configuration)">
                 <a class="action-link" ng-click="editConfiguration(device.configuration)">{{device.configuration.name}}</a>
@@ -492,6 +494,7 @@
         </tr>
         </tbody>
     </table>
+    </div>
 
     <div ng-if='!devices' class='center' localized>success.loading.devices</div>
 
@@ -554,6 +557,7 @@
         <button type="button" class="btn btn-primary" ng-click="openBulkConfigUpdatedModal()">Atualizar Config</button>
         <button type="button" class="btn" ng-click="openBulkGrantPermissionsModal()">Permissões</button>
         <button type="button" class="btn" ng-click="openBulkNotificationModal()">Notificar</button>
+        <button type="button" class="btn bf-del" ng-click="openBulkRebootModal()">Reiniciar</button>
         <button type="button" class="btn" ng-if="hasPermission('edit_devices')" ng-click="openBulkUpdateModal()">Config</button>
         <button type="button" class="btn" ng-if="hasPermission('edit_devices')" ng-click="openBulkGroupModal()">Grupo</button>
         <button type="button" class="btn bf-del" ng-if="hasPermission('edit_devices')" ng-click="confirmBulkDelete()">Excluir</button>
@@ -565,4 +569,8 @@
 @-webkit-keyframes spin { 0%{-webkit-transform:rotate(0deg)} 100%{-webkit-transform:rotate(360deg)} }
 @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
 .spinning { -webkit-animation:spin .8s linear infinite; animation:spin .8s linear infinite; display:inline-block; }
+
+/* Polish Mikitos: confina o scroll horizontal da tabela (não estoura a página). */
+.devices-scroll { overflow-x: auto; width: 100%; -webkit-overflow-scrolling: touch; }
+.devices-scroll > table.table { margin-bottom: 0; }
 </style>

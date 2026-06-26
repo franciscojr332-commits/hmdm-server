@@ -4,6 +4,10 @@
     <title>Mikitos MDM</title>
 
     <link href="images/favicon.ico" rel="icon" type="image/x-icon" />
+    <!-- Redesign Mikitos: fontes em paralelo (antes era @import render-blocking no theme.css) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700;750&family=JetBrains+Mono:wght@400;500&display=swap">
     <link rel='stylesheet' type='text/css' href='lib/ng-tags-input/ng-tags-input.css'>
     <link rel='stylesheet' type='text/css' href='lib/angular-bootstrap-colorpicker/colorpicker.css'>
     <link rel='stylesheet' type='text/css' href='lib/angular-input-dropdown/inputDropdownStyles.css'>
@@ -40,7 +44,7 @@
         (function () {
             if (window.Chart && Chart.defaults) {
                 Chart.defaults.global.defaultFontColor = 'rgba(255,255,255,0.72)';
-                Chart.defaults.global.defaultFontFamily = "Archivo, -apple-system, 'Segoe UI', sans-serif";
+                Chart.defaults.global.defaultFontFamily = "Inter, -apple-system, 'Segoe UI', sans-serif";
                 if (Chart.defaults.global.legend && Chart.defaults.global.legend.labels) {
                     Chart.defaults.global.legend.labels.fontColor = 'rgba(255,255,255,0.78)';
                 }
@@ -71,7 +75,7 @@
     <script src='app/components/about/about.controller.js?timestamp=6'></script>
 
     <script src='app/components/main/controller/summary.controller.js?timestamp=6'></script>
-    <script src='app/components/main/controller/devices.controller.js?timestamp=15'></script>
+    <script src='app/components/main/controller/devices.controller.js?timestamp=22'></script>
     <script src='app/components/main/controller/applications.controller.js?timestamp=6'></script>
     <script src='app/components/main/controller/configurations.controller.js?timestamp=7'></script>
     <script src='app/components/main/controller/files.controller.js?timestamp=6'></script>
@@ -118,7 +122,7 @@
     <link rel='stylesheet' type='text/css' href='lib/bootstrap-css-only/css/bootstrap.css'>
     <link rel='stylesheet' type='text/css' href='css/main.css'>
     <!-- Redesign Mikitos: camada de tema (remapeia BS3/HMDM -> tokens indigo). Reverter = remover esta linha. -->
-    <link rel='stylesheet' type='text/css' href='css/theme.css?timestamp=20'>
+    <link rel='stylesheet' type='text/css' href='css/theme.css?timestamp=23'>
 </head>
 <body>
     <div ng-include='"app/components/main/view/main.html"'></div>

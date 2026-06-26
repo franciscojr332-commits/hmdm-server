@@ -6,7 +6,8 @@
    Identidade: neutro frio + marca índigo-elétrico + status funcional.
    Não altera markup nem bindings Angular.
    ============================================================ */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700;750&family=JetBrains+Mono:wght@400;500&display=swap");
+/* Fontes movidas p/ <link rel=preconnect+stylesheet> no index.html (paraleliza).
+   @import aqui era render-blocking serial: theme.css -> descobre import -> fonte. */
 
 :root {
   --bg: oklch(0.968 0.005 256);
@@ -634,7 +635,7 @@ body:has(.content-wrapper):not(:has(.login-page)){
   color:rgb(255 255 255/.95);
 }
 /* header dark glass */
-.header.navbar, .navbar.header{ background:rgb(20 24 52/.55) !important; backdrop-filter:blur(16px) saturate(1.1);
+.header.navbar, .navbar.header{ background:rgb(20 24 52/.72) !important; backdrop-filter:blur(10px) saturate(1.1);
   border-bottom:1px solid rgb(255 255 255/.10) !important; box-shadow:0 1px 0 rgb(255 255 255/.04) }
 .header a, .header a:active{ color:rgb(255 255 255/.66) !important } .header a:hover{ color:#fff !important }
 .header .username-label{ color:rgb(255 255 255/.85) !important }
@@ -646,7 +647,7 @@ body:has(.content-wrapper):not(:has(.login-page)){
 .content-wrapper .nav-tabs > li.active > a::after{ background:var(--brand-soft) }
 
 /* painel / tabela glass */
-.content-wrapper .panel{ background:rgb(255 255 255/.05) !important; backdrop-filter:blur(16px) saturate(1.1);
+.content-wrapper .panel{ background:rgb(255 255 255/.07) !important;
   border:1px solid rgb(255 255 255/.10) !important; box-shadow:0 24px 64px color-mix(in oklab,black 55%,transparent) !important }
 .content-wrapper .panel-default > .panel-heading{ background:rgb(255 255 255/.04) !important; color:#fff !important; border-color:rgb(255 255 255/.10) !important }
 .content-wrapper .table{ color:rgb(255 255 255/.92) }
@@ -737,8 +738,8 @@ body:has(form[name="qrForm"]):not(:has(.login-page)):not(:has(.content-wrapper))
 /* card glass centralizado p/ profile/updates/qr */
 .profile, form[name="qrForm"] > .width-1000{
   max-width:780px; margin:56px auto 40px; padding:30px clamp(20px,3vw,38px);
-  background:rgb(255 255 255/.05); border:1px solid rgb(255 255 255/.10);
-  border-radius:18px; backdrop-filter:blur(18px) saturate(1.1);
+  background:rgb(255 255 255/.07); border:1px solid rgb(255 255 255/.10);
+  border-radius:18px;
   box-shadow:0 24px 64px color-mix(in oklab,black 55%,transparent);
 }
 .profile h3, form[name="qrForm"] h3{ color:#fff; font-weight:800; letter-spacing:-.02em }
@@ -821,3 +822,12 @@ form[name="qrForm"] textarea.form-control{ background:rgb(255 255 255/.07) !impo
 .content-wrapper .table .cell-mono{font-family:var(--mono);font-size:12px;letter-spacing:-.01em}
 .content-wrapper .table .muted-cell{color:rgb(255 255 255/.55)}
 .content-wrapper .table .dev-badge{display:inline-block;padding:2px 8px;border-radius:6px;background:rgb(255 255 255/.08);font-size:11px;font-weight:600;color:rgb(255 255 255/.75)}
+
+/* ===== FIX hover branco: main.css tem `tr:hover{background:#fafafa}` GLOBAL (claro).
+   Nos scopes dark (admin/profile/qr) isso vira branco-sobre-branco e o conteúdo
+   some no hover. Override genérico de baixa especificidade; tabelas .table-hover
+   mantêm seu tint (vencem por especificidade). ===== */
+.content-wrapper tbody > tr:hover,
+.content-wrapper tr:hover,
+.profile tr:hover,
+form[name="qrForm"] tr:hover{ background-color: rgb(255 255 255 / .05); }

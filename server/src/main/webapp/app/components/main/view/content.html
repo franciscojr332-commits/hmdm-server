@@ -8,7 +8,7 @@
 
         <uib-tab active="act.DEVICES" classes="tab-ico tab-devices" ng-click="openTab('DEVICES')">
             <uib-tab-heading localized-change-tracking>tab.devices</uib-tab-heading>
-            <ng-include src="'app/components/main/view/devices.html'" ng-if="activeTab === 'DEVICES'"></ng-include>
+            <ng-include src="'app/components/main/view/devices.html?v=2'" ng-if="activeTab === 'DEVICES'"></ng-include>
         </uib-tab>
 
         <uib-tab active="act.APPS" classes="tab-ico tab-apps" ng-if="hasPermission('applications')" ng-click="openTab('APPS')">
